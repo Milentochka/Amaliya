@@ -1,369 +1,419 @@
-# Avatars Catalog — 50 героев для виш-листа
+# Avatars Catalog (v2) — мультяшные иллюстрации, по одному герою
 
-Этот каталог — список кандидатов на аватары пользователей. По каждому герою — 1–2 ссылки на публично доступные изображения. Просьба ревьюшеру: пройтись по списку, отметить «годится» / «заменить» / «нужен другой кандидат».
+Второй проход. Жёсткие требования: только иллюстративный стиль, без надписей, один герой на картинке.
 
-**Технические требования к финальным картинкам:** квадрат ~512×512 px, PNG/JPEG, узнаваемое лицо/фигура героя.
+**Технические требования к финальным картинкам:** квадрат ~512×512 px, PNG/JPEG.
 
-**Общая заметка:** для большинства героев лучшие найденные кандидаты — это либо кадры из мультфильмов (на ru.wikipedia, fair-use, формат подходит для аватаров), либо изображения с почтовых марок СССР/России на Wikimedia Commons (всегда цветные, узнаваемые, но иногда композиция многофигурная — придётся кропать).
+Все URL проверены HTTP HEAD-запросом и возвращают 200. Основные источники: foni.papik.pro, png.klev.club, papik.pro, kartinki.pibig.info, kartinkof.club, slovnet.ru, kartinki.pics — все они хостят PNG-вырезки и иллюстративные кадры советских мультфильмов и сказок без подписей.
 
 ---
 
 ## Народные и литературные сказки
 
 ### 1. Иван-царевич
-- **Источник:** русские народные сказки; экранизации Союзмультфильма
+- **Источник:** foni.papik.pro (PNG-вырезки в стиле детской книжной иллюстрации) + png.klev.club (стилистика м/ф «Иван Царевич и Серый Волк», студия «Мельница»)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Wiktor_Michajlowitsch_Wassnezow_004.jpg/250px-Wiktor_Michajlowitsch_Wassnezow_004.jpg — В. М. Васнецов, «Иван-царевич на Сером Волке», 1889 (классика, не мультфильм, но самый узнаваемый канонический образ)
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/1923._%D0%98%D0%B2%D0%B0%D0%BD_%D0%A6%D0%B0%D1%80%D0%B5%D0%B2%D0%B8%D1%87_%D0%B8_%D0%A1%D0%B5%D1%80%D1%8B%D0%B9_%D0%92%D0%BE%D0%BB%D0%BA.jpg/250px-1923._%D0%98%D0%B2%D0%B0%D0%BD_%D0%A6%D0%B0%D1%80%D0%B5%D0%B2%D0%B8%D1%87_%D0%B8_%D0%A1%D0%B5%D1%80%D1%8B%D0%B9_%D0%92%D0%BE%D0%BB%D0%BA.jpg — открытка 1923 года
-- **Заметки:** не нашёл подходящего отдельного кадра советской анимации; обе ссылки — иллюстрации/живопись. Возможно, нужен ручной подбор кадра из «Иван-царевич и Серый Волк» (1991/2011).
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-sfqp-p-kartinki-ivan-na-prozrachnom-fone-5.png — детская иллюстрация Ивана-царевича
+  - https://png.klev.club/uploads/posts/2024-06/png-klev-club-ix5c-p-ivan-tsarevich-i-serii-volk-png-26.png — Иван из мультфильма «Мельница», современная анимация
+  - https://png.klev.club/uploads/posts/2024-06/png-klev-club-iktp-p-ivan-tsarevich-i-serii-volk-png-10.png — Иван-царевич в полный рост
+- **Заметки:** третий вариант — современный мультяшный стиль (после 2010), второй тоже. Первый — книжная иллюстрация.
 
 ### 2. Василиса Премудрая
-- **Источник:** русские народные сказки
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Russian_Wonder_Tales_081.jpg/250px-Russian_Wonder_Tales_081.jpg — иллюстрация И. Я. Билибина, 1899
-- **Заметки:** в статье о Василисе на Wiki — фактически только эта иллюстрация (Билибин). Можно использовать как стилистический ориентир.
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-jfbj-p-kartinki-vasilisa-premudraya-na-prozrachno-2.png — иллюстрация в книжном стиле
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-jjp8-p-kartinki-vasilisa-premudraya-na-prozrachno-13.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-jl0j-p-kartinki-vasilisa-premudraya-na-prozrachno-18.png
 
 ### 3. Баба-Яга
-- **Источник:** русские народные сказки
+- **Источник:** foni.papik.pro + png.klev.club
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Bilibin._Baba_Yaga.jpg/330px-Bilibin._Baba_Yaga.jpg — Билибин, 1900 (классика)
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/%D0%91%D0%B0%D0%B1%D0%B0_%D0%AF%D0%B3%D0%B0.jpg/250px-%D0%91%D0%B0%D0%B1%D0%B0_%D0%AF%D0%B3%D0%B0.jpg — Васнецов, 1917
-- **Заметки:** обе классические живописные/графические работы. Для мультяшного стиля можно поискать кадр из «Летучий корабль» (1979) или «Ивашка из дворца пионеров».
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-g08j-p-kartinki-baba-yaga-na-prozrachnom-fone-1.png — мультяшная Баба-Яга
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-g0wx-p-kartinki-baba-yaga-na-prozrachnom-fone-6.png
+  - https://png.klev.club/uploads/posts/2024-04/png-klev-club-eydr-p-baba-yaga-png-8.png — «Баба Яга для детей»
 
 ### 4. Кощей Бессмертный
-- **Источник:** русские народные сказки
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Ivan_Bilibin_Koshchey.jpg/330px-Ivan_Bilibin_Koshchey.jpg — Билибин (классика образа)
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Viktor_Vasnetsov_Kashchey_the_Immortal.jpg/250px-Viktor_Vasnetsov_Kashchey_the_Immortal.jpg — Васнецов, 1926
-- **Заметки:** живописные эталоны; возможно, для аватара лучше мультяшный — нужен ручной подбор.
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-3cup-p-kartinki-koshchei-bessmertnii-na-prozrachn-3.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-3d3k-p-kartinki-koshchei-bessmertnii-na-prozrachn-6.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-3dc9-p-kartinki-koshchei-bessmertnii-na-prozrachn-7.png
 
 ### 5. Жар-птица
-- **Источник:** русские народные сказки
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Boriszvorykin_Firebird.jpg/330px-Boriszvorykin_Firebird.jpg — Б. Зворыкин, 1930
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/1976_CPA_4629.jpg/500px-1976_CPA_4629.jpg — почтовая марка СССР 1976
-- **Заметки:** очень яркий узнаваемый образ; обе ссылки годятся для квадратного кропа.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-g22x-p-kartinki-zhar-ptitsa-na-prozrachnom-fone-3.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-g2k4-p-kartinki-zhar-ptitsa-na-prozrachnom-fone-5.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-g4hz-p-kartinki-zhar-ptitsa-na-prozrachnom-fone-7.png
 
 ### 6. Серый Волк
-- **Источник:** русская народная сказка «Иван-царевич и Серый Волк»
+- **Источник:** png.klev.club (PNG из «Иван Царевич и Серый Волк», студия «Мельница» — современный мультяшный стиль)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Wiktor_Michajlowitsch_Wassnezow_004.jpg/250px-Wiktor_Michajlowitsch_Wassnezow_004.jpg — Васнецов, 1889 (Волк с Иваном)
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/%D0%96%D1%83%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_-_%D0%A1%D0%BA%D0%B0%D0%B7%D0%BA%D0%B0_%D0%BE_%D0%98%D0%B2%D0%B0%D0%BD-%D0%A6%D0%B0%D1%80%D0%B5%D0%B2%D0%B8%D1%87%D0%B5_%D0%B8_%D0%A1%D0%B5%D1%80%D0%BE%D0%BC_%D0%B2%D0%BE%D0%BB%D0%BA%D0%B5_01.jpg/250px-...jpg — обложка книги Жуковского, 1902
-- **Заметки:** оба кандидата — Волк вместе с Иваном; нужен кроп.
+  - https://png.klev.club/uploads/posts/2024-06/png-klev-club-id2z-p-ivan-tsarevich-i-serii-volk-png-2.png
+  - https://png.klev.club/uploads/posts/2024-06/png-klev-club-iq6u-p-ivan-tsarevich-i-serii-volk-png-18.png
+  - https://png.klev.club/uploads/posts/2024-06/png-klev-club-ievp-p-ivan-tsarevich-i-serii-volk-png-5.png
 
 ### 7. Колобок
-- **Источник:** русская народная сказка
+- **Источник:** foni.papik.pro + png.klev.club
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Epinglette_Kolobok.jpg/330px-Epinglette_Kolobok.jpg — значок «Колобок на носу у Лисы»
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Tales_of_Ukraine_2002-kolobok.jpeg/250px-Tales_of_Ukraine_2002-kolobok.jpeg — украинская марка 2002
-- **Заметки:** для советской анимации (мультфильм 1956) кадров на Wiki не нашлось — нужен ручной подбор, если хочется именно мультяшного Колобка.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-2tbs-p-kartinki-kolobok-na-prozrachnom-fone-2.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-2tdt-p-kartinki-kolobok-na-prozrachnom-fone-4.png
+  - https://png.klev.club/uploads/posts/2024-03/png-klev-club-p-kolobok-png-12.png
 
 ### 8. Конёк-Горбунок
-- **Источник:** сказка П. П. Ершова; мультфильм Союзмультфильм 1947/1975
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/The_Soviet_Union_1988_CPA_5915_stamp_%28The_Little_Horse_-_Little_Humpback%29.jpg/250px-The_Soviet_Union_1988_CPA_5915_stamp_%28The_Little_Horse_-_Little_Humpback%29.jpg — почтовая марка СССР 1988 (по мультфильму)
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/%D0%9C%D0%B0%D1%80%D0%BA%D0%B0_%D0%A1%D0%A1%D0%A1%D0%A0_%22%D0%9A%D0%BE%D0%BD%D1%91%D0%BA-%D0%93%D0%BE%D1%80%D0%B1%D1%83%D0%BD%D0%BE%D0%BA%22%2C_1961.jpg/250px-...jpg — марка СССР 1961
-- **Заметки:** марки изображают Конька с Иваном; лошадка узнаваема.
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-whgg-p-kartinki-konek-gorbunok-na-prozrachnom-fon-1.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-wj9i-p-kartinki-konek-gorbunok-na-prozrachnom-fon-4.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-wjah-p-kartinki-konek-gorbunok-na-prozrachnom-fon-5.png
 
 ### 9. Алёнушка
-- **Источник:** «Сестрица Алёнушка и братец Иванушка»
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Vasnetsov_Alenushka.jpg/330px-Vasnetsov_Alenushka.jpg — В. М. Васнецов, «Алёнушка» (классика)
-- **Заметки:** живопись, не мультфильм; один из самых узнаваемых образов в русской культуре. Если нужен мультяшный кадр — ручной подбор.
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-d4vu-p-kartinki-alenushka-na-prozrachnom-fone-4.png — детская книжная иллюстрация
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-d5hm-p-kartinki-alenushka-na-prozrachnom-fone-6.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-dcv7-p-kartinki-alenushka-na-prozrachnom-fone-23.png
 
 ### 10. Братец Иванушка
-- **Источник:** «Сестрица Алёнушка и братец Иванушка»; мультфильм Союзмультфильм 1953
+- **Источник:** kartinkof.club (детские иллюстрации Иванушки)
 - **Кандидаты:**
-  - Не найден подходящий кандидат — нужен ручной подбор. На странице сказки в Wiki есть только Васнецов «Алёнушка» и иллюстрация Лютемана к Гримм.
+  - https://kartinkof.club/uploads/posts/2023-05/1683410758_kartinkof-club-p-kartinki-ivanushka-7.jpg — «Иванушка-дурачок»
+  - https://kartinkof.club/uploads/posts/2023-05/1683410774_kartinkof-club-p-kartinki-ivanushka-32.jpg — «Иван-дурак мультфильм»
+  - https://kartinkof.club/uploads/posts/2023-05/1683410757_kartinkof-club-p-kartinki-ivanushka-4.png — «Иванушка из сказки»
+- **Заметки:** в собирательном смысле — мальчик Иванушка как герой русских сказок (не строго козлёнок из сестрицы Алёнушки; для конкретно козлёнка см. сводку пробелов).
 
 ### 11. Лиса Патрикеевна
-- **Источник:** русские народные сказки
+- **Источник:** foni.papik.pro («лиса из колобка» — классический образ хитрой лисы)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Dmitrevsky_fox.jpg/330px-Dmitrevsky_fox.jpg — гравюра Н. Дмитревского, 1934
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/%D0%9B%D0%B8%D1%81%D0%B0_%D0%B7%D0%BD%D0%B0%D1%87%D0%BE%D0%BA.jpg/250px-%D0%9B%D0%B8%D1%81%D0%B0_%D0%B7%D0%BD%D0%B0%D1%87%D0%BE%D0%BA.jpg — советский значок
-- **Заметки:** оба графические; для мультяшной Лисы (например, из «Колобка») нужен ручной подбор.
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-gvbo-p-kartinki-lisa-iz-kolobka-na-prozrachnom-fo-8.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-gwab-p-kartinki-lisa-iz-kolobka-na-prozrachnom-fo-9.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-h0ga-p-kartinki-lisa-iz-kolobka-na-prozrachnom-fo-26.png
 
 ### 12. Курочка Ряба
-- **Источник:** русская народная сказка
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/2002._%D0%9A%D1%83%D1%80%D0%BE%D1%87%D0%BA%D0%B0_%D0%A0%D1%8F%D0%B1%D0%B0_%28%D0%BC%D0%B0%D1%80%D0%BA%D0%B0%29_w.jpg/250px-2002._%D0%9A%D1%83%D1%80%D0%BE%D1%87%D0%BA%D0%B0_%D0%A0%D1%8F%D0%B1%D0%B0_%28%D0%BC%D0%B0%D1%80%D0%BA%D0%B0%29_w.jpg — украинская почтовая марка 2002
-- **Заметки:** единственный приличный кандидат на Wiki; для советского мультфильма 1959/1989 нужен ручной подбор.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-djlw-p-kartinki-kurochka-ryaba-na-prozrachnom-fon-4.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-djo3-p-kartinki-kurochka-ryaba-na-prozrachnom-fon-5.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-dk4c-p-kartinki-kurochka-ryaba-na-prozrachnom-fon-6.png
 
 ---
 
 ## Простоквашино
 
 ### 13. Дядя Фёдор
-- **Источник:** «Трое из Простоквашино», «Каникулы в Простоквашино», «Зима в Простоквашино» (Союзмультфильм, 1978–1984)
+- **Источник:** foni.papik.pro (вырезка кадра советского мультфильма Союзмультфильма)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/e/e1/%D0%94%D1%8F%D0%B4%D1%8F_%D0%A4%D1%91%D0%B4%D0%BE%D1%80.jpg — кадр из мультфильма «Каникулы в Простоквашино»
-- **Заметки:** один кадр; качество хорошее, лицо чёткое.
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-5jod-p-kartinki-dyadya-fedor-iz-prostokvashino-na-1.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-5lab-p-kartinki-dyadya-fedor-iz-prostokvashino-na-7.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-5p2b-p-kartinki-dyadya-fedor-iz-prostokvashino-na-18.png
 
 ### 14. Кот Матроскин
-- **Источник:** трилогия «Простоквашино»
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/6/6f/%D0%9A%D0%BE%D1%82_%D0%9C%D0%B0%D1%82%D1%80%D0%BE%D1%81%D0%BA%D0%B8%D0%BD.jpg/330px-%D0%9A%D0%BE%D1%82_%D0%9C%D0%B0%D1%82%D1%80%D0%BE%D1%81%D0%BA%D0%B8%D0%BD.jpg — кадр из мультфильма (главное изображение страницы)
-- **Заметки:** канонический образ.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-w9df-p-kartinki-kot-matroskin-na-prozrachnom-fone-1.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-wabw-p-kartinki-kot-matroskin-na-prozrachnom-fone-3.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-wdka-p-kartinki-kot-matroskin-na-prozrachnom-fone-5.png
 
 ### 15. Пёс Шарик
-- **Источник:** трилогия «Простоквашино»
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/b/ba/Sharik_Figvam.jpg/330px-Sharik_Figvam.jpg — Шарик в «Зиме в Простоквашино» (1984)
-- **Заметки:** характерная сцена «Фигвам».
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-ullq-p-kartinki-sharik-prostokvashino-na-prozrach-3.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-umo7-p-kartinki-sharik-prostokvashino-na-prozrach-8.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-uq3i-p-kartinki-sharik-prostokvashino-na-prozrach-19.png
 
 ### 16. Почтальон Печкин
-- **Источник:** трилогия «Простоквашино»
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/2/20/%D0%9F%D0%BE%D1%87%D1%82%D0%B0%D0%BB%D1%8C%D0%BE%D0%BD_%D0%9F%D0%B5%D1%87%D0%BA%D0%B8%D0%BD_%28%D0%BA%D0%B0%D0%B4%D1%80_%D0%B8%D0%B7_%D0%BC%D1%83%D0%BB%D1%8C%D1%82%D1%84%D0%B8%D0%BB%D1%8C%D0%BC%D0%B0%29.jpg — кадр из мультфильма
-- **Заметки:** канонический Печкин в шапке-ушанке.
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-ucp3-p-kartinki-pochtalon-pechkin-na-prozrachnom-9.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-ucrn-p-kartinki-pochtalon-pechkin-na-prozrachnom-10.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-uf4n-p-kartinki-pochtalon-pechkin-na-prozrachnom-19.png
 
 ---
 
 ## Чебурашка и Крокодил Гена
 
 ### 17. Чебурашка
-- **Источник:** «Крокодил Гена» (1969), «Чебурашка» (1971), «Шапокляк» (1974), «Чебурашка идёт в школу» (1983)
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/e/ef/%D0%A7%D0%B5%D0%B1%D1%83%D1%80%D0%B0%D1%88%D0%BA%D0%B0_%281971%29.jpg/330px-%D0%A7%D0%B5%D0%B1%D1%83%D1%80%D0%B0%D1%88%D0%BA%D0%B0_%281971%29.jpg — кадр из мультфильма «Чебурашка», 1971
-- **Заметки:** канон.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-x60y-p-kartinki-cheburashka-na-prozrachnom-fone-6.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-x6zn-p-kartinki-cheburashka-na-prozrachnom-fone-9.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-xaby-p-kartinki-cheburashka-na-prozrachnom-fone-20.png
 
 ### 18. Крокодил Гена
-- **Источник:** тот же цикл
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - Не найден подходящий кандидат — нужен ручной подбор. (На странице Чебурашки нет отдельного кадра только с Геной; стоит поискать на ru.wikipedia.org/wiki/Крокодил_Гена.)
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-g0ck-p-kartinki-krokodil-gena-na-prozrachnom-fone-10.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-g25c-p-kartinki-krokodil-gena-na-prozrachnom-fone-15.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-g46s-p-kartinki-krokodil-gena-na-prozrachnom-fone-24.png
 
 ### 19. Старуха Шапокляк
-- **Источник:** тот же цикл
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/3/38/%D0%A1%D1%82%D0%B0%D1%80%D1%83%D1%85%D0%B0_%D0%A8%D0%B0%D0%BF%D0%BE%D0%BA%D0%BB%D1%8F%D0%BA_%28%D0%BA%D0%B0%D0%B4%D1%80%29.jpg/330px-%D0%A1%D1%82%D0%B0%D1%80%D1%83%D1%85%D0%B0_%D0%A8%D0%B0%D0%BF%D0%BE%D0%BA%D0%BB%D1%8F%D0%BA_%28%D0%BA%D0%B0%D0%B4%D1%80%29.jpg — кадр из мультфильма
-- **Заметки:** канон.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-4cep-p-kartinki-shapoklyak-na-prozrachnom-fone-1.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-4ffx-p-kartinki-shapoklyak-na-prozrachnom-fone-4.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-4itf-p-kartinki-shapoklyak-na-prozrachnom-fone-10.png
 
 ---
 
 ## Винни-Пух (советский)
 
 ### 20. Винни-Пух
-- **Источник:** «Винни-Пух» (1969), «Винни-Пух идёт в гости» (1971), «Винни-Пух и день забот» (1972), Союзмультфильм, реж. Хитрук
+- **Источник:** foni.papik.pro (кадры из мультфильма Хитрука)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/b/b0/Nazarov_pooh.JPG/250px-Nazarov_pooh.JPG — образ работы художника Эдуарда Назарова и Фёдора Хитрука
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/The_Soviet_Union_1988_CPA_5916_stamp_%28Winnie-the-Pooh%29.jpg/330px-The_Soviet_Union_1988_CPA_5916_stamp_%28Winnie-the-Pooh%29.jpg — марка СССР 1988
-- **Заметки:** именно советский, не Disney.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-zr21-p-kartinki-vinni-pukh-na-prozrachnom-fone-8.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-zr2v-p-kartinki-vinni-pukh-na-prozrachnom-fone-9.png
+  - https://png.klev.club/uploads/posts/2024-04/png-klev-club-m1rk-p-sovetskii-vinni-pukh-png-2.png
 
 ### 21. Пятачок
-- **Источник:** тот же цикл
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/The_Soviet_Union_1988_CPA_5916_stamp_%28Winnie-the-Pooh%29.jpg/250px-The_Soviet_Union_1988_CPA_5916_stamp_%28Winnie-the-Pooh%29.jpg — марка СССР 1988 (Пятачок виден рядом с Винни)
-- **Заметки:** отдельного кадра-портрета на Wiki не нашёл; марка содержит и Пятачка и Винни — нужен кроп. Возможен ручной подбор кадра.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-rba8-p-kartinki-pyatachok-na-prozrachnom-fone-9.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-rbp7-p-kartinki-pyatachok-na-prozrachnom-fone-10.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-rdao-p-kartinki-pyatachok-na-prozrachnom-fone-13.png
 
 ### 22. Иа-Иа
-- **Источник:** «Винни-Пух и день забот» (1972)
+- **Источник:** foni.papik.pro («Ослик из Винни-Пуха Советский»)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/7/71/Ia-1972-ussr.jpg/250px-Ia-1972-ussr.jpg — кадр советского мультфильма 1972
-- **Заметки:** канон.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-stwj-p-kartinki-oslik-ia-na-prozrachnom-fone-17.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-t5zk-p-kartinki-oslik-ia-na-prozrachnom-fone-25.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-t6st-p-kartinki-oslik-ia-na-prozrachnom-fone-30.png
 
 ### 23. Сова
-- **Источник:** тот же цикл
+- **Источник:** kartinki.pics (PNG-вырезки совы из советского Винни-Пуха)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/1/10/%D0%A1%D0%BE%D0%B2%D0%B0_%28%D0%92%D0%B8%D0%BD%D0%BD%D0%B8-%D0%9F%D1%83%D1%85_%D0%B8_%D0%B4%D0%B5%D0%BD%D1%8C_%D0%B7%D0%B0%D0%B1%D0%BE%D1%82%29.jpg/120px-%D0%A1%D0%BE%D0%B2%D0%B0_%28%D0%92%D0%B8%D0%BD%D0%BD%D0%B8-%D0%9F%D1%83%D1%85_%D0%B8_%D0%B4%D0%B5%D0%BD%D1%8C_%D0%B7%D0%B0%D0%B1%D0%BE%D1%82%29.jpg — кадр из «Винни-Пух и день забот»
-- **Заметки:** разрешение исходного thumb низковато (120px), но файл существует — можно запросить более крупный thumb на Commons.
+  - https://kartinki.pics/uploads/posts/2022-02/1645179799_2-kartinkin-net-p-sova-iz-vinni-pukha-kartinki-2.png
+  - https://kartinki.pics/uploads/posts/2022-02/1645179808_7-kartinkin-net-p-sova-iz-vinni-pukha-kartinki-7.jpg
+  - https://kartinki.pics/uploads/posts/2022-02/1645179796_8-kartinkin-net-p-sova-iz-vinni-pukha-kartinki-8.jpg
+- **Заметки:** страница содержит и диснеевскую Сову, и советскую — финальный отбор требует визуальной проверки. Стоит выбирать конкретно советский образ Хитрука/Назарова.
 
 ---
 
 ## Малыш и Карлсон
 
 ### 24. Карлсон
-- **Источник:** «Малыш и Карлсон» (1968), «Карлсон вернулся» (1970), Союзмультфильм
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/8/81/%D0%9C%D0%B0%D0%BB%D1%8B%D1%88_%D0%B8_%D0%9A%D0%B0%D1%80%D0%BB%D1%81%D0%BE%D0%BD.jpg/330px-%D0%9C%D0%B0%D0%BB%D1%8B%D1%88_%D0%B8_%D0%9A%D0%B0%D1%80%D0%BB%D1%81%D0%BE%D0%BD.jpg — постер мультфильма (Карлсон + Малыш)
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Karlsson-on-the-Roof_1992_stamp_of_Russia.jpg/330px-Karlsson-on-the-Roof_1992_stamp_of_Russia.jpg — марка России 1992
-- **Заметки:** обе содержат и Карлсона и Малыша — нужен кроп для отдельного аватара.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-l8v7-p-kartinki-karlson-na-prozrachnom-fone-1.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-l97d-p-kartinki-karlson-na-prozrachnom-fone-3.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-lasv-p-kartinki-karlson-na-prozrachnom-fone-10.png
 
 ### 25. Малыш
-- **Источник:** тот же
+- **Источник:** png.klev.club («Малыш и Карлсон» — индивидуальные PNG)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/8/81/%D0%9C%D0%B0%D0%BB%D1%8B%D1%88_%D0%B8_%D0%9A%D0%B0%D1%80%D0%BB%D1%81%D0%BE%D0%BD.jpg/330px-%D0%9C%D0%B0%D0%BB%D1%8B%D1%88_%D0%B8_%D0%9A%D0%B0%D1%80%D0%BB%D1%81%D0%BE%D0%BD.jpg — постер мультфильма (Малыш виден)
-- **Заметки:** отдельного кадра только с Малышом не нашёл — кропать постер.
+  - https://png.klev.club/uploads/posts/2024-06/png-klev-club-97f3-p-malish-i-karlson-png-15.png
+  - https://png.klev.club/uploads/posts/2024-06/png-klev-club-944e-p-malish-i-karlson-png-13.png
+  - https://png.klev.club/uploads/posts/2024-06/png-klev-club-9i09-p-malish-i-karlson-png-31.png
+- **Заметки:** требуется визуальная проверка — на странице есть и парные, и одиночные кадры. Эти три по описаниям были одиночными.
 
 ### 26. Фрекен Бок
-- **Источник:** «Карлсон вернулся» (1970)
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/2/2e/%D0%A5%D0%B8%D0%BB%D1%8C%D0%B4%D1%83%D1%80_%D0%91%D0%BE%D0%BA.jpg/330px-%D0%A5%D0%B8%D0%BB%D1%8C%D0%B4%D1%83%D1%80_%D0%91%D0%BE%D0%BA.jpg — кадр из мультфильма
-- **Заметки:** канон.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-h14p-p-kartinki-freken-bok-na-prozrachnom-fone-17.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-h1i2-p-kartinki-freken-bok-na-prozrachnom-fone-18.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-h3yc-p-kartinki-freken-bok-na-prozrachnom-fone-27.png
 
 ---
 
 ## Ну, погоди!
 
 ### 27. Волк
-- **Источник:** «Ну, погоди!», Союзмультфильм, 1969–
+- **Источник:** foni.papik.pro + png.klev.club
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Nu%2C_pogodi%21_logo.png/330px-Nu%2C_pogodi%21_logo.png — логотип сериала (Волк + Заяц)
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/The_Soviet_Union_1988_CPA_5918_stamp_%28Well%2C_Just_You_Wait%21%29.jpg/330px-The_Soviet_Union_1988_CPA_5918_stamp_%28Well%2C_Just_You_Wait%21%29.jpg — марка СССР 1988
-- **Заметки:** обе многофигурные — кропать.
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-bmr1-p-kartinki-volk-iz-nu-pogodi-na-prozrachnom-3.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-byos-p-kartinki-volk-iz-nu-pogodi-na-prozrachnom-25.png
+  - https://png.klev.club/uploads/posts/2024-04/png-klev-club-y9a6-p-nu-pogodi-png-20.png
 
 ### 28. Заяц
-- **Источник:** тот же
+- **Источник:** foni.papik.pro + png.klev.club
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/The_Soviet_Union_1988_CPA_5918_stamp_%28Well%2C_Just_You_Wait%21%29.jpg/330px-The_Soviet_Union_1988_CPA_5918_stamp_%28Well%2C_Just_You_Wait%21%29.jpg — марка СССР 1988 (Заяц с Волком)
-- **Заметки:** отдельного портрета только с Зайцем на Wiki не нашёл; нужен кроп либо ручной подбор кадра.
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-hr50-p-kartinki-zayats-iz-nu-pogodi-na-prozrachno-2.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-htv4-p-kartinki-zayats-iz-nu-pogodi-na-prozrachno-10.png
+  - https://png.klev.club/uploads/posts/2024-04/png-klev-club-ya49-p-nu-pogodi-png-21.png
 
 ---
 
 ## 38 попугаев
 
 ### 29. Мартышка
-- **Источник:** «38 попугаев» и связанные мультфильмы, 1976–1991
-- **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/1/1d/38_%D0%BF%D0%BE%D0%BF%D1%83%D0%B3%D0%B0%D0%B5%D0%B2.jpg — главное изображение статьи (все 4 героя)
-- **Заметки:** одно общее изображение всех четырёх; кроп под каждого героя.
+- **Кандидат не найден — нужен ручной подбор.**
+- **Заметки:** все встреченные страницы (papik.pro/risunki/77702, kartinki.pibig.info/4248) содержат либо групповые композиции, либо смешанные галереи, где невозможно автоматически выделить одиночный кадр Мартышки без визуального просмотра. Рекомендую вручную пройти кадры из мультфильма «38 попугаев» (1976) на kinopoisk.ru / animator.ru.
 
 ### 30. Удав
-- **Источник:** тот же
+- **Источник:** foni.papik.pro (страница «удав» содержит как обычных змей, так и кадры Удава из мультика — нужна визуальная проверка)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/1/1d/38_%D0%BF%D0%BE%D0%BF%D1%83%D0%B3%D0%B0%D0%B5%D0%B2.jpg — общая картинка
-- **Заметки:** см. выше — кропать. Возможно, нужен ручной подбор отдельного кадра.
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-ar64-p-kartinki-udav-na-prozrachnom-fone-1.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-arkq-p-kartinki-udav-na-prozrachnom-fone-2.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-au9m-p-kartinki-udav-na-prozrachnom-fone-9.png
+- **Заметки:** часть изображений — обычные удавы, часть — конкретно из «38 попугаев». Требует визуальной отбраковки.
 
 ### 31. Слонёнок
-- **Источник:** тот же
-- **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/1/1d/38_%D0%BF%D0%BE%D0%BF%D1%83%D0%B3%D0%B0%D0%B5%D0%B2.jpg — общая картинка
-- **Заметки:** см. выше.
+- **Кандидат не найден — нужен ручной подбор.**
+- **Заметки:** «слонёнок из 38 попугаев» как отдельный одиночный PNG не индексируется на основных русскоязычных PNG-сайтах. Рекомендация: посмотреть кадры на animator.ru или скриншоты на mults.info из конкретных серий.
 
 ### 32. Попугай
-- **Источник:** тот же
-- **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/1/1d/38_%D0%BF%D0%BE%D0%BF%D1%83%D0%B3%D0%B0%D0%B5%D0%B2.jpg — общая картинка
-- **Заметки:** см. выше.
+- **Кандидат не найден — нужен ручной подбор.**
+- **Заметки:** в выдаче доминирует попугай Кеша (из «Возвращение блудного попугая»), а не зеленый попугай-оратор из «38 попугаев». Кадр одиночного Попугая из «38 попугаев» придётся вырезать вручную из эпизода.
 
 ---
 
 ## Летучий корабль
 
 ### 33. Водяной
-- **Источник:** «Летучий корабль» (Союзмультфильм, 1979)
+- **Источник:** foni.papik.pro + kartinki.pibig.info (кадры из м/ф Гарри Бардина 1979)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/a/a8/%D0%9B%D0%B5%D1%82%D1%83%D1%87%D0%B8%D0%B9_%D0%BA%D0%BE%D1%80%D0%B0%D0%B1%D0%BB%D1%8C_-_%D0%B2%D0%BE%D0%B4%D1%8F%D0%BD%D0%BE%D0%B9.JPG/250px-%D0%9B%D0%B5%D1%82%D1%83%D1%87%D0%B8%D0%B9_%D0%BA%D0%BE%D1%80%D0%B0%D0%B1%D0%BB%D1%8C_-_%D0%B2%D0%BE%D0%B4%D1%8F%D0%BD%D0%BE%D0%B9.JPG — кадр из мультфильма
-- **Заметки:** канон.
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-378z-p-kartinki-vodyanoi-na-prozrachnom-fone-2.png
+  - https://kartinki.pibig.info/uploads/posts/2023-04/1681319883_kartinki-pibig-info-p-vodyanoi-letuchii-korabl-kartinki-iz-multi-2.jpg
+  - https://kartinki.pibig.info/uploads/posts/2023-04/1681319805_kartinki-pibig-info-p-vodyanoi-letuchii-korabl-kartinki-iz-multi-14.jpg
 
 ### 34. Бабки-Ёжки
-- **Источник:** тот же
-- **Кандидаты:**
-  - Не найден подходящий кандидат — нужен ручной подбор. На странице мультфильма отдельного изображения Бабок-Ёжек на Wiki нет; нужен скриншот частушек.
+- **Кандидат не найден — нужен ручной подбор.**
+- **Заметки:** Бабки-Ёжки в «Летучем корабле» — это семёрка персонажей-сестёр Водяного, кадры одной отдельной Бабки-Ёжки на PNG-сайтах не выделены — везде групповая частушка. Нужно вырезать одиночный кадр из YouTube-копии м/ф 1979. Альтернативой можно взять любую мультяшную Бабу-Ягу — но это тематически неточно.
 
 ---
 
 ## Прочая классика Союзмультфильма
 
 ### 35. Кот Леопольд
-- **Источник:** цикл «Приключения Кота Леопольда», Творческое объединение «Экран», 1975–1987
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/5/55/KotLeopold.jpg — главное изображение статьи (кадр из мультфильма)
-- **Заметки:** канон.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-jmro-p-kartinki-kot-leopold-na-prozrachnom-fone-1.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-jnuh-p-kartinki-kot-leopold-na-prozrachnom-fone-3.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-jo2m-p-kartinki-kot-leopold-na-prozrachnom-fone-4.png
 
 ### 36. Чиполлино
-- **Источник:** «Чиполлино» (Союзмультфильм, 1961)
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/e/ec/%D0%A7%D0%B8%D0%BF%D0%BE%D0%BB%D0%BB%D0%B8%D0%BD%D0%BE_%28%D0%BC%D1%83%D0%BB%D1%8C%D1%82%D1%84%D0%B8%D0%BB%D1%8C%D0%BC%29.jpg/250px-%D0%A7%D0%B8%D0%BF%D0%BE%D0%BB%D0%BB%D0%B8%D0%BD%D0%BE_%28%D0%BC%D1%83%D0%BB%D1%8C%D1%82%D1%84%D0%B8%D0%BB%D1%8C%D0%BC%29.jpg — постер мультфильма
-- **Заметки:** канон.
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-5np2-p-kartinki-chipollino-na-prozrachnom-fone-4.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-5ols-p-kartinki-chipollino-na-prozrachnom-fone-6.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-5p9h-p-kartinki-chipollino-na-prozrachnom-fone-9.png
 
 ### 37. Незнайка
-- **Источник:** книги Н. Носова и экранизации
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Russia_stamp_1992_No_17.jpg/330px-Russia_stamp_1992_No_17.jpg — марка России 1992 «Незнайка»
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Dunno_and_his_friends_Postal_card_Russia_2008.jpg/330px-Dunno_and_his_friends_Postal_card_Russia_2008.jpg — открытка 2008
-- **Заметки:** марка 1992 — крупный план Незнайки в шляпе.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-4h27-p-kartinki-neznaika-na-prozrachnom-fone-1.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-4hm2-p-kartinki-neznaika-na-prozrachnom-fone-2.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-4ibs-p-kartinki-neznaika-na-prozrachnom-fone-4.png
 
-### 38. Львёнок
-- **Источник:** «Как львёнок и черепаха пели песню», Союзмультфильм, 1974
+### 38. Львёнок (из «Как львёнок и черепаха пели песню»)
+- **Источник:** kartinki.pibig.info
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/0/0e/Lvenok-i-cherepaha.jpg/330px-Lvenok-i-cherepaha.jpg — постер мультфильма (Львёнок + Черепаха)
-- **Заметки:** общая картинка с Черепахой; кропать.
+  - https://kartinki.pibig.info/uploads/posts/2023-04/1681562292_kartinki-pibig-info-p-kartinki-iz-multika-lvenok-i-cherepakha-ar-7.png
+  - https://kartinki.pibig.info/uploads/posts/2023-04/1681562370_kartinki-pibig-info-p-kartinki-iz-multika-lvenok-i-cherepakha-ar-66.jpg
+  - https://kartinki.pibig.info/uploads/posts/2023-04/1681562369_kartinki-pibig-info-p-kartinki-iz-multika-lvenok-i-cherepakha-ar-73.png
+- **Заметки:** в галерее перемешаны львята из разных мультфильмов — нужна визуальная проверка, что именно советский львёнок Шварцмана.
 
-### 39. Большая Черепаха
-- **Источник:** тот же
+### 39. Большая Черепаха (из «Как львёнок и черепаха пели песню»)
+- **Источник:** kartinki.pibig.info (та же галерея)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/0/0e/Lvenok-i-cherepaha.jpg/330px-Lvenok-i-cherepaha.jpg — постер
-- **Заметки:** см. выше.
+  - https://kartinki.pibig.info/uploads/posts/2023-04/1681562334_kartinki-pibig-info-p-kartinki-iz-multika-lvenok-i-cherepakha-ar-41.jpg
+  - https://kartinki.pibig.info/uploads/posts/2023-04/1681562319_kartinki-pibig-info-p-kartinki-iz-multika-lvenok-i-cherepakha-ar-74.jpg
+  - https://kartinki.pibig.info/uploads/posts/2023-04/1681562327_kartinki-pibig-info-p-kartinki-iz-multika-lvenok-i-cherepakha-ar-75.jpg
+- **Заметки:** также требуется визуальная отбраковка, чтобы выбрать кадры конкретно с черепахой без львёнка.
 
-### 40. Ёжик
-- **Источник:** «Ёжик в тумане», Союзмультфильм, 1975, реж. Норштейн
+### 40. Ёжик (из «Ёжик в тумане»)
+- **Источник:** foni.papik.pro (кадры из м/ф Норштейна)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/3/3c/%D0%81%D0%B6%D0%B8%D0%BA_%D0%B2_%D1%82%D1%83%D0%BC%D0%B0%D0%BD%D0%B5._%D0%9F%D0%B5%D1%80%D1%81%D0%BE%D0%BD%D0%B0%D0%B6%D0%B8.jpg/330px-%D0%81%D0%B6%D0%B8%D0%BA_%D0%B2_%D1%82%D1%83%D0%BC%D0%B0%D0%BD%D0%B5._%D0%9F%D0%B5%D1%80%D1%81%D0%BE%D0%BD%D0%B0%D0%B6%D0%B8.jpg — Ёжик и Филин (кадр)
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/9/93/%D0%81%D0%B6%D0%B8%D0%BA_%D0%B2_%D1%82%D1%83%D0%BC%D0%B0%D0%BD%D0%B5._%D0%A1%D0%BC%D0%B5%D0%BD%D0%B0_%D0%BA%D0%B0%D0%B4%D1%80%D0%BE%D0%B2.jpg/330px-%D0%81%D0%B6%D0%B8%D0%BA_%D0%B2_%D1%82%D1%83%D0%BC%D0%B0%D0%BD%D0%B5._%D0%A1%D0%BC%D0%B5%D0%BD%D0%B0_%D0%BA%D0%B0%D0%B4%D1%80%D0%BE%D0%B2.jpg — другой кадр
-- **Заметки:** канон.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-3y32-p-kartinki-yezhik-v-tumane-na-prozrachnom-fo-20.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-3yll-p-kartinki-yezhik-v-tumane-na-prozrachnom-fo-22.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-419f-p-kartinki-yezhik-v-tumane-na-prozrachnom-fo-27.png
 
-### 41. Медвежонок
-- **Источник:** тот же
-- **Кандидаты:**
-  - Не найден подходящий кандидат — нужен ручной подбор. На странице «Ёжик в тумане» нет отдельного кадра с Медвежонком (есть только Ёжик и Филин).
+### 41. Медвежонок (из «Ёжик в тумане»)
+- **Кандидат не найден — нужен ручной подбор.**
+- **Заметки:** в галереях «Ёжик в тумане» Медвежонок появляется только в групповых сценах с Ёжиком (костёр, чай). Одиночный кадр Медвежонка-друга в анимационном стиле Норштейна нужно вырезать вручную из YouTube-копии.
 
 ### 42. Маугли
-- **Источник:** «Маугли» (цикл Союзмультфильм, реж. Р. Давыдов, 1967–1971; полнометражная сборка 1973)
+- **Источник:** kartinki.pibig.info (галерея кадров советского м/ф «Маугли» 1973)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/f/f2/Maugli_dvd_2.jpg/330px-Maugli_dvd_2.jpg — обложка DVD/постер
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/MaugliStamp.JPG/250px-MaugliStamp.JPG — марка России с героями советского мультфильма
-- **Заметки:** оба — групповые/коллажные; для аватара кропать.
+  - https://kartinki.pibig.info/uploads/posts/2023-04/1681673631_kartinki-pibig-info-p-maugli-kartinki-iz-multfilma-arti-pinteres-1.jpg
+  - https://kartinki.pibig.info/uploads/posts/2023-04/1681673647_kartinki-pibig-info-p-maugli-kartinki-iz-multfilma-arti-pinteres-2.jpg
+  - https://kartinki.pibig.info/uploads/posts/2023-04/1681673626_kartinki-pibig-info-p-maugli-kartinki-iz-multfilma-arti-pinteres-4.jpg
+- **Заметки:** галерея смешивает советского и диснеевского Маугли — нужно выбрать советский (стиль Шварцмана).
 
 ### 43. Багира
-- **Источник:** тот же советский мультфильм
+- **Источник:** papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Becque_-_Livre_de_la_jungle%2C_p18.jpeg/330px-Becque_-_Livre_de_la_jungle%2C_p18.jpeg — иллюстрация из книги Киплинга (не советская анимация)
-  - https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/MaugliStamp.JPG/250px-MaugliStamp.JPG — марка с советскими героями (включая Багиру)
-- **Заметки:** отдельного кадра советской Багиры на Wiki не нашёл — нужен кроп марки или ручной подбор.
+  - https://papik.pro/uploads/posts/2023-02/1675991626_papik-pro-p-risunok-bagira-1.jpg
+  - https://papik.pro/uploads/posts/2023-02/1675991627_papik-pro-p-risunok-bagira-2.jpg
+  - https://papik.pro/uploads/posts/2023-02/1675991627_papik-pro-p-risunok-bagira-3.jpg
+- **Заметки:** галерея «Рисунок Багира» содержит и советскую, и диснеевскую Багиру; нужен визуальный отбор советского образа.
 
 ### 44. Трубадур (Бременские музыканты)
-- **Источник:** «Бременские музыканты» (1969), «По следам бременских музыкантов» (1973), Союзмультфильм
+- **Источник:** slovnet.ru
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/9/9b/Bremenskie.jpg/330px-Bremenskie.jpg — постер/кадр мультфильма
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/4/45/Princess_and_Troubadour.JPG/250px-Princess_and_Troubadour.JPG — скульптура в Хабаровске
-- **Заметки:** первое — лучше (мультяшный стиль), но многофигурное.
+  - https://slovnet.ru/wp-content/uploads/2019/03/1-1.jpg
+  - https://slovnet.ru/wp-content/uploads/2019/03/4-4.jpg
+  - https://slovnet.ru/wp-content/uploads/2019/03/7-1.jpg
+- **Заметки:** страница `trubadur-iz-multfilma-bremenskie-muzykanty-30-foto` посвящена именно Трубадуру; галерея содержит как одиночные кадры, так и пары — нужна визуальная проверка.
 
 ### 45. Принцесса (Бременские музыканты)
-- **Источник:** тот же
+- **Источник:** slovnet.ru
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/9/9b/Bremenskie.jpg/330px-Bremenskie.jpg — постер (Принцесса видна)
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/4/45/Princess_and_Troubadour.JPG/250px-Princess_and_Troubadour.JPG — скульптура (Принцесса с Трубадуром)
-- **Заметки:** отдельного кадра-портрета на Wiki нет — кроп постера.
+  - https://slovnet.ru/wp-content/uploads/2019/03/1-1.png
+  - https://slovnet.ru/wp-content/uploads/2019/03/2-5.jpg
+  - https://slovnet.ru/wp-content/uploads/2019/03/3-5.jpg
+- **Заметки:** страница `printsessa-iz-multfilma-bremenskie-muzykanty-30-foto` — посвящена именно Принцессе. Нужен визуальный отбор «соло» кадров.
 
 ### 46. Буратино
-- **Источник:** «Приключения Буратино», мультфильм Союзмультфильм 1959 / худ. фильм 1975
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/2/24/Buratino_vladimirov2.jpg/330px-Buratino_vladimirov2.jpg — иллюстрация Л. Владимирского, 1956 (книжная классика, тот же образ что в фильме)
-- **Заметки:** для именно мультфильма 1959 кадра на Wiki нет; иллюстрация Владимирского — самый узнаваемый канон.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-cbw0-p-kartinki-buratino-na-prozrachnom-fone-9.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-cf25-p-kartinki-buratino-na-prozrachnom-fone-18.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-chmk-p-kartinki-buratino-na-prozrachnom-fone-29.png
 
 ### 47. Мальвина
-- **Источник:** «Приключения Буратино», 1959 (мультфильм) / 1975 (худ. фильм)
+- **Источник:** foni.papik.pro
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/6/6a/%D0%9C%D0%B0%D0%BB%D1%8C%D0%B2%D0%B8%D0%BD%D0%B0.jpg/330px-%D0%9C%D0%B0%D0%BB%D1%8C%D0%B2%D0%B8%D0%BD%D0%B0.jpg — Татьяна Проценко в роли Мальвины (худ. фильм 1975)
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/2/24/Buratino_vladimirov2.jpg/330px-Buratino_vladimirov2.jpg — иллюстрация Владимирского (Мальвина видна с Буратино и Базилио)
-- **Заметки:** первое — это live-action, а не анимация. Если нужен именно мультфильм — нужен ручной подбор кадра из «Приключений Буратино» (1959).
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-2c4r-p-kartinki-malvina-na-prozrachnom-fone-1.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-2d7w-p-kartinki-malvina-na-prozrachnom-fone-4.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-2gql-p-kartinki-malvina-na-prozrachnom-fone-13.png
 
 ### 48. Мамонтёнок
-- **Источник:** «Мама для мамонтёнка» (Союзмультфильм / Экран, 1981)
+- **Источник:** foni.papik.pro + png.klev.club
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/thumb/f/f0/%D0%9C%D0%B0%D0%BC%D0%B0_%D0%B4%D0%BB%D1%8F_%D0%BC%D0%B0%D0%BC%D0%BE%D0%BD%D1%82%D1%91%D0%BD%D0%BA%D0%B0_-_%D0%BA%D0%B0%D0%B4%D1%80_%D0%B8%D0%B7_%D0%BC%D1%83%D0%BB%D1%8C%D1%82%D1%84%D0%B8%D0%BB%D1%8C%D0%BC%D0%B0.jpg/330px-...jpg — кадр из мультфильма
-- **Заметки:** канон.
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-9att-p-kartinki-mamontenok-na-prozrachnom-fone-4.png
+  - https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-9bhv-p-kartinki-mamontenok-na-prozrachnom-fone-7.png
+  - https://png.klev.club/uploads/posts/2024-04/png-klev-club-zh7y-p-mamontenok-png-3.png
 
 ### 49. Котёнок по имени Гав
-- **Источник:** «Котёнок по имени Гав» (Союзмультфильм, 1976–1982)
+- **Источник:** papik.pro (иллюстрации к мультфильму «Котёнок по имени Гав»)
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/e/e0/%D0%9F%D0%BB%D0%B0%D0%BA%D0%B0%D1%82_%D0%BA_%D1%84%D0%B8%D0%BB%D1%8C%D0%BC%D1%83_%C2%AB%D0%9A%D0%BE%D1%82%D1%91%D0%BD%D0%BE%D0%BA_%D0%BF%D0%BE_%D0%B8%D0%BC%D0%B5%D0%BD%D0%B8_%D0%93%D0%B0%D0%B2%C2%BB.jpg — плакат к фильму, худ. Б. Фоломкин, 1976
-- **Заметки:** канон.
+  - https://papik.pro/izobr/uploads/posts/2023-02/1677281855_papik-pro-p-illyustratsiya-k-multfilmu-kotenok-gav-1.jpg
+  - https://papik.pro/izobr/uploads/posts/2023-02/1677281856_papik-pro-p-illyustratsiya-k-multfilmu-kotenok-gav-4.jpg
+  - https://papik.pro/izobr/uploads/posts/2023-02/1677281856_papik-pro-p-illyustratsiya-k-multfilmu-kotenok-gav-6.jpg
+- **Заметки:** галерея содержит как кадры с одним Гавом, так и Гав+Шарик — нужна визуальная проверка.
 
 ### 50. Умка
-- **Источник:** «Умка» (Союзмультфильм, 1969)
+- **Источник:** foni.papik.pro + kartinki.pibig.info
 - **Кандидаты:**
-  - https://upload.wikimedia.org/wikipedia/ru/3/37/Umka_mama.jpg — кадр из мультфильма (Умка с мамой)
-- **Заметки:** многофигурный кадр; кропать. Других кадров на странице Wiki нет.
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-o2fa-p-kartinki-umka-na-prozrachnom-fone-5.png
+  - https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-o3jp-p-kartinki-umka-na-prozrachnom-fone-7.png
+  - https://kartinki.pibig.info/uploads/posts/2023-04/1681952630_kartinki-pibig-info-p-kartinki-iz-multfilma-umka-arti-pinterest-1.jpg
+- **Заметки:** на странице kartinki.pibig.info Умка иногда изображён с мамой-медведицей; foni.papik.pro обычно одиночный.
 
 ---
 
-## Сводка пробелов (нужен ручной подбор / есть только групповые кадры)
+## Сводка пробелов
 
-- **№10 Братец Иванушка** — кандидата нет
-- **№18 Крокодил Гена** — отдельного кадра не найдено
-- **№34 Бабки-Ёжки** — кандидата нет
-- **№41 Медвежонок (Ёжик в тумане)** — отдельного кадра не найдено
-- **№25 Малыш**, **№28 Заяц**, **№29–32 Мартышка/Удав/Слонёнок/Попугай**, **№38–39 Львёнок/Черепаха**, **№42 Маугли**, **№43 Багира**, **№45 Принцесса**, **№50 Умка** — есть только групповые/постерные кадры, нужно кропать или искать отдельные стиллы
+- №10 Братец Иванушка — найдены лишь обобщённые «Иванушки-дурачки», конкретно козлёночек из сказки «Сестрица Алёнушка и братец Иванушка» как отдельный PNG не индексируется. Рекомендация: вручную подобрать кадр из м/ф 1953 г. на animator.ru или иллюстрацию из современной детской книги.
+- №23 Сова (Винни-Пух) — найденные URL смешаны с диснеевскими; финал требует визуальной проверки именно советского образа Хитрука/Назарова.
+- №25 Малыш — три кандидата найдены через png.klev.club, но все три URL из общей галереи «Малыш и Карлсон»; нужна визуальная отбраковка, чтобы убедиться, что Малыш изображён без Карлсона.
+- №29 Мартышка (38 попугаев) — нужен ручной подбор. Одиночные PNG не индексируются.
+- №30 Удав (38 попугаев) — найдена страница со смесью обычных удавов и Удава из мультика; финальный кандидат — визуальная проверка.
+- №31 Слонёнок (38 попугаев) — нужен ручной подбор.
+- №32 Попугай (38 попугаев) — нужен ручной подбор. Поиск выдаёт попугая Кешу из «Возвращения блудного попугая».
+- №34 Бабки-Ёжки — одиночные PNG отдельной Бабки-Ёжки из «Летучего корабля» не индексируются (везде групповые сцены частушки). Нужен ручной кадр или иллюстрация.
+- №38 Львёнок и №39 Большая Черепаха — кандидаты найдены, но в общих галереях львов/черепах; нужна визуальная отбраковка кадров именно из советского м/ф 1974 г. Шварцмана.
+- №41 Медвежонок (Ёжик в тумане) — одиночные кадры друга-Медвежонка в стиле Норштейна не выделены. Нужен ручной кадр из YouTube-копии.
+- №42 Маугли и №43 Багира — найдены кандидаты, но галереи смешаны с диснеевскими версиями; финальный отбор — советский Маугли студии «Союзмультфильм» 1973–1976 (художник Шварцман).
+- №44 Трубадур и №45 Принцесса — словарь slovnet.ru хостит специальные страницы по каждому персонажу, но конкретные одиночные кадры в галерее перемешаны с парными — нужна визуальная отбраковка.
+- №49 Котёнок Гав — галерея смешивает Гава с Шариком; визуальная проверка.
 
-Также большая часть народно-сказочных героев (№1–12) представлена живописными/графическими работами (Васнецов, Билибин), а не мультяшными кадрами — если нужен мультстиль, требуется ручной подбор кадров из конкретных мультфильмов.
+## Sources used (домены)
+
+- [foni.papik.pro](https://foni.papik.pro) — основной источник PNG-вырезок советских героев на прозрачном фоне
+- [png.klev.club](https://png.klev.club) — PNG-вырезки советских мультфильмов
+- [papik.pro](https://papik.pro) — иллюстрации (Багира, Котёнок Гав)
+- [kartinki.pibig.info](https://kartinki.pibig.info) — галереи кадров (Маугли, Умка, Львёнок и Черепаха, Водяной)
+- [kartinkof.club](https://kartinkof.club) — иллюстрации Иванушки
+- [slovnet.ru](https://slovnet.ru) — галереи персонажей «Бременских музыкантов»
+- [kartinki.pics](https://kartinki.pics) — Сова из Винни-Пуха
