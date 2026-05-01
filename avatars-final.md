@@ -1,6 +1,11 @@
-# Avatars Final — финальные URL для 50 героев
+# Avatars Final — финальные URL для 51 героя
 
-Финальный отбор после ревью `avatars-catalog.md`. Этот файл — источник истины для этапа реализации модуля 1: каждый URL соответствует одному из 50 свободных слотов аватаров (плюс №49 «Котёнок Гав» закреплён за админом).
+Финальный отбор после ревью `avatars-catalog.md`. Этот файл — источник истины для этапа реализации модуля 1: каждый URL соответствует одному из 51 героя в системе. **Двое из них зарезервированы за админами:**
+
+- **№49 Котёнок Гав** — закреплён за мамой-админом
+- **№51 Бонифаций** — закреплён за папой-админом
+
+Гостям доступны 49 аватаров (все, кроме #49 и #51).
 
 ## TODO к этапу реализации
 
@@ -83,5 +88,9 @@
 46. **Буратино** — https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-cbw0-p-kartinki-buratino-na-prozrachnom-fone-9.png
 47. **Мальвина** — https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-2c4r-p-kartinki-malvina-na-prozrachnom-fone-1.png
 48. **Мамонтёнок** — https://png.klev.club/uploads/posts/2024-04/png-klev-club-zh7y-p-mamontenok-png-3.png
-49. **Котёнок по имени Гав** *(закреплён за админом)* — https://papik.pro/izobr/uploads/posts/2023-02/1677281856_papik-pro-p-illyustratsiya-k-multfilmu-kotenok-gav-6.jpg
+49. **Котёнок по имени Гав** *(закреплён за мамой-админом)* — https://papik.pro/izobr/uploads/posts/2023-02/1677281856_papik-pro-p-illyustratsiya-k-multfilmu-kotenok-gav-6.jpg
 50. **Умка** — https://kartinki.pibig.info/uploads/posts/2023-04/1681952630_kartinki-pibig-info-p-kartinki-iz-multfilma-umka-arti-pinterest-1.jpg
+
+### Закреплён за вторым админом
+
+51. **Бонифаций** *(закреплён за папой-админом)* — https://memax.club/wp-content/uploads/2019/06/Kartinki_lev_Bonifaciy_1_09050039.jpg
