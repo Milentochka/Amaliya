@@ -93,7 +93,7 @@ def _serialize_guest(guest: Guest, avatar: Avatar) -> dict:
             "image_url": avatar.image_url,
         },
         "zodiac": western_zodiac(guest.birth_date),
-        "chinese_zodiac": chinese_zodiac(guest.birth_date.year),
+        "chinese_zodiac": chinese_zodiac(guest.birth_date),
         "has_telegram": guest.telegram_id is not None,
     }
 
