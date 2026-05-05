@@ -8,9 +8,8 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from app.config import get_settings
 from app.db.database import Base
 
-# Side-effect import: ensures all models are registered on Base.metadata.
-# Add new model modules here as they get created.
-# from app import db  # noqa: F401
+# Side-effect import: registers all models on Base.metadata.
+from app.db import models  # noqa: F401, E402
 
 config = context.config
 if config.config_file_name is not None:
