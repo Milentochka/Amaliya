@@ -8,12 +8,14 @@ Notifications are sent via the Bot instance from elsewhere in the app
 (bookings, RSVP changes, video moderation, game results, etc.).
 """
 
+from typing import Optional
+
 from aiogram import Bot, Dispatcher
 
 from app.config import get_settings
 
 
-def build_bot() -> Bot | None:
+def build_bot() -> Optional[Bot]:
     settings = get_settings()
     if not settings.telegram_bot_token:
         return None

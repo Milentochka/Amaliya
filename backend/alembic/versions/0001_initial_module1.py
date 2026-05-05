@@ -7,11 +7,14 @@ Revision ID: 0001_initial_module1
 Revises:
 Create Date: 2026-05-06
 """
+from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import List, Tuple
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = "0001_initial_module1"
@@ -20,8 +23,20 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 
+# Reusable enum instances. Each is created once via .create(); referenced
+# from columns by the same Python object so SA does not re-emit CREATE TYPE.
+admin_role_enum = postgresql.ENUM("mom", "dad", name="admin_role", create_type=False)
+guest_gender_enum = postgresql.ENUM("M", "F", name="guest_gender", create_type=False)
+session_owner_enum = postgresql.ENUM(
+    "guest", "admin", name="session_owner_type", create_type=False
+)
+tg_binding_owner_enum = postgresql.ENUM(
+    "guest", "admin", name="tg_binding_owner_type", create_type=False
+)
+
+
 # (id, name, image_url, reserved_for_admin)
-AVATARS: list[tuple[int, str, str, bool]] = [
+AVATARS: List[Tuple[int, str, str, bool]] = [
     (1, "Иван-царевич", "https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-sfqp-p-kartinki-ivan-na-prozrachnom-fone-5.png", False),
     (2, "Василиса Премудрая", "https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-jl0j-p-kartinki-vasilisa-premudraya-na-prozrachno-18.png", False),
     (3, "Баба-Яга", "https://foni.papik.pro/uploads/posts/2024-09/foni-papik-pro-g0wx-p-kartinki-baba-yaga-na-prozrachnom-fone-6.png", False),
@@ -77,7 +92,15 @@ AVATARS: list[tuple[int, str, str, bool]] = [
 
 
 def upgrade() -> None:
-    # avatars
+    bind = op.get_bind()
+
+    # 1. Create all enum types up front via raw SQL — idempotent, predictable.
+    op.execute("CREATE TYPE admin_role AS ENUM ('mom', 'dad')")
+    op.execute("CREATE TYPE guest_gender AS ENUM ('M', 'F')")
+    op.execute("CREATE TYPE session_owner_type AS ENUM ('guest', 'admin')")
+    op.execute("CREATE TYPE tg_binding_owner_type AS ENUM ('guest', 'admin')")
+
+    # 2. avatars (no enums, but referenced by FKs from admin/guests)
     op.create_table(
         "avatars",
         sa.Column("id", sa.Integer, primary_key=True, autoincrement=False),
@@ -86,8 +109,6 @@ def upgrade() -> None:
         sa.Column("is_taken", sa.Boolean, server_default=sa.text("false"), nullable=False),
         sa.Column("reserved_for_admin", sa.Boolean, server_default=sa.text("false"), nullable=False),
     )
-
-    # Seed 51 avatars
     avatars_table = sa.table(
         "avatars",
         sa.column("id", sa.Integer),
@@ -110,18 +131,11 @@ def upgrade() -> None:
         ],
     )
 
-    # admin
-    admin_role = sa.Enum("mom", "dad", name="admin_role")
-    admin_role.create(op.get_bind(), checkfirst=True)
+    # 3. admin
     op.create_table(
         "admin",
         sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column(
-            "role",
-            sa.Enum("mom", "dad", name="admin_role", create_type=False),
-            unique=True,
-            nullable=False,
-        ),
+        sa.Column("role", admin_role_enum, unique=True, nullable=False),
         sa.Column("login", sa.Text, unique=True, nullable=False),
         sa.Column("password_hash", sa.Text, nullable=False),
         sa.Column("avatar_id", sa.Integer, sa.ForeignKey("avatars.id"), nullable=True),
@@ -135,22 +149,14 @@ def upgrade() -> None:
         ),
     )
 
-    # guests
-    guest_gender = sa.Enum("M", "F", name="guest_gender")
-    guest_gender.create(op.get_bind(), checkfirst=True)
+    # 4. guests
     op.create_table(
         "guests",
         sa.Column("id", sa.Uuid, primary_key=True),
         sa.Column("name", sa.Text, nullable=False),
         sa.Column("birth_date", sa.Date, nullable=False),
-        sa.Column(
-            "gender",
-            sa.Enum("M", "F", name="guest_gender", create_type=False),
-            nullable=False,
-        ),
-        sa.Column(
-            "avatar_id", sa.Integer, sa.ForeignKey("avatars.id"), nullable=False
-        ),
+        sa.Column("gender", guest_gender_enum, nullable=False),
+        sa.Column("avatar_id", sa.Integer, sa.ForeignKey("avatars.id"), nullable=False),
         sa.Column("telegram_id", sa.BigInteger, unique=True, nullable=True),
         sa.Column("telegram_username", sa.Text, nullable=True),
         sa.Column(
@@ -162,17 +168,11 @@ def upgrade() -> None:
         sa.UniqueConstraint("name", "birth_date", name="uq_guest_name_birth_date"),
     )
 
-    # sessions
-    session_owner_type = sa.Enum("guest", "admin", name="session_owner_type")
-    session_owner_type.create(op.get_bind(), checkfirst=True)
+    # 5. sessions
     op.create_table(
         "sessions",
         sa.Column("token", sa.Text, primary_key=True),
-        sa.Column(
-            "owner_type",
-            sa.Enum("guest", "admin", name="session_owner_type", create_type=False),
-            nullable=False,
-        ),
+        sa.Column("owner_type", session_owner_enum, nullable=False),
         sa.Column("owner_id", sa.Text, nullable=False),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column(
@@ -183,17 +183,11 @@ def upgrade() -> None:
         ),
     )
 
-    # telegram_binding_codes
-    tg_owner = sa.Enum("guest", "admin", name="tg_binding_owner_type")
-    tg_owner.create(op.get_bind(), checkfirst=True)
+    # 6. telegram_binding_codes
     op.create_table(
         "telegram_binding_codes",
         sa.Column("code", sa.Text, primary_key=True),
-        sa.Column(
-            "owner_type",
-            sa.Enum("guest", "admin", name="tg_binding_owner_type", create_type=False),
-            nullable=False,
-        ),
+        sa.Column("owner_type", tg_binding_owner_enum, nullable=False),
         sa.Column("owner_id", sa.Text, nullable=False),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("used", sa.Boolean, server_default=sa.text("false"), nullable=False),

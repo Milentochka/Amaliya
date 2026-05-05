@@ -1,6 +1,7 @@
 import enum
 import uuid
 from datetime import date, datetime
+from typing import Optional
 
 from sqlalchemy import (
     BigInteger,
@@ -43,10 +44,10 @@ class Guest(Base):
         nullable=False,
     )
     avatar_id: Mapped[int] = mapped_column(ForeignKey("avatars.id"), nullable=False)
-    telegram_id: Mapped[int | None] = mapped_column(
+    telegram_id: Mapped[Optional[int]] = mapped_column(
         BigInteger, unique=True, nullable=True
     )
-    telegram_username: Mapped[str | None] = mapped_column(Text, nullable=True)
+    telegram_username: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
