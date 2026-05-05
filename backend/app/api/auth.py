@@ -6,16 +6,47 @@ from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_session
-from app.schemas.auth import GuestRegisterIn, GuestRegisterOut, MessageOut
+from app.schemas.auth import (
+    GuestLookupIn,
+    GuestRegisterIn,
+    GuestRegisterOut,
+    MessageOut,
+)
 from app.security.cookies import GUEST_COOKIE, clear_session_cookie, set_session_cookie
 from app.services.auth import (
     AvatarsExhausted,
     login_or_register_guest,
     logout as svc_logout,
+    lookup_existing_guest,
     resolve_guest_from_token,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.post(
+    "/lookup",
+    response_model=GuestRegisterOut,
+    status_code=status.HTTP_200_OK,
+)
+async def lookup(
+    payload: GuestLookupIn,
+    response: Response,
+    session: AsyncSession = Depends(get_session),
+):
+    """Step 1: only Name + DOB. Returns 200 + login on match, 404 on miss."""
+    result = await lookup_existing_guest(
+        session, name=payload.name, birth_date_str=payload.birth_date
+    )
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="not_registered"
+        )
+    response_data, token, expires_at = result
+    set_session_cookie(
+        response, token=token, expires_at=expires_at, owner_type="guest"
+    )
+    return response_data
 
 
 @router.post(

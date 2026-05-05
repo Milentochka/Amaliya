@@ -47,6 +47,20 @@ async function parseError(res: Response): Promise<string> {
   return `Ошибка ${res.status}`;
 }
 
+export async function lookup(
+  payload: { name: string; birth_date: string },
+): Promise<RegisterResponse | null> {
+  const res = await fetch(`${API_URL}/api/auth/lookup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as RegisterResponse;
+}
+
 export async function loginOrRegister(
   payload: RegisterPayload,
 ): Promise<RegisterResponse> {

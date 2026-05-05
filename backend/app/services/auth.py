@@ -19,7 +19,7 @@ from app.db.models import (
     SessionOwnerType,
 )
 from app.schemas.auth import GuestRegisterIn, parse_dd_mm_yy
-from app.security.jwt import issue_jwt, make_session_token
+from app.security.jwt import issue_jwt
 from app.security.passwords import verify_password
 from app.services.zodiac import chinese_zodiac, western_zodiac
 
@@ -39,18 +39,12 @@ class AdminCredentialsInvalid(Exception):
 
 
 async def _pick_random_free_avatar(session: AsyncSession) -> Avatar:
-    """Atomically pick and reserve a free, non-admin-reserved avatar.
-
-    Uses ORDER BY random() LIMIT 1 + immediate UPDATE to mark as taken.
-    """
     stmt = (
         select(Avatar)
         .where(Avatar.is_taken.is_(False), Avatar.reserved_for_admin.is_(False))
-        .order_by(Avatar.id)  # deterministic for testability; could use random()
+        .order_by(Avatar.id)
         .limit(1)
     )
-    # NOTE: for ~30 guests, deterministic order is fine. Add a small random
-    # later if uniqueness of which-hero-goes-to-whom matters more.
     avatar = (await session.execute(stmt)).scalar_one_or_none()
     if avatar is None:
         raise AvatarsExhausted()
@@ -98,46 +92,62 @@ def _serialize_guest(guest: Guest, avatar: Avatar) -> dict:
     }
 
 
-# -------- Guest: login or register --------
+async def _find_existing(
+    session: AsyncSession, name: str, bd: Date
+) -> Optional[Guest]:
+    return (
+        await session.execute(
+            select(Guest).where(Guest.name == name, Guest.birth_date == bd)
+        )
+    ).scalar_one_or_none()
+
+
+async def _login_to_existing(
+    session: AsyncSession, guest: Guest
+) -> Tuple[dict, str, datetime]:
+    avatar = (
+        await session.execute(select(Avatar).where(Avatar.id == guest.avatar_id))
+    ).scalar_one()
+    rsvp_rows = (
+        await session.execute(select(Rsvp).where(Rsvp.guest_id == guest.id))
+    ).scalars().all()
+    rsvp_dict = {
+        row.event_part_type.value: row.status.value for row in rsvp_rows
+    }
+    token, expires_at = await _create_session_record(
+        session, owner_type=SessionOwnerType.GUEST, owner_id=str(guest.id)
+    )
+    await session.commit()
+    return (
+        {"guest": _serialize_guest(guest, avatar), "rsvp": rsvp_dict},
+        token,
+        expires_at,
+    )
+
+
+# -------- Public service functions --------
+
+
+async def lookup_existing_guest(
+    session: AsyncSession, *, name: str, birth_date_str: str
+) -> Optional[Tuple[dict, str, datetime]]:
+    """Step 1 of two-step flow: find pair (name, dob); login if exists, else None."""
+    bd = parse_dd_mm_yy(birth_date_str)
+    existing = await _find_existing(session, name, bd)
+    if existing is None:
+        return None
+    return await _login_to_existing(session, existing)
 
 
 async def login_or_register_guest(
     session: AsyncSession, payload: GuestRegisterIn
 ) -> Tuple[dict, str, datetime]:
-    """If (name, birth_date) exists → log into that account; ignore other fields.
-    Otherwise → create guest + 2 RSVP rows + assign avatar.
-    Returns (response_dict, jwt_token, expires_at).
-    """
-    bd: Date = parse_dd_mm_yy(payload.birth_date)
-
-    existing = (
-        await session.execute(
-            select(Guest).where(Guest.name == payload.name, Guest.birth_date == bd)
-        )
-    ).scalar_one_or_none()
-
+    """If (name, birth_date) exists → log in; else create + assign avatar + 2 RSVPs."""
+    bd = parse_dd_mm_yy(payload.birth_date)
+    existing = await _find_existing(session, payload.name, bd)
     if existing is not None:
-        # Login flow — fetch avatar, return serialized
-        avatar = (
-            await session.execute(select(Avatar).where(Avatar.id == existing.avatar_id))
-        ).scalar_one()
-        rsvp_rows = (
-            await session.execute(select(Rsvp).where(Rsvp.guest_id == existing.id))
-        ).scalars().all()
-        rsvp_dict = {
-            row.event_part_type.value: row.status.value for row in rsvp_rows
-        }
-        token, expires_at = await _create_session_record(
-            session, owner_type=SessionOwnerType.GUEST, owner_id=str(existing.id)
-        )
-        await session.commit()
-        return (
-            {"guest": _serialize_guest(existing, avatar), "rsvp": rsvp_dict},
-            token,
-            expires_at,
-        )
+        return await _login_to_existing(session, existing)
 
-    # Register flow
     avatar = await _pick_random_free_avatar(session)
     new_guest = Guest(
         id=uuid.uuid4(),
@@ -147,7 +157,6 @@ async def login_or_register_guest(
         avatar_id=avatar.id,
     )
     session.add(new_guest)
-    # RSVP rows for both event parts
     session.add(
         Rsvp(
             guest_id=new_guest.id,
@@ -162,7 +171,6 @@ async def login_or_register_guest(
             status=RsvpStatus(payload.rsvp_banquet),
         )
     )
-
     token, expires_at = await _create_session_record(
         session, owner_type=SessionOwnerType.GUEST, owner_id=str(new_guest.id)
     )
@@ -203,7 +211,6 @@ async def admin_login(
 
 
 async def logout(session: AsyncSession, token: str) -> None:
-    """Delete the session row. Cookie is cleared by caller."""
     db_session = (
         await session.execute(select(DbSession).where(DbSession.token == token))
     ).scalar_one_or_none()
@@ -212,13 +219,12 @@ async def logout(session: AsyncSession, token: str) -> None:
         await session.commit()
 
 
-# -------- Get current guest from cookie token --------
+# -------- Resolve current guest from cookie --------
 
 
 async def resolve_guest_from_token(
     session: AsyncSession, token: Optional[str]
 ) -> Optional[dict]:
-    """Returns serialized guest dict if token is valid + non-expired, else None."""
     if not token:
         return None
     db_session = (

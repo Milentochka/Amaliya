@@ -44,6 +44,24 @@ def parse_dd_mm_yy(value: str) -> date:
 # -------- Inputs --------
 
 
+class GuestLookupIn(BaseModel):
+    """Step 1 of the two-step flow: just identity probe."""
+
+    name: str = Field(min_length=1, max_length=100)
+    birth_date: str = Field(description="DD/MM/YY")
+
+    @field_validator("name")
+    @classmethod
+    def trim_name(cls, v: str) -> str:
+        return v.strip()
+
+    @field_validator("birth_date")
+    @classmethod
+    def validate_birth_date_format(cls, v: str) -> str:
+        parse_dd_mm_yy(v)
+        return v.strip()
+
+
 class GuestRegisterIn(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     birth_date: str = Field(description="DD/MM/YY")
