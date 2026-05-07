@@ -93,3 +93,56 @@ export async function logout(): Promise<void> {
     credentials: "include",
   });
 }
+
+// -------- Wishlist --------
+
+export type Priority = "high" | "normal";
+
+export interface WishlistItem {
+  id: string;
+  name: string;
+  description: string | null;
+  photo_url: string | null;
+  price_rub: number | null;
+  ozon_url: string | null;
+  category: string | null;
+  priority: Priority;
+  can_be_shared: boolean;
+  is_booked: boolean;
+  booked_by_me: boolean;
+  my_booking_id: string | null;
+  my_comment: string | null;
+}
+
+export async function listWishlist(): Promise<WishlistItem[]> {
+  const res = await fetch(`${API_URL}/api/wishlist`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as WishlistItem[];
+}
+
+export async function bookItem(
+  itemId: string,
+  comment: string,
+): Promise<WishlistItem> {
+  const res = await fetch(
+    `${API_URL}/api/wishlist/items/${itemId}/book`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ comment }),
+    },
+  );
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as WishlistItem;
+}
+
+export async function cancelBooking(bookingId: string): Promise<void> {
+  const res = await fetch(
+    `${API_URL}/api/wishlist/bookings/${bookingId}`,
+    { method: "DELETE", credentials: "include" },
+  );
+  if (!res.ok) throw new Error(await parseError(res));
+}

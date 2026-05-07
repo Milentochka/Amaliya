@@ -9,11 +9,13 @@ from app.db.models.telegram_binding_code import (
     TelegramBindingCode,
     TelegramBindingCodeOwnerType,
 )
+from app.db.models.wishlist import Booking, WishlistItem, WishlistPriority
 
 __all__ = [
     "Admin",
     "AdminRole",
     "Avatar",
+    "Booking",
     "EventPartType",
     "Guest",
     "GuestGender",
@@ -23,4 +25,6 @@ __all__ = [
     "SessionOwnerType",
     "TelegramBindingCode",
     "TelegramBindingCodeOwnerType",
+    "WishlistItem",
+    "WishlistPriority",
 ]

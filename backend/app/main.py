@@ -4,8 +4,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.admin_auth import router as admin_auth_router
+from app.api.admin_wishlist import router as admin_wishlist_router
 from app.api.auth import router as auth_router
 from app.api.health import router as health_router
+from app.api.wishlist import router as wishlist_router
 from app.config import get_settings
 
 
@@ -33,6 +35,8 @@ def create_app() -> FastAPI:
     app.include_router(health_router, prefix="/api")
     app.include_router(auth_router, prefix="/api")
     app.include_router(admin_auth_router, prefix="/api")
+    app.include_router(wishlist_router, prefix="/api")
+    app.include_router(admin_wishlist_router, prefix="/api")
     return app
 
 

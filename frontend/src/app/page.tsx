@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import {
@@ -158,9 +159,16 @@ export default function Home() {
             />
           </dl>
 
+          <Link
+            href="/wishlist"
+            className="mt-8 block w-full rounded-2xl bg-blush-500 py-3 text-center text-sm font-medium text-white shadow-soft transition hover:bg-blush-600"
+          >
+            Виш-лист подарков →
+          </Link>
+
           <button
             onClick={handleLogout}
-            className="mt-8 w-full rounded-2xl border border-cream-300 bg-cream-50 py-3 text-sm font-medium text-mocha-700 transition hover:bg-cream-100"
+            className="mt-3 w-full rounded-2xl border border-cream-300 bg-cream-50 py-3 text-sm font-medium text-mocha-700 transition hover:bg-cream-100"
           >
             Выйти
           </button>
