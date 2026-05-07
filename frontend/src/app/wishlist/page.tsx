@@ -13,6 +13,18 @@ import {
   WishlistItem,
 } from "@/lib/api";
 
+const GIFT_EMOJIS = [
+  "🎁", "🧸", "📚", "🎨", "🚂", "🎵", "🌟", "🎈", "🦄", "🐻",
+  "🌸", "🍭", "🎀", "🧩", "🚲", "🌈", "🦋", "🐰", "🐥", "🦊",
+  "🧵", "🌷", "🥁", "🪁", "🪀",
+];
+
+function emojiFor(id: string): string {
+  let sum = 0;
+  for (let i = 0; i < id.length; i++) sum += id.charCodeAt(i);
+  return GIFT_EMOJIS[sum % GIFT_EMOJIS.length];
+}
+
 export default function WishlistPage() {
   const [guest, setGuest] = useState<GuestOut | null>(null);
   const [items, setItems] = useState<WishlistItem[] | null>(null);
@@ -75,7 +87,7 @@ export default function WishlistPage() {
   if (!guest) {
     return (
       <main className="mx-auto max-w-md px-6 py-16 text-center">
-        <p className="text-mocha-500">Сначала зайди в свой аккаунт.</p>
+        <p className="text-mocha-500">Сначала войдите в свой аккаунт.</p>
         <Link
           href="/"
           className="mt-4 inline-block rounded-2xl bg-blush-500 px-5 py-2.5 text-sm text-white"
@@ -95,7 +107,21 @@ export default function WishlistPage() {
         >
           ← в кабинет
         </Link>
-        <span className="text-xs text-mocha-400">{guest.name}</span>
+        <div className="flex items-center gap-3">
+          <div className="relative h-14 w-14 overflow-hidden rounded-full bg-cream-100 ring-2 ring-cream-100">
+            <Image
+              src={guest.avatar.image_url}
+              alt={guest.avatar.name}
+              fill
+              sizes="56px"
+              className="object-contain p-1"
+              unoptimized
+            />
+          </div>
+          <span className="text-sm font-medium text-mocha-700">
+            {guest.name}
+          </span>
+        </div>
       </header>
 
       <h1 className="text-3xl font-light tracking-tight text-mocha-900">
@@ -104,9 +130,26 @@ export default function WishlistPage() {
         <span className="font-medium text-blush-600">подарков</span>
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-mocha-500">
-        Это список того, чему Амалия будет рада. Выбери подарок и забронируй —
-        чтобы никто не подарил то же самое.
+        Это список того, чему Амалия будет рада. Выберите подарок и
+        забронируйте — чтобы никто не подарил то же самое.
       </p>
+
+      <div className="mt-6 space-y-3 rounded-3xl border border-cream-200 bg-cream-50/60 p-5 text-xs leading-relaxed text-mocha-500">
+        <p>
+          Список не обязательный и создан для удобства гостей. Ссылки приведены
+          для наглядности — всегда можно использовать другие площадки или
+          других продавцов. Вы можете выбрать подарок на свой вкус и кошелёк.
+        </p>
+        <p>
+          Есть только несколько просьб от родителей: пожалуйста, не дарите
+          одежду и необработанные деревянные «эко-игрушки»; книжки
+          предпочтительнее на английском языке; и, по возможности, исключите
+          страны-производители Турцию и Азербайджан.
+        </p>
+        <p className="text-mocha-700">
+          Спасибо за понимание и уважение к культуре семьи.
+        </p>
+      </div>
 
       {error && (
         <div className="mt-6 rounded-2xl border border-blush-200 bg-blush-100/60 px-4 py-3 text-sm text-blush-700">
@@ -184,9 +227,7 @@ function ItemCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <h3 className="text-base font-medium leading-tight text-mocha-900">
-              {item.priority === "high" && (
-                <span className="mr-1 text-blush-500">★</span>
-              )}
+              <span className="mr-1.5">{emojiFor(item.id)}</span>
               {item.name}
             </h3>
             {item.price_rub != null && (
@@ -217,7 +258,7 @@ function ItemCard({
         <div className="text-xs text-mocha-400">
           {item.booked_by_me ? (
             <span className="text-blush-700">
-              Ты забронировал
+              Вы забронировали
               {item.my_comment ? `: «${item.my_comment}»` : ""}
             </span>
           ) : item.is_booked ? (
@@ -288,7 +329,7 @@ function BookModal({
           rows={3}
           maxLength={500}
           autoFocus
-          placeholder="Например: куплю до 20 мая, везу из Москвы"
+          placeholder="Например: привезу на праздник сам, закажу доставку вам на дом, вложу в подарок всю свою любовь и заботу…"
           className="mt-2 block w-full resize-none rounded-2xl border border-cream-200 bg-cream-50/60 px-4 py-3 text-sm text-mocha-900 placeholder-mocha-300 focus:border-blush-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blush-200"
         />
 

@@ -81,7 +81,7 @@ async def cancel_booking(
     except BookingNotFound:
         raise HTTPException(status_code=404, detail="Бронь не найдена")
     except NotYourBooking:
-        raise HTTPException(status_code=403, detail="Это не твоя бронь")
+        raise HTTPException(status_code=403, detail="Это не Ваша бронь")
     return {"message": "cancelled"}
 
 

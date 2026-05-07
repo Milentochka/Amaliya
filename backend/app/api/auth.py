@@ -64,7 +64,7 @@ async def login_or_register(
     except AvatarsExhausted:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Все слоты аватаров заняты. Обратись к админу.",
+            detail="Все слоты аватаров заняты. Обратитесь к администратору.",
         )
     set_session_cookie(
         response, token=token, expires_at=expires_at, owner_type="guest"

@@ -84,7 +84,7 @@ export default function Home() {
 
     // step 2 — full registration
     if (!gender || !rsvpC || !rsvpB) {
-      setError("Заполни все поля.");
+      setError("Заполните все поля.");
       return;
     }
     setSubmitting(true);
@@ -141,10 +141,10 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-2xl font-medium tracking-tight text-mocha-900">
-                Привет, {guest.name}
+                Здравствуйте, {guest.name}
               </h1>
               <p className="mt-1 text-sm text-mocha-400">
-                Твой герой — {guest.avatar.name}
+                Ваш герой — {guest.avatar.name}
               </p>
             </div>
           </div>
@@ -188,13 +188,13 @@ export default function Home() {
         <p className="mt-3 text-sm leading-relaxed text-mocha-500">
           {step === 1 ? (
             <>
-              Чтобы попасть в систему, представься —<br />
+              Чтобы попасть в систему, представьтесь —<br />
               этого достаточно.
             </>
           ) : (
             <>
-              Кажется, ты впервые. Заполни ещё пару полей,<br />
-              и пропустим в свой кабинет.
+              Похоже, Вы здесь впервые. Заполните ещё пару полей,<br />
+              и пропустим в Ваш кабинет.
             </>
           )}
         </p>
