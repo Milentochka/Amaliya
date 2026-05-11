@@ -16,6 +16,8 @@ const nextConfig = {
       { protocol: "https", hostname: "licensingrussia.ru" },
       { protocol: "https", hostname: "kulturologia.ru" },
       { protocol: "https", hostname: "static.kinoafisha.info" },
+      { protocol: "https", hostname: "avatars.mds.yandex.net" },
+      { protocol: "https", hostname: "cafehinkalnaya.ru" },
     ],
   },
 };
