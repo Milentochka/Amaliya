@@ -146,3 +146,54 @@ export async function cancelBooking(bookingId: string): Promise<void> {
   );
   if (!res.ok) throw new Error(await parseError(res));
 }
+
+// -------- Event info --------
+
+export interface EventPart {
+  type: "christening" | "banquet";
+  start_time: string;
+  address: string | null;
+  yandex_maps_link: string | null;
+  program: string | null;
+}
+
+export interface Parent {
+  role: "mother" | "father";
+  name: string;
+  photo_url: string | null;
+  phone: string | null;
+  telegram_username: string | null;
+}
+
+export interface EventInfo {
+  title: string;
+  dress_code: string | null;
+  wishes: string | null;
+  countdown_target: string;
+  parts: EventPart[];
+  parents: Parent[];
+}
+
+export interface PublicGuest {
+  name: string;
+  avatar_url: string;
+  avatar_name: string;
+  zodiac: string;
+  chinese_zodiac: string;
+}
+
+export async function getEvent(): Promise<EventInfo> {
+  const res = await fetch(`${API_URL}/api/event`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as EventInfo;
+}
+
+export async function listPublicGuests(): Promise<PublicGuest[]> {
+  const res = await fetch(`${API_URL}/api/event/guests`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as PublicGuest[];
+}

@@ -2,6 +2,7 @@
 
 from app.db.models.admin import Admin, AdminRole
 from app.db.models.avatar import Avatar
+from app.db.models.event import EventMeta, EventPart, Parent, ParentRole
 from app.db.models.guest import Guest, GuestGender
 from app.db.models.rsvp import EventPartType, Rsvp, RsvpStatus
 from app.db.models.session import Session, SessionOwnerType
@@ -16,9 +17,13 @@ __all__ = [
     "AdminRole",
     "Avatar",
     "Booking",
+    "EventMeta",
+    "EventPart",
     "EventPartType",
     "Guest",
     "GuestGender",
+    "Parent",
+    "ParentRole",
     "Rsvp",
     "RsvpStatus",
     "Session",

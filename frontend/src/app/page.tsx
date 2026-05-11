@@ -160,8 +160,15 @@ export default function Home() {
           </dl>
 
           <Link
-            href="/wishlist"
+            href="/event"
             className="mt-8 block w-full rounded-2xl bg-blush-500 py-3 text-center text-sm font-medium text-white shadow-soft transition hover:bg-blush-600"
+          >
+            Страница мероприятия →
+          </Link>
+
+          <Link
+            href="/wishlist"
+            className="mt-3 block w-full rounded-2xl border border-blush-300 bg-blush-100/60 py-3 text-center text-sm font-medium text-blush-700 transition hover:bg-blush-100"
           >
             Виш-лист подарков →
           </Link>
