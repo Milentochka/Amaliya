@@ -288,13 +288,13 @@ function PartCard({
           }`}
         >
           {part.photos.map((url, i) => (
-            <div key={i} className="relative aspect-[4/3] overflow-hidden">
+            <div key={i} className="relative aspect-[3/4] overflow-hidden bg-cream-100">
               <Image
                 src={url}
                 alt={`${title} — фото ${i + 1}`}
                 fill
                 sizes="(max-width: 640px) 100vw, 400px"
-                className="object-cover"
+                className="object-cover object-top"
                 unoptimized
               />
             </div>
@@ -378,37 +378,64 @@ function InfoCard({
 }
 
 function ParentCard({ parent }: { parent: Parent }) {
+  const [expanded, setExpanded] = useState(false);
+  const hasContact = Boolean(parent.phone || parent.telegram_username);
+
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-cream-200 bg-cream-50/60 p-3">
-      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-cream-100">
-        {parent.photo_url ? (
-          <Image
-            src={parent.photo_url}
-            alt={parent.name}
-            fill
-            sizes="56px"
-            className="object-cover"
-            unoptimized
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-xl text-mocha-300">
-            {parent.role === "mother" ? "👩" : "👨"}
-          </div>
-        )}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-mocha-900">
-          {parent.name}
-        </p>
-        <p className="text-xs text-mocha-400">
-          {parent.role === "mother" ? "Мама" : "Папа"}
-        </p>
-        <div className="mt-1 flex gap-2 text-xs">
+    <div className="rounded-2xl border border-cream-200 bg-cream-50/60 p-3">
+      <button
+        type="button"
+        onClick={() => hasContact && setExpanded((v) => !v)}
+        className={`flex w-full items-center gap-3 text-left ${
+          hasContact ? "cursor-pointer" : "cursor-default"
+        }`}
+        aria-expanded={expanded}
+        aria-disabled={!hasContact}
+      >
+        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-cream-100 ring-2 ring-transparent transition group-hover:ring-blush-200">
+          {parent.photo_url ? (
+            <Image
+              src={parent.photo_url}
+              alt={parent.name}
+              fill
+              sizes="56px"
+              className="object-cover"
+              unoptimized
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-xl text-mocha-300">
+              {parent.role === "mother" ? "👩" : "👨"}
+            </div>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-mocha-900">
+            {parent.name}
+          </p>
+          <p className="text-xs text-mocha-400">
+            {parent.role === "mother" ? "Мама" : "Папа"}
+            {hasContact && (
+              <span className="ml-1 text-blush-500">
+                {expanded ? "↑" : "↓"}
+              </span>
+            )}
+          </p>
+        </div>
+      </button>
+
+      <div
+        className={`overflow-hidden transition-all duration-200 ${
+          expanded ? "mt-3 max-h-24 opacity-100" : "max-h-0 opacity-0"
+        }`}
+        aria-hidden={!expanded}
+      >
+        <div className="flex flex-col gap-1.5 border-t border-cream-200 pt-3 text-sm">
           {parent.phone && (
             <a
               href={`tel:${parent.phone}`}
-              className="text-blush-600 hover:underline"
+              className="flex items-center gap-2 text-blush-700 hover:underline"
             >
+              <span aria-hidden>📞</span>
               {parent.phone}
             </a>
           )}
@@ -417,8 +444,9 @@ function ParentCard({ parent }: { parent: Parent }) {
               href={`https://t.me/${parent.telegram_username}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blush-600 hover:underline"
+              className="flex items-center gap-2 text-blush-700 hover:underline"
             >
+              <span aria-hidden>✈️</span>
               @{parent.telegram_username}
             </a>
           )}
