@@ -147,7 +147,7 @@ export default function EventPage() {
 
       <section className="text-center">
         <h1 className="text-4xl font-light leading-tight tracking-tight text-mocha-900">
-          {event.title}
+          {highlightAmalia(event.title)}
         </h1>
 
         {countdown && (
@@ -240,6 +240,21 @@ export default function EventPage() {
   );
 }
 
+function highlightAmalia(title: string): React.ReactNode {
+  // Match Амали[яюие] (any common case ending) and color it blush.
+  const re = /(Амали(?:я|ю|и|ей|ею))/;
+  const m = title.match(re);
+  if (!m) return title;
+  const idx = m.index ?? 0;
+  return (
+    <>
+      {title.slice(0, idx)}
+      <span className="font-medium text-blush-600">{m[0]}</span>
+      {title.slice(idx + m[0].length)}
+    </>
+  );
+}
+
 function Countdown({ value, unit }: { value: number; unit: string }) {
   return (
     <div className="text-center">
@@ -263,40 +278,79 @@ function PartCard({
   title: string;
 }) {
   const mapsLink = buildMapsLink(part);
+  const hasPhotos = part.photos && part.photos.length > 0;
   return (
-    <article className="rounded-3xl border border-cream-200 bg-white/70 p-6 shadow-soft backdrop-blur-sm">
-      <div className="flex items-center gap-3">
-        <span className="text-3xl">{emoji}</span>
-        <div>
-          <h2 className="text-xl font-medium text-mocha-900">{title}</h2>
-          <p className="text-sm text-mocha-500">
-            {formatPartTime(part.start_time)}
-          </p>
-        </div>
-      </div>
-      {part.address && (
-        <p className="mt-4 text-sm text-mocha-700">{part.address}</p>
-      )}
-      {mapsLink && (
-        <a
-          href={mapsLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 inline-block rounded-2xl bg-blush-500 px-4 py-2 text-xs font-medium text-white shadow-gentle transition hover:bg-blush-600"
+    <article className="overflow-hidden rounded-3xl border border-cream-200 bg-white/70 shadow-soft backdrop-blur-sm">
+      {hasPhotos && (
+        <div
+          className={`grid gap-1 bg-cream-100 ${
+            part.photos.length === 1 ? "grid-cols-1" : "grid-cols-2"
+          }`}
         >
-          Открыть в Яндекс.Картах →
-        </a>
-      )}
-      {part.program && (
-        <div className="mt-5 rounded-2xl border border-cream-200 bg-cream-50/60 p-4">
-          <p className="mb-1 text-xs font-medium uppercase tracking-wider text-mocha-500">
-            Программа
-          </p>
-          <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-mocha-700">
-            {part.program}
-          </pre>
+          {part.photos.map((url, i) => (
+            <div key={i} className="relative aspect-[4/3] overflow-hidden">
+              <Image
+                src={url}
+                alt={`${title} — фото ${i + 1}`}
+                fill
+                sizes="(max-width: 640px) 100vw, 400px"
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+          ))}
         </div>
       )}
+
+      <div className="p-6">
+        <div className="flex items-center gap-3">
+          {!hasPhotos && <span className="text-3xl">{emoji}</span>}
+          <div>
+            <h2 className="text-xl font-medium text-mocha-900">
+              {hasPhotos && (
+                <span className="mr-2 text-2xl align-middle">{emoji}</span>
+              )}
+              {title}
+            </h2>
+            <p className="text-sm text-mocha-500">
+              {formatPartTime(part.start_time)}
+            </p>
+          </div>
+        </div>
+        {part.address && (
+          <p className="mt-4 text-sm text-mocha-700">{part.address}</p>
+        )}
+        {mapsLink && (
+          <a
+            href={mapsLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-block rounded-2xl bg-blush-500 px-4 py-2 text-xs font-medium text-white shadow-gentle transition hover:bg-blush-600"
+          >
+            Открыть в Яндекс.Картах →
+          </a>
+        )}
+        {part.program && (
+          <div className="mt-5 rounded-2xl border border-cream-200 bg-cream-50/60 p-4">
+            <p className="mb-1 text-xs font-medium uppercase tracking-wider text-mocha-500">
+              Программа
+            </p>
+            <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-mocha-700">
+              {part.program}
+            </pre>
+          </div>
+        )}
+        {part.additional_info && (
+          <div className="mt-3 rounded-2xl border border-cream-200 bg-cream-50/60 p-4">
+            <p className="mb-1 text-xs font-medium uppercase tracking-wider text-mocha-500">
+              Дополнительная информация
+            </p>
+            <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-mocha-700">
+              {part.additional_info}
+            </pre>
+          </div>
+        )}
+      </div>
     </article>
   );
 }

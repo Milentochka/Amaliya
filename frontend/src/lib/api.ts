@@ -155,6 +155,8 @@ export interface EventPart {
   address: string | null;
   yandex_maps_link: string | null;
   program: string | null;
+  photos: string[];
+  additional_info: string | null;
 }
 
 export interface Parent {

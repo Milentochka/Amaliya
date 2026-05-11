@@ -40,6 +40,8 @@ async def get_event(session: AsyncSession) -> dict:
                 "address": p.address,
                 "yandex_maps_link": p.yandex_maps_link,
                 "program": p.program,
+                "photos": p.photos or [],
+                "additional_info": p.additional_info,
             }
             for p in parts
         ],

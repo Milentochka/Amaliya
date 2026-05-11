@@ -1,8 +1,9 @@
 import enum
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from sqlalchemy import DateTime, Enum, Integer, Text, func
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.database import Base
@@ -53,6 +54,10 @@ class EventPart(Base):
     address: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     yandex_maps_link: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     program: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    photos: Mapped[List[str]] = mapped_column(
+        JSONB, nullable=False, server_default="[]"
+    )
+    additional_info: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
 
 class Parent(Base):

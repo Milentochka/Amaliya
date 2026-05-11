@@ -11,6 +11,8 @@ class EventPartOut(BaseModel):
     address: Optional[str] = None
     yandex_maps_link: Optional[str] = None
     program: Optional[str] = None
+    photos: List[str] = []
+    additional_info: Optional[str] = None
 
 
 class ParentOut(BaseModel):
