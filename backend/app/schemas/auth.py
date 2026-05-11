@@ -2,7 +2,7 @@
 
 import re
 from datetime import date
-from typing import Dict, Literal
+from typing import Dict, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -104,6 +104,7 @@ class GuestOut(BaseModel):
     zodiac: str
     chinese_zodiac: str
     has_telegram: bool
+    telegram_username: Optional[str] = None
 
 
 class GuestRegisterOut(BaseModel):
@@ -119,3 +120,9 @@ class AdminOut(BaseModel):
 
 class MessageOut(BaseModel):
     message: str
+
+
+class TelegramBindCodeOut(BaseModel):
+    code: str
+    bot_username: str
+    expires_at: str

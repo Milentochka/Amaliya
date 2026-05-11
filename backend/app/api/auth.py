@@ -1,16 +1,19 @@
 """Guest auth endpoints: register/login (single form), logout, me."""
 
+import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import get_settings
 from app.db.database import get_session
 from app.schemas.auth import (
     GuestLookupIn,
     GuestRegisterIn,
     GuestRegisterOut,
     MessageOut,
+    TelegramBindCodeOut,
 )
 from app.security.cookies import GUEST_COOKIE, clear_session_cookie, set_session_cookie
 from app.services.auth import (
@@ -19,6 +22,10 @@ from app.services.auth import (
     logout as svc_logout,
     lookup_existing_guest,
     resolve_guest_from_token,
+)
+from app.services.telegram_bind import (
+    issue_code_for_guest,
+    unbind_guest_telegram,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -96,6 +103,43 @@ async def me(
             detail="Не авторизован",
         )
     return {"guest": guest}
+
+
+@router.post("/me/telegram/start-bind", response_model=TelegramBindCodeOut)
+async def telegram_start_bind(
+    amaliya_guest_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    """Generate a one-time code for Telegram binding. Show to guest along
+    with the bot username; guest opens t.me/<bot>?start=<code>."""
+    guest = await resolve_guest_from_token(session, amaliya_guest_session)
+    if guest is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Не авторизован"
+        )
+    issued = await issue_code_for_guest(
+        session, guest_id=uuid.UUID(guest["id"])
+    )
+    settings = get_settings()
+    return {
+        "code": issued["code"],
+        "bot_username": settings.telegram_bot_username,
+        "expires_at": issued["expires_at"],
+    }
+
+
+@router.post("/me/telegram/unbind", response_model=MessageOut)
+async def telegram_unbind(
+    amaliya_guest_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    guest = await resolve_guest_from_token(session, amaliya_guest_session)
+    if guest is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Не авторизован"
+        )
+    await unbind_guest_telegram(session, guest_id=uuid.UUID(guest["id"]))
+    return {"message": "unbound"}
 
 
 # Trick: tell FastAPI which cookie name we read so OpenAPI shows it.

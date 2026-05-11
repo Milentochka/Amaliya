@@ -8,7 +8,9 @@ import {
   EventInfo,
   EventPart,
   getEvent,
+  getLeaderboard,
   GuestOut,
+  Leaderboard,
   listPublicGuests,
   me,
   Parent,
@@ -60,20 +62,31 @@ export default function EventPage() {
   const [guest, setGuest] = useState<GuestOut | null>(null);
   const [event, setEvent] = useState<EventInfo | null>(null);
   const [guests, setGuests] = useState<PublicGuest[] | null>(null);
+  const [leaderboard, setLeaderboard] = useState<Leaderboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    Promise.all([me(), getEvent(), listPublicGuests()])
-      .then(([g, e, gs]) => {
+    Promise.all([me(), getEvent(), listPublicGuests(), getLeaderboard()])
+      .then(([g, e, gs, lb]) => {
         setGuest(g);
         setEvent(e);
         setGuests(gs);
+        setLeaderboard(lb);
       })
       .catch((err) => setError((err as Error).message))
       .finally(() => setLoading(false));
   }, []);
+
+  // Refresh leaderboard every 60s.
+  useEffect(() => {
+    if (!guest) return;
+    const id = setInterval(() => {
+      getLeaderboard().then(setLeaderboard).catch(() => {});
+    }, 60_000);
+    return () => clearInterval(id);
+  }, [guest]);
 
   const countdown = useCountdown(event?.countdown_target ?? null);
 
@@ -236,6 +249,68 @@ export default function EventPage() {
           )}
         </ul>
       </section>
+
+      {leaderboard && (
+        <section className="mt-6 rounded-3xl border border-cream-200 bg-white/70 p-6 shadow-soft backdrop-blur-sm">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-lg font-medium text-mocha-900">
+              🏆 Игра «Ангел Амалия»
+            </h2>
+            <Link
+              href="/game"
+              className="text-xs text-blush-600 hover:underline"
+            >
+              Сыграть →
+            </Link>
+          </div>
+          {leaderboard.entries.length === 0 ? (
+            <p className="mt-4 text-sm text-mocha-400">
+              Пока никто не играл. Стань первым!
+            </p>
+          ) : (
+            <ol className="mt-4 space-y-2">
+              {leaderboard.entries.map((e) => (
+                <li
+                  key={e.guest_id}
+                  className={`flex items-center gap-3 rounded-2xl border px-3 py-2 ${
+                    leaderboard.winner_guest_id === e.guest_id
+                      ? "border-blush-300 bg-blush-100/60"
+                      : "border-cream-200 bg-cream-50/60"
+                  }`}
+                >
+                  <span className="w-6 shrink-0 text-center text-sm font-medium text-mocha-500">
+                    {e.rank}
+                  </span>
+                  <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-cream-100">
+                    <Image
+                      src={e.avatar_url}
+                      alt={e.name}
+                      fill
+                      sizes="32px"
+                      className="object-contain p-0.5"
+                      unoptimized
+                    />
+                  </div>
+                  <span className="min-w-0 flex-1 truncate text-sm text-mocha-700">
+                    {e.name}
+                    {leaderboard.winner_guest_id === e.guest_id && (
+                      <span className="ml-1 text-blush-600">★</span>
+                    )}
+                  </span>
+                  <span className="text-sm font-medium text-blush-600">
+                    {e.total_score}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          )}
+          {leaderboard.is_closed && (
+            <p className="mt-4 text-center text-xs text-mocha-400">
+              Игра завершена. Победитель отмечен ★.
+            </p>
+          )}
+        </section>
+      )}
     </main>
   );
 }

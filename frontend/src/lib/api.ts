@@ -25,6 +25,7 @@ export interface GuestOut {
   zodiac: string;
   chinese_zodiac: string;
   has_telegram: boolean;
+  telegram_username: string | null;
 }
 
 export interface RegisterResponse {
@@ -92,6 +93,31 @@ export async function logout(): Promise<void> {
     method: "POST",
     credentials: "include",
   });
+}
+
+// -------- Telegram binding --------
+
+export interface TelegramBindCode {
+  code: string;
+  bot_username: string;
+  expires_at: string;
+}
+
+export async function startTelegramBind(): Promise<TelegramBindCode> {
+  const res = await fetch(`${API_URL}/api/auth/me/telegram/start-bind`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as TelegramBindCode;
+}
+
+export async function unbindTelegram(): Promise<void> {
+  const res = await fetch(`${API_URL}/api/auth/me/telegram/unbind`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
 }
 
 // -------- Wishlist --------
@@ -198,4 +224,56 @@ export async function listPublicGuests(): Promise<PublicGuest[]> {
   });
   if (!res.ok) throw new Error(await parseError(res));
   return (await res.json()) as PublicGuest[];
+}
+
+// -------- Game --------
+
+export interface GameStats {
+  total_score: number;
+  attempts_today: number;
+  attempts_left_today: number;
+  rank: number | null;
+  is_closed: boolean;
+  cutoff_iso: string;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  guest_id: string;
+  name: string;
+  avatar_url: string;
+  total_score: number;
+}
+
+export interface Leaderboard {
+  is_closed: boolean;
+  entries: LeaderboardEntry[];
+  winner_guest_id: string | null;
+}
+
+export async function getGameStats(): Promise<GameStats> {
+  const res = await fetch(`${API_URL}/api/game/my-stats`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as GameStats;
+}
+
+export async function submitGameAttempt(score: number): Promise<GameStats> {
+  const res = await fetch(`${API_URL}/api/game/attempts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ score }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as GameStats;
+}
+
+export async function getLeaderboard(): Promise<Leaderboard> {
+  const res = await fetch(`${API_URL}/api/game/leaderboard`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Leaderboard;
 }

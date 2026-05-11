@@ -12,6 +12,9 @@ import {
   me,
   RegisterPayload,
   RsvpStatus,
+  startTelegramBind,
+  TelegramBindCode,
+  unbindTelegram,
 } from "@/lib/api";
 
 const RSVP_OPTIONS: { value: RsvpStatus; label: string }[] = [
@@ -153,11 +156,14 @@ export default function Home() {
             <Row label="Дата рождения" value={formatDob(guest.birth_date)} />
             <Row label="Знак зодиака" value={guest.zodiac} />
             <Row label="Год животного" value={guest.chinese_zodiac} />
-            <Row
-              label="Telegram"
-              value={guest.has_telegram ? "Привязан" : "Не привязан"}
-            />
           </dl>
+
+          <TelegramSection
+            guest={guest}
+            onChange={() => {
+              me().then((g) => g && setGuest(g));
+            }}
+          />
 
           <Link
             href="/event"
@@ -171,6 +177,13 @@ export default function Home() {
             className="mt-3 block w-full rounded-2xl border border-blush-300 bg-blush-100/60 py-3 text-center text-sm font-medium text-blush-700 transition hover:bg-blush-100"
           >
             Виш-лист подарков →
+          </Link>
+
+          <Link
+            href="/game"
+            className="mt-3 block w-full rounded-2xl border border-cream-300 bg-cream-50 py-3 text-center text-sm font-medium text-mocha-700 transition hover:bg-cream-100"
+          >
+            👼🏼 Игра «Ангел Амалия» →
           </Link>
 
           <button
@@ -358,5 +371,227 @@ function Row({ label, value }: { label: string; value: string }) {
       <dt className="text-mocha-400">{label}</dt>
       <dd className="font-medium text-mocha-700">{value}</dd>
     </div>
+  );
+}
+
+function TelegramSection({
+  guest,
+  onChange,
+}: {
+  guest: GuestOut;
+  onChange: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [bindCode, setBindCode] = useState<TelegramBindCode | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function handleStart() {
+    setLoading(true);
+    setError(null);
+    try {
+      const c = await startTelegramBind();
+      setBindCode(c);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleUnbind() {
+    if (!confirm("Отвязать Telegram?")) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await unbindTelegram();
+      setBindCode(null);
+      onChange();
+      setOpen(false);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function copyCode() {
+    if (!bindCode) return;
+    try {
+      await navigator.clipboard.writeText(`/start ${bindCode.code}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setError("Не удалось скопировать");
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          setOpen(true);
+          setBindCode(null);
+          setError(null);
+        }}
+        className="mt-4 flex w-full items-center justify-between rounded-2xl border border-cream-200 bg-cream-50/60 px-3 py-2 text-sm transition hover:bg-cream-100"
+      >
+        <span className="text-mocha-400">Telegram</span>
+        <span className="flex items-center gap-1.5 font-medium text-mocha-700">
+          {guest.has_telegram ? (
+            <>
+              <span className="text-blush-600">
+                @{guest.telegram_username ?? "привязан"}
+              </span>
+              <span className="text-mocha-300">→</span>
+            </>
+          ) : (
+            <>
+              <span className="text-mocha-400">не привязан</span>
+              <span className="text-blush-500">→</span>
+            </>
+          )}
+        </span>
+      </button>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-mocha-900/30 px-4 backdrop-blur-sm"
+          onClick={() => !loading && setOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl border border-cream-200 bg-white p-6 shadow-soft"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-medium text-mocha-900">
+              {guest.has_telegram ? "Telegram привязан" : "Привязать Telegram"}
+            </h3>
+
+            {/* Bound state */}
+            {guest.has_telegram && !bindCode && (
+              <>
+                <p className="mt-2 text-sm text-mocha-500">
+                  Ваш Telegram:{" "}
+                  <span className="font-medium text-blush-600">
+                    @{guest.telegram_username ?? "—"}
+                  </span>
+                </p>
+                <p className="mt-3 text-xs leading-relaxed text-mocha-400">
+                  Уведомления о бронированиях и изменениях будут приходить
+                  сюда от бота{" "}
+                  <span className="text-mocha-700">@amalia_dr_bot</span>.
+                </p>
+                <div className="mt-5 flex gap-3">
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="flex-1 rounded-2xl border border-cream-300 bg-cream-50 py-2.5 text-sm font-medium text-mocha-700 transition hover:bg-cream-100"
+                  >
+                    Закрыть
+                  </button>
+                  <button
+                    onClick={handleUnbind}
+                    disabled={loading}
+                    className="flex-1 rounded-2xl bg-blush-500 py-2.5 text-sm font-medium text-white shadow-soft transition hover:bg-blush-600 disabled:opacity-60"
+                  >
+                    Отвязать
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Unbound, no code yet */}
+            {!guest.has_telegram && !bindCode && (
+              <>
+                <p className="mt-2 text-sm leading-relaxed text-mocha-500">
+                  Нажмите «Получить код» — мы выдадим разовый код для
+                  привязки. Затем откройте бота{" "}
+                  <span className="text-mocha-700">@amalia_dr_bot</span> и
+                  отправьте ему этот код одним сообщением.
+                </p>
+                {error && (
+                  <div className="mt-3 rounded-2xl border border-blush-200 bg-blush-100/60 px-3 py-2 text-sm text-blush-700">
+                    {error}
+                  </div>
+                )}
+                <div className="mt-5 flex gap-3">
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="flex-1 rounded-2xl border border-cream-300 bg-cream-50 py-2.5 text-sm font-medium text-mocha-700 transition hover:bg-cream-100"
+                  >
+                    Отмена
+                  </button>
+                  <button
+                    onClick={handleStart}
+                    disabled={loading}
+                    className="flex-1 rounded-2xl bg-blush-500 py-2.5 text-sm font-medium text-white shadow-soft transition hover:bg-blush-600 disabled:opacity-60"
+                  >
+                    {loading ? "Минутку…" : "Получить код"}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Code issued */}
+            {bindCode && (
+              <>
+                <p className="mt-2 text-sm leading-relaxed text-mocha-500">
+                  Откройте{" "}
+                  <a
+                    href={`https://t.me/${bindCode.bot_username}?start=${bindCode.code}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-blush-600 hover:underline"
+                  >
+                    @{bindCode.bot_username}
+                  </a>{" "}
+                  и отправьте боту:
+                </p>
+
+                <button
+                  type="button"
+                  onClick={copyCode}
+                  className="mt-4 flex w-full items-center justify-between rounded-2xl border border-cream-300 bg-cream-50 px-4 py-3 font-mono text-sm text-mocha-900 transition hover:bg-cream-100"
+                >
+                  <span>/start {bindCode.code}</span>
+                  <span className="text-xs text-mocha-400">
+                    {copied ? "✓ скопировано" : "скопировать"}
+                  </span>
+                </button>
+
+                <p className="mt-3 text-xs leading-relaxed text-mocha-400">
+                  Код действует 15 минут. После того как бот подтвердит
+                  привязку, обновите страницу.
+                </p>
+
+                {error && (
+                  <div className="mt-3 rounded-2xl border border-blush-200 bg-blush-100/60 px-3 py-2 text-sm text-blush-700">
+                    {error}
+                  </div>
+                )}
+
+                <div className="mt-5 flex gap-3">
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="flex-1 rounded-2xl border border-cream-300 bg-cream-50 py-2.5 text-sm font-medium text-mocha-700 transition hover:bg-cream-100"
+                  >
+                    Закрыть
+                  </button>
+                  <a
+                    href={`https://t.me/${bindCode.bot_username}?start=${bindCode.code}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-1 items-center justify-center rounded-2xl bg-blush-500 py-2.5 text-sm font-medium text-white shadow-soft transition hover:bg-blush-600"
+                  >
+                    Открыть бота
+                  </a>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
