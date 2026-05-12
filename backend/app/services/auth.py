@@ -24,6 +24,61 @@ from app.security.passwords import verify_password
 from app.services.zodiac import chinese_zodiac, western_zodiac
 
 
+# -------- RSVP --------
+
+
+async def get_guest_rsvp(
+    session: AsyncSession, *, guest_id: uuid.UUID
+) -> dict:
+    """Returns {christening, banquet} status strings. Missing → 'maybe'."""
+    rows = (
+        await session.execute(select(Rsvp).where(Rsvp.guest_id == guest_id))
+    ).scalars().all()
+    out = {"christening": "maybe", "banquet": "maybe"}
+    for row in rows:
+        key = row.event_part_type.value if hasattr(row.event_part_type, "value") else row.event_part_type
+        out[key] = row.status.value if hasattr(row.status, "value") else row.status
+    return out
+
+
+async def update_guest_rsvp(
+    session: AsyncSession,
+    *,
+    guest_id: uuid.UUID,
+    christening: Optional[str] = None,
+    banquet: Optional[str] = None,
+) -> dict:
+    pairs = [
+        (EventPartType.CHRISTENING, christening),
+        (EventPartType.BANQUET, banquet),
+    ]
+    for part_type, value in pairs:
+        if value is None:
+            continue
+        new_status = RsvpStatus(value)
+        row = (
+            await session.execute(
+                select(Rsvp).where(
+                    Rsvp.guest_id == guest_id,
+                    Rsvp.event_part_type == part_type,
+                )
+            )
+        ).scalar_one_or_none()
+        if row is not None:
+            row.status = new_status
+            row.updated_at = datetime.now(timezone.utc)
+        else:
+            session.add(
+                Rsvp(
+                    guest_id=guest_id,
+                    event_part_type=part_type,
+                    status=new_status,
+                )
+            )
+    await session.commit()
+    return await get_guest_rsvp(session, guest_id=guest_id)
+
+
 # -------- Errors --------
 
 
@@ -226,25 +281,35 @@ async def logout(session: AsyncSession, token: str) -> None:
 async def resolve_guest_from_token(
     session: AsyncSession, token: Optional[str]
 ) -> Optional[dict]:
+    """JWT-only auth: decode + signature/exp check is local (no DB), then
+    one JOIN query loads guest + avatar together. Saves 2 round trips vs
+    the older session-table check."""
     if not token:
         return None
-    db_session = (
-        await session.execute(select(DbSession).where(DbSession.token == token))
-    ).scalar_one_or_none()
-    if db_session is None:
+
+    from app.security.jwt import decode_jwt
+
+    payload = decode_jwt(token)  # validates signature and exp
+    if payload is None:
         return None
-    if db_session.owner_type != SessionOwnerType.GUEST:
+    if payload.get("ot") != "guest":
         return None
-    if db_session.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+    sub = payload.get("sub")
+    if not sub:
         return None
-    guest = (
+    try:
+        guest_id = uuid.UUID(sub)
+    except (ValueError, TypeError):
+        return None
+
+    row = (
         await session.execute(
-            select(Guest).where(Guest.id == uuid.UUID(db_session.owner_id))
+            select(Guest, Avatar)
+            .join(Avatar, Avatar.id == Guest.avatar_id)
+            .where(Guest.id == guest_id)
         )
-    ).scalar_one_or_none()
-    if guest is None:
+    ).first()
+    if row is None:
         return None
-    avatar = (
-        await session.execute(select(Avatar).where(Avatar.id == guest.avatar_id))
-    ).scalar_one()
+    guest, avatar = row
     return _serialize_guest(guest, avatar)

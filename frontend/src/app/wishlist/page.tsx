@@ -33,6 +33,7 @@ export default function WishlistPage() {
 
   // Modal state
   const [bookingTarget, setBookingTarget] = useState<WishlistItem | null>(null);
+  const [cancellingTarget, setCancellingTarget] = useState<WishlistItem | null>(null);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -65,14 +66,18 @@ export default function WishlistPage() {
     }
   }
 
-  async function handleCancel(bookingId: string) {
-    if (!confirm("Отменить бронь?")) return;
+  async function handleCancelConfirmed() {
+    if (!cancellingTarget?.my_booking_id) return;
     setError(null);
+    setSubmitting(true);
     try {
-      await cancelBooking(bookingId);
+      await cancelBooking(cancellingTarget.my_booking_id);
       await refresh();
+      setCancellingTarget(null);
     } catch (e) {
       setError((e as Error).message);
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -147,7 +152,7 @@ export default function WishlistPage() {
           страны-производители Турцию и Азербайджан.
         </p>
         <p className="text-mocha-700">
-          Спасибо за понимание и уважение к культуре семьи.
+          Спасибо за понимание и уважение к культуре семьи Матасянц!
         </p>
       </div>
 
@@ -171,7 +176,7 @@ export default function WishlistPage() {
               setComment("");
               setBookingTarget(item);
             }}
-            onCancel={() => item.my_booking_id && handleCancel(item.my_booking_id)}
+            onCancel={() => setCancellingTarget(item)}
           />
         ))}
       </ul>
@@ -188,6 +193,17 @@ export default function WishlistPage() {
               setBookingTarget(null);
               setComment("");
             }
+          }}
+        />
+      )}
+
+      {cancellingTarget && (
+        <CancelConfirmModal
+          item={cancellingTarget}
+          submitting={submitting}
+          onConfirm={handleCancelConfirmed}
+          onClose={() => {
+            if (!submitting) setCancellingTarget(null);
           }}
         />
       )}
@@ -288,6 +304,55 @@ function ItemCard({
         ) : null}
       </div>
     </li>
+  );
+}
+
+function CancelConfirmModal({
+  item,
+  submitting,
+  onConfirm,
+  onClose,
+}: {
+  item: WishlistItem;
+  submitting: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-mocha-900/30 px-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-3xl border border-cream-200 bg-white p-6 shadow-soft"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-lg font-medium text-mocha-900">Отменить бронь?</h3>
+        <p className="mt-1 text-xs text-mocha-500">{item.name}</p>
+
+        <p className="mt-4 text-sm leading-relaxed text-mocha-500">
+          Подарок снова станет доступен другим гостям. Вы сможете
+          забронировать его заново, если передумаете.
+        </p>
+
+        <div className="mt-5 flex gap-3">
+          <button
+            onClick={onClose}
+            disabled={submitting}
+            className="flex-1 rounded-2xl border border-cream-300 bg-cream-50 py-2.5 text-sm font-medium text-mocha-700 transition hover:bg-cream-100 disabled:opacity-60"
+          >
+            Не сейчас
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={submitting}
+            className="flex-1 rounded-2xl bg-blush-500 py-2.5 text-sm font-medium text-white shadow-soft transition hover:bg-blush-600 disabled:opacity-60"
+          >
+            {submitting ? "Минутку…" : "Да, отменить"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -126,3 +126,13 @@ class TelegramBindCodeOut(BaseModel):
     code: str
     bot_username: str
     expires_at: str
+
+
+class RsvpStatusOut(BaseModel):
+    christening: Literal["coming", "not_coming", "maybe"]
+    banquet: Literal["coming", "not_coming", "maybe"]
+
+
+class RsvpUpdateIn(BaseModel):
+    christening: Optional[Literal["coming", "not_coming", "maybe"]] = None
+    banquet: Optional[Literal["coming", "not_coming", "maybe"]] = None

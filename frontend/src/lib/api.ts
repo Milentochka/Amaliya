@@ -120,6 +120,34 @@ export async function unbindTelegram(): Promise<void> {
   if (!res.ok) throw new Error(await parseError(res));
 }
 
+// -------- RSVP --------
+
+export interface MyRsvp {
+  christening: RsvpStatus;
+  banquet: RsvpStatus;
+}
+
+export async function getRsvp(): Promise<MyRsvp> {
+  const res = await fetch(`${API_URL}/api/auth/me/rsvp`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as MyRsvp;
+}
+
+export async function patchRsvp(
+  updates: Partial<MyRsvp>,
+): Promise<MyRsvp> {
+  const res = await fetch(`${API_URL}/api/auth/me/rsvp`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(updates),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as MyRsvp;
+}
+
 // -------- Wishlist --------
 
 export type Priority = "high" | "normal";

@@ -77,11 +77,11 @@ def _admin_extras(
 async def list_items_for_guest(
     session: AsyncSession, *, viewer_guest_id: uuid.UUID
 ) -> List[dict]:
+    # Alphabetical SQL fetch; stable Python sort then surfaces free items
+    # to the top of the list and pushes booked items below.
     items = (
         await session.execute(
-            select(WishlistItem).order_by(
-                WishlistItem.priority.asc(), WishlistItem.created_at
-            )
+            select(WishlistItem).order_by(WishlistItem.name)
         )
     ).scalars().all()
 
@@ -93,20 +93,21 @@ async def list_items_for_guest(
     for b in bookings:
         by_item.setdefault(b.item_id, []).append(b)
 
-    return [
+    serialized = [
         _serialize_item(
             item, bookings=by_item.get(item.id, []), viewer_guest_id=viewer_guest_id
         )
         for item in items
     ]
+    # Stable sort: False (0) before True (1) → free items first.
+    serialized.sort(key=lambda x: x["is_booked"])
+    return serialized
 
 
 async def list_items_for_admin(session: AsyncSession) -> List[dict]:
     items = (
         await session.execute(
-            select(WishlistItem).order_by(
-                WishlistItem.priority.asc(), WishlistItem.created_at
-            )
+            select(WishlistItem).order_by(WishlistItem.created_at)
         )
     ).scalars().all()
     bookings = (
@@ -292,22 +293,20 @@ async def admin_delete_item(
 async def resolve_admin_id_from_token(
     session: AsyncSession, token: Optional[str]
 ) -> Optional[int]:
-    """Returns admin.id if cookie is a valid admin session, else None."""
+    """JWT-only auth: zero DB queries — JWT signature/exp validation is enough."""
     if not token:
         return None
-    from datetime import datetime, timezone
+    from app.security.jwt import decode_jwt
 
-    from app.db.models import Session as DbSession, SessionOwnerType
-
-    db_session = (
-        await session.execute(
-            select(DbSession).where(DbSession.token == token)
-        )
-    ).scalar_one_or_none()
-    if db_session is None:
+    payload = decode_jwt(token)
+    if payload is None:
         return None
-    if db_session.owner_type != SessionOwnerType.ADMIN:
+    if payload.get("ot") != "admin":
         return None
-    if db_session.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+    sub = payload.get("sub")
+    if not sub:
         return None
-    return int(db_session.owner_id)
+    try:
+        return int(sub)
+    except (ValueError, TypeError):
+        return None

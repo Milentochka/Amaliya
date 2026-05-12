@@ -263,6 +263,10 @@ export default function EventPage() {
               Сыграть →
             </Link>
           </div>
+          <p className="mt-3 rounded-2xl border border-blush-200 bg-blush-100/40 px-4 py-3 text-xs leading-relaxed text-mocha-700">
+            🎁 За первенство в игре предусмотрен <b>специальный приз</b> от
+            семьи Матасянц — официальное вручение состоится на банкете.
+          </p>
           {leaderboard.entries.length === 0 ? (
             <p className="mt-4 text-sm text-mocha-400">
               Пока никто не играл. Стань первым!

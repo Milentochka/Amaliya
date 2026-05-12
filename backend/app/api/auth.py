@@ -13,15 +13,19 @@ from app.schemas.auth import (
     GuestRegisterIn,
     GuestRegisterOut,
     MessageOut,
+    RsvpStatusOut,
+    RsvpUpdateIn,
     TelegramBindCodeOut,
 )
 from app.security.cookies import GUEST_COOKIE, clear_session_cookie, set_session_cookie
 from app.services.auth import (
     AvatarsExhausted,
+    get_guest_rsvp,
     login_or_register_guest,
     logout as svc_logout,
     lookup_existing_guest,
     resolve_guest_from_token,
+    update_guest_rsvp,
 )
 from app.services.telegram_bind import (
     issue_code_for_guest,
@@ -103,6 +107,38 @@ async def me(
             detail="Не авторизован",
         )
     return {"guest": guest}
+
+
+@router.get("/me/rsvp", response_model=RsvpStatusOut)
+async def get_my_rsvp(
+    amaliya_guest_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    guest = await resolve_guest_from_token(session, amaliya_guest_session)
+    if guest is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Не авторизован"
+        )
+    return await get_guest_rsvp(session, guest_id=uuid.UUID(guest["id"]))
+
+
+@router.patch("/me/rsvp", response_model=RsvpStatusOut)
+async def patch_my_rsvp(
+    payload: RsvpUpdateIn,
+    amaliya_guest_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    guest = await resolve_guest_from_token(session, amaliya_guest_session)
+    if guest is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Не авторизован"
+        )
+    return await update_guest_rsvp(
+        session,
+        guest_id=uuid.UUID(guest["id"]),
+        christening=payload.christening,
+        banquet=payload.banquet,
+    )
 
 
 @router.post("/me/telegram/start-bind", response_model=TelegramBindCodeOut)

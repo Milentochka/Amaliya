@@ -1,24 +1,57 @@
 """Read services for event info + guest list."""
 
+import asyncio
 from typing import List
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.database import _session_factory
 from app.db.models import Avatar, EventMeta, EventPart, Guest, Parent
 from app.services.zodiac import chinese_zodiac, western_zodiac
 
 
 async def get_event(session: AsyncSession) -> dict:
-    meta = (
-        await session.execute(select(EventMeta).order_by(EventMeta.id).limit(1))
-    ).scalar_one()
-    parts = (
-        await session.execute(select(EventPart).order_by(EventPart.start_time))
-    ).scalars().all()
-    parents = (
-        await session.execute(select(Parent).order_by(Parent.id))
-    ).scalars().all()
+    """Loads event meta + parts + parents in parallel using three separate
+    asyncpg connections, cutting the latency from 3 round trips to ~1.
+    Falls back to sequential if the engine isn't available."""
+
+    if _session_factory is None:
+        # Sequential fallback for tests/no-DB envs.
+        meta = (
+            await session.execute(select(EventMeta).order_by(EventMeta.id).limit(1))
+        ).scalar_one()
+        parts = (
+            await session.execute(select(EventPart).order_by(EventPart.start_time))
+        ).scalars().all()
+        parents = (
+            await session.execute(select(Parent).order_by(Parent.id))
+        ).scalars().all()
+    else:
+
+        async def _meta():
+            async with _session_factory() as s:
+                return (
+                    await s.execute(
+                        select(EventMeta).order_by(EventMeta.id).limit(1)
+                    )
+                ).scalar_one()
+
+        async def _parts():
+            async with _session_factory() as s:
+                return (
+                    await s.execute(
+                        select(EventPart).order_by(EventPart.start_time)
+                    )
+                ).scalars().all()
+
+        async def _parents():
+            async with _session_factory() as s:
+                return (
+                    await s.execute(select(Parent).order_by(Parent.id))
+                ).scalars().all()
+
+        meta, parts, parents = await asyncio.gather(_meta(), _parts(), _parents())
 
     christening = next(
         (p for p in parts if (p.type.value if hasattr(p.type, "value") else p.type) == "christening"),

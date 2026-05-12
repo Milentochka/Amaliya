@@ -5,11 +5,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import {
+  getRsvp,
   GuestOut,
   loginOrRegister,
   logout,
   lookup,
   me,
+  MyRsvp,
+  patchRsvp,
   RegisterPayload,
   RsvpStatus,
   startTelegramBind,
@@ -38,6 +41,7 @@ function formatDob(iso: string): string {
 
 export default function Home() {
   const [guest, setGuest] = useState<GuestOut | null>(null);
+  const [rsvp, setRsvp] = useState<MyRsvp | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -52,7 +56,12 @@ export default function Home() {
 
   useEffect(() => {
     me()
-      .then(setGuest)
+      .then((g) => {
+        setGuest(g);
+        if (g) {
+          getRsvp().then(setRsvp).catch(() => setRsvp(null));
+        }
+      })
       .catch(() => setGuest(null))
       .finally(() => setLoading(false));
   }, []);
@@ -157,6 +166,8 @@ export default function Home() {
             <Row label="Знак зодиака" value={guest.zodiac} />
             <Row label="Год животного" value={guest.chinese_zodiac} />
           </dl>
+
+          <RsvpSection rsvp={rsvp} setRsvp={setRsvp} />
 
           <TelegramSection
             guest={guest}
@@ -370,6 +381,107 @@ function Row({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between border-b border-cream-100 pb-2 last:border-0 last:pb-0">
       <dt className="text-mocha-400">{label}</dt>
       <dd className="font-medium text-mocha-700">{value}</dd>
+    </div>
+  );
+}
+
+function RsvpSection({
+  rsvp,
+  setRsvp,
+}: {
+  rsvp: MyRsvp | null;
+  setRsvp: (r: MyRsvp | null) => void;
+}) {
+  const [savingPart, setSavingPart] = useState<keyof MyRsvp | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!rsvp) return null;
+
+  async function change(part: keyof MyRsvp, value: RsvpStatus) {
+    if (!rsvp || rsvp[part] === value) return;
+    const prev = rsvp;
+    setRsvp({ ...rsvp, [part]: value });
+    setSavingPart(part);
+    setError(null);
+    try {
+      const fresh = await patchRsvp({ [part]: value });
+      setRsvp(fresh);
+    } catch (e) {
+      setError((e as Error).message);
+      setRsvp(prev);
+    } finally {
+      setSavingPart(null);
+    }
+  }
+
+  return (
+    <div className="mt-6 rounded-2xl border border-cream-200 bg-cream-50/60 p-4">
+      <p className="mb-3 text-xs font-medium uppercase tracking-wider text-mocha-500">
+        Я приду
+      </p>
+      <RsvpRow
+        label="Крестины"
+        current={rsvp.christening}
+        saving={savingPart === "christening"}
+        onChange={(v) => change("christening", v)}
+      />
+      <div className="mt-3">
+        <RsvpRow
+          label="Банкет"
+          current={rsvp.banquet}
+          saving={savingPart === "banquet"}
+          onChange={(v) => change("banquet", v)}
+        />
+      </div>
+      {error && (
+        <div className="mt-3 rounded-xl border border-blush-200 bg-blush-100/60 px-3 py-2 text-xs text-blush-700">
+          {error}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const RSVP_OPTIONS_INLINE: { value: RsvpStatus; label: string }[] = [
+  { value: "coming", label: "Да" },
+  { value: "maybe", label: "Возможно" },
+  { value: "not_coming", label: "Нет" },
+];
+
+function RsvpRow({
+  label,
+  current,
+  saving,
+  onChange,
+}: {
+  label: string;
+  current: RsvpStatus;
+  saving: boolean;
+  onChange: (v: RsvpStatus) => void;
+}) {
+  return (
+    <div>
+      <p className="mb-1.5 text-xs text-mocha-500">
+        {label}
+        {saving && <span className="ml-2 text-blush-400">сохраняем…</span>}
+      </p>
+      <div className="grid grid-cols-3 gap-1.5">
+        {RSVP_OPTIONS_INLINE.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => onChange(o.value)}
+            disabled={saving}
+            className={`rounded-xl border px-2 py-1.5 text-xs font-medium transition ${
+              current === o.value
+                ? "border-blush-300 bg-blush-100 text-blush-700 shadow-gentle"
+                : "border-cream-200 bg-white text-mocha-500 hover:bg-cream-100"
+            } ${saving ? "opacity-60" : ""}`}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
