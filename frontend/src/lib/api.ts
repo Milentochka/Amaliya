@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// All API calls are same-origin — Next.js rewrites in next.config.mjs proxy
+// /api/* to the backend. Keeps the auth cookie first-party.
+const API_URL = "";
 
 export type RsvpStatus = "coming" | "not_coming" | "maybe";
 
