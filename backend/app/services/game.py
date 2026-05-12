@@ -22,10 +22,7 @@ MAX_SCORE_PER_ATTEMPT = 5000  # cheat ceiling — clean play ~ 0..1000
 # Event happens in Moscow; calendar-day boundary uses Moscow midnight.
 _MSK = timezone(timedelta(hours=3))
 
-# Test accounts bypass the daily attempts cap. Remove before the event.
-_UNLIMITED_GUESTS: set = {
-    uuid.UUID("a36b8251-8c27-4629-9d11-551adebc711b"),  # Милена — для тестирования
-}
+_UNLIMITED_GUESTS: set = set()
 
 
 class TooManyAttempts(Exception):
