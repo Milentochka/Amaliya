@@ -555,7 +555,9 @@ function TelegramSection({
           {guest.has_telegram ? (
             <>
               <span className="text-blush-600">
-                @{guest.telegram_username ?? "привязан"}
+                {guest.telegram_username
+                  ? `@${guest.telegram_username}`
+                  : "привязан"}
               </span>
               <span className="text-mocha-300">→</span>
             </>
@@ -585,10 +587,16 @@ function TelegramSection({
             {guest.has_telegram && !bindCode && (
               <>
                 <p className="mt-2 text-sm text-mocha-500">
-                  Ваш Telegram:{" "}
-                  <span className="font-medium text-blush-600">
-                    @{guest.telegram_username ?? "—"}
-                  </span>
+                  {guest.telegram_username ? (
+                    <>
+                      Ваш Telegram:{" "}
+                      <span className="font-medium text-blush-600">
+                        @{guest.telegram_username}
+                      </span>
+                    </>
+                  ) : (
+                    <>Аккаунт Telegram привязан (без ника).</>
+                  )}
                 </p>
                 <p className="mt-3 text-xs leading-relaxed text-mocha-400">
                   Уведомления о бронированиях и изменениях будут приходить

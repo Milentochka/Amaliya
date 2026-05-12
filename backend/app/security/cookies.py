@@ -21,13 +21,17 @@ def set_session_cookie(
     expires_at: datetime,
     owner_type: str,
 ) -> None:
+    """In production the frontend (Vercel) lives on a different domain
+    than the backend (Railway), so cookies must be SameSite=None+Secure
+    to flow on cross-site fetch requests."""
     settings = get_settings()
+    is_prod = settings.app_env != "development"
     response.set_cookie(
         key=_cookie_name(owner_type),
         value=token,
         httponly=True,
-        secure=settings.app_env != "development",
-        samesite="lax",
+        secure=is_prod,
+        samesite="none" if is_prod else "lax",
         expires=expires_at,
         path="/",
     )
