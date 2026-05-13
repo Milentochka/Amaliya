@@ -146,10 +146,13 @@ export default function AdminGuestsPage() {
                     <div>
                       <div className="text-mocha-900">{g.name}</div>
                       <div className="text-xs text-mocha-400">
-                        {g.has_telegram && g.telegram_username
-                          ? `@${g.telegram_username}`
-                          : g.avatar_name}
+                        {g.avatar_name}
                       </div>
+                      {g.has_telegram && g.telegram_username && (
+                        <div className="text-xs text-mocha-400">
+                          @{g.telegram_username}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </td>
