@@ -54,3 +54,16 @@ class BookingAdminOut(BaseModel):
     guest_name: str
     comment: str
     created_at: str  # ISO
+
+
+class GamePlayerOut(BaseModel):
+    rank: int
+    guest_id: str
+    guest_name: str
+    avatar_url: str
+    avatar_name: str
+    attempts: int
+    total_score: int
+    best_score: int
+    first_played_at: str  # ISO
+    last_played_at: str  # ISO

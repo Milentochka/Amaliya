@@ -446,6 +446,27 @@ export async function adminCancelBooking(bookingId: string): Promise<void> {
   if (!res.ok) throw new Error(await parseError(res));
 }
 
+export interface GamePlayer {
+  rank: number;
+  guest_id: string;
+  guest_name: string;
+  avatar_url: string;
+  avatar_name: string;
+  attempts: number;
+  total_score: number;
+  best_score: number;
+  first_played_at: string;
+  last_played_at: string;
+}
+
+export async function adminListGame(): Promise<GamePlayer[]> {
+  const res = await fetch(`${API_URL}/api/admin/game`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as GamePlayer[];
+}
+
 // -------- Admin wishlist CRUD --------
 
 export interface WishlistItemAdmin extends WishlistItem {

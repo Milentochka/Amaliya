@@ -277,3 +277,45 @@ async def admin_cancel_booking(
         raise BookingNotFound()
     await session.delete(booking)
     await session.commit()
+
+
+# -------- Game --------
+
+
+async def list_game_players(session: AsyncSession) -> List[dict]:
+    stmt = (
+        select(
+            Guest.id,
+            Guest.name,
+            Avatar.image_url,
+            Avatar.name.label("avatar_name"),
+            func.count(GameAttempt.id).label("attempts"),
+            func.sum(GameAttempt.score).label("total_score"),
+            func.max(GameAttempt.score).label("best_score"),
+            func.min(GameAttempt.played_at).label("first_played_at"),
+            func.max(GameAttempt.played_at).label("last_played_at"),
+        )
+        .join(GameAttempt, GameAttempt.guest_id == Guest.id)
+        .join(Avatar, Avatar.id == Guest.avatar_id)
+        .group_by(Guest.id, Guest.name, Avatar.image_url, Avatar.name)
+        .order_by(
+            func.sum(GameAttempt.score).desc(),
+            func.min(GameAttempt.played_at),
+        )
+    )
+    rows = (await session.execute(stmt)).all()
+    return [
+        {
+            "rank": i + 1,
+            "guest_id": str(r.id),
+            "guest_name": r.name,
+            "avatar_url": r.image_url,
+            "avatar_name": r.avatar_name,
+            "attempts": int(r.attempts),
+            "total_score": int(r.total_score or 0),
+            "best_score": int(r.best_score or 0),
+            "first_played_at": r.first_played_at.isoformat(),
+            "last_played_at": r.last_played_at.isoformat(),
+        }
+        for i, r in enumerate(rows)
+    ]

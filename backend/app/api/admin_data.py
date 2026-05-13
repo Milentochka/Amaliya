@@ -11,6 +11,7 @@ from app.schemas.admin import (
     AdminRsvpUpdateIn,
     BookingAdminOut,
     DashboardStats,
+    GamePlayerOut,
     GuestAdminOut,
 )
 from app.schemas.auth import MessageOut, RsvpStatusOut
@@ -22,6 +23,7 @@ from app.services.admin import (
     admin_update_guest_rsvp,
     get_dashboard_stats,
     list_bookings,
+    list_game_players,
     list_guests,
 )
 from app.services.wishlist import resolve_admin_id_from_token
@@ -111,6 +113,15 @@ async def cancel_booking(
     except BookingNotFound:
         raise HTTPException(status_code=404, detail="Бронь не найдена")
     return {"message": "cancelled"}
+
+
+@router.get("/game", response_model=List[GamePlayerOut])
+async def game_players(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await list_game_players(session)
 
 
 @router.get("/me", response_model=dict)
