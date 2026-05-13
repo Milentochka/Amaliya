@@ -307,3 +307,201 @@ export async function getLeaderboard(): Promise<Leaderboard> {
   if (!res.ok) throw new Error(await parseError(res));
   return (await res.json()) as Leaderboard;
 }
+
+// -------- Admin --------
+
+export interface AdminOut {
+  id: number;
+  role: "mom" | "dad";
+  login: string;
+}
+
+export async function adminLogin(
+  login: string,
+  password: string,
+): Promise<AdminOut> {
+  const res = await fetch(`${API_URL}/api/admin/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ login, password }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as AdminOut;
+}
+
+export async function adminLogout(): Promise<void> {
+  await fetch(`${API_URL}/api/admin/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+}
+
+export async function adminMe(): Promise<{ admin_id: number } | null> {
+  const res = await fetch(`${API_URL}/api/admin/me`, {
+    credentials: "include",
+  });
+  if (res.status === 401) return null;
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as { admin_id: number };
+}
+
+export interface StatsCounts {
+  coming: number;
+  not_coming: number;
+  maybe: number;
+}
+
+export interface DashboardStats {
+  guests_total: number;
+  christening: StatsCounts;
+  banquet: StatsCounts;
+  wishlist_total: number;
+  wishlist_booked: number;
+  wishlist_free: number;
+  bookings_total: number;
+  bookings_sum_rub: number;
+  game_players: number;
+  game_attempts: number;
+}
+
+export async function adminDashboardStats(): Promise<DashboardStats> {
+  const res = await fetch(`${API_URL}/api/admin/dashboard/stats`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as DashboardStats;
+}
+
+export interface GuestAdmin {
+  id: string;
+  name: string;
+  birth_date: string;
+  gender: "M" | "F";
+  avatar_name: string;
+  avatar_url: string;
+  has_telegram: boolean;
+  telegram_username: string | null;
+  rsvp_christening: RsvpStatus;
+  rsvp_banquet: RsvpStatus;
+  bookings_count: number;
+  last_activity: string | null;
+  created_at: string;
+}
+
+export async function adminListGuests(): Promise<GuestAdmin[]> {
+  const res = await fetch(`${API_URL}/api/admin/guests`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as GuestAdmin[];
+}
+
+export async function adminPatchGuestRsvp(
+  guestId: string,
+  updates: { christening?: RsvpStatus; banquet?: RsvpStatus },
+): Promise<MyRsvp> {
+  const res = await fetch(`${API_URL}/api/admin/guests/${guestId}/rsvp`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(updates),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as MyRsvp;
+}
+
+export async function adminDeleteGuest(guestId: string): Promise<void> {
+  const res = await fetch(`${API_URL}/api/admin/guests/${guestId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export interface BookingAdmin {
+  booking_id: string;
+  item_id: string;
+  item_name: string;
+  item_price_rub: number | null;
+  guest_id: string;
+  guest_name: string;
+  comment: string;
+  created_at: string;
+}
+
+export async function adminListBookings(): Promise<BookingAdmin[]> {
+  const res = await fetch(`${API_URL}/api/admin/bookings`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as BookingAdmin[];
+}
+
+export async function adminCancelBooking(bookingId: string): Promise<void> {
+  const res = await fetch(`${API_URL}/api/admin/bookings/${bookingId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+// -------- Admin wishlist CRUD --------
+
+export interface WishlistItemAdmin extends WishlistItem {
+  bookers: { guest_id: string; name: string; comment: string }[];
+}
+
+export interface WishlistItemPayload {
+  name: string;
+  description?: string | null;
+  photo_url?: string | null;
+  price_rub?: number | null;
+  ozon_url?: string | null;
+  category?: string | null;
+  priority: Priority;
+  can_be_shared: boolean;
+}
+
+export async function adminListWishlist(): Promise<WishlistItemAdmin[]> {
+  const res = await fetch(`${API_URL}/api/admin/wishlist/items`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as WishlistItemAdmin[];
+}
+
+export async function adminCreateWishlistItem(
+  payload: WishlistItemPayload,
+): Promise<WishlistItemAdmin> {
+  const res = await fetch(`${API_URL}/api/admin/wishlist/items`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as WishlistItemAdmin;
+}
+
+export async function adminUpdateWishlistItem(
+  itemId: string,
+  payload: Partial<WishlistItemPayload>,
+): Promise<WishlistItemAdmin> {
+  const res = await fetch(`${API_URL}/api/admin/wishlist/items/${itemId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as WishlistItemAdmin;
+}
+
+export async function adminDeleteWishlistItem(itemId: string): Promise<void> {
+  const res = await fetch(`${API_URL}/api/admin/wishlist/items/${itemId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
