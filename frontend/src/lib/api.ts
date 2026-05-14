@@ -583,6 +583,96 @@ export async function projectorContestsList(): Promise<ContestState[]> {
   return (await res.json()) as ContestState[];
 }
 
+// -------- Contest 2 («Знаете ли вы») --------
+
+export interface Contest2Question {
+  id: number;
+  order_index: number;
+  text: string;
+  options: string[];
+  correct_index: number | null;
+  first_correct_name: string | null;
+  first_correct_guest_id: string | null;
+}
+
+export interface Contest2LeaderRow {
+  name: string;
+  wins: number;
+}
+
+export interface Contest2Overview {
+  state: ContestState;
+  questions: Contest2Question[];
+  leaderboard: Contest2LeaderRow[];
+  winner_name: string | null;
+  answered: number;
+  total: number;
+}
+
+export async function hostContest2Overview(): Promise<Contest2Overview> {
+  const res = await fetch(`${API_URL}/api/host/contest2`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest2Overview;
+}
+
+export async function hostContest2SetActive(
+  questionId: number | null,
+  showAnswer: boolean,
+): Promise<ContestState> {
+  const res = await fetch(`${API_URL}/api/host/contest2/active`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ question_id: questionId, show_answer: showAnswer }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as ContestState;
+}
+
+export async function hostContest2SetFirst(
+  questionId: number,
+  payload: { guest_id?: string | null; guest_name?: string | null },
+): Promise<void> {
+  const res = await fetch(
+    `${API_URL}/api/host/contest2/questions/${questionId}/first`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    },
+  );
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function hostContest2ClearFirst(
+  questionId: number,
+): Promise<void> {
+  const res = await fetch(
+    `${API_URL}/api/host/contest2/questions/${questionId}/first`,
+    { method: "DELETE", credentials: "include" },
+  );
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function hostContest2Reset(): Promise<void> {
+  const res = await fetch(`${API_URL}/api/host/contest2/reset`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function projectorContest2Overview(): Promise<Contest2Overview> {
+  const res = await fetch(`${API_URL}/api/projector/contest2`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest2Overview;
+}
+
 // -------- Admin wishlist CRUD --------
 
 export interface WishlistItemAdmin extends WishlistItem {

@@ -48,3 +48,40 @@ class Contest1TallyIn(BaseModel):
     votes_dad: Optional[int] = None
     votes_unique: Optional[int] = None
     votes_relatives: Optional[List[RelativeVote]] = None
+
+
+# -------- Contest 2 --------
+
+
+class Contest2QuestionOut(BaseModel):
+    id: int
+    order_index: int
+    text: str
+    options: List[str]
+    correct_index: Optional[int] = None
+    first_correct_name: Optional[str] = None
+    first_correct_guest_id: Optional[str] = None
+
+
+class Contest2LeaderRow(BaseModel):
+    name: str
+    wins: int
+
+
+class Contest2Overview(BaseModel):
+    state: ContestStateOut
+    questions: List[Contest2QuestionOut]
+    leaderboard: List[Contest2LeaderRow]
+    winner_name: Optional[str] = None
+    answered: int
+    total: int
+
+
+class Contest2ActiveIn(BaseModel):
+    question_id: Optional[int] = None
+    show_answer: bool = False
+
+
+class Contest2FirstCorrectIn(BaseModel):
+    guest_id: Optional[str] = None
+    guest_name: Optional[str] = None

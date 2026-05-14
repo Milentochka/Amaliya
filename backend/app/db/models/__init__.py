@@ -5,6 +5,8 @@ from app.db.models.avatar import Avatar
 from app.db.models.contest import (
     Contest1Trait,
     Contest1VoteTally,
+    Contest2FirstCorrect,
+    Contest2Question,
     ContestState,
     ContestStatus,
 )
@@ -26,6 +28,8 @@ __all__ = [
     "Booking",
     "Contest1Trait",
     "Contest1VoteTally",
+    "Contest2FirstCorrect",
+    "Contest2Question",
     "ContestState",
     "ContestStatus",
     "EventMeta",

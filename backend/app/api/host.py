@@ -1,5 +1,6 @@
 """Host endpoints — controls contests, requires admin cookie."""
 
+import uuid
 from typing import List, Optional
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, status
@@ -7,19 +8,29 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_session
+from app.schemas.auth import MessageOut
 from app.schemas.contests import (
     Contest1Overview,
     Contest1TallyIn,
     Contest1TraitOut,
+    Contest2ActiveIn,
+    Contest2FirstCorrectIn,
+    Contest2Overview,
     ContestStateOut,
     ContestStatusIn,
 )
 from app.services.contests import (
     InvalidStatus,
+    QuestionNotFound,
     TraitNotFound,
     contest1_overview,
     contest1_reset,
     contest1_set_tally,
+    contest2_clear_first_correct,
+    contest2_overview,
+    contest2_reset,
+    contest2_set_active,
+    contest2_set_first_correct,
     list_all_states,
     set_status,
 )
@@ -139,3 +150,78 @@ async def contest1_results_pdf(
             "Content-Disposition": 'inline; filename="contest1-results.pdf"'
         },
     )
+
+
+# -------- Contest 2 --------
+
+
+@router.get("/contest2", response_model=Contest2Overview)
+async def contest2(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await contest2_overview(session, reveal=True)
+
+
+@router.post("/contest2/active", response_model=ContestStateOut)
+async def contest2_active(
+    payload: Contest2ActiveIn,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    try:
+        return await contest2_set_active(
+            session,
+            question_id=payload.question_id,
+            show_answer=payload.show_answer,
+        )
+    except QuestionNotFound:
+        raise HTTPException(status_code=404, detail="Вопрос не найден")
+
+
+@router.put("/contest2/questions/{question_id}/first")
+async def contest2_first(
+    question_id: int,
+    payload: Contest2FirstCorrectIn,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    try:
+        guest_uuid = uuid.UUID(payload.guest_id) if payload.guest_id else None
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Некорректный guest_id")
+    try:
+        return await contest2_set_first_correct(
+            session,
+            question_id=question_id,
+            guest_id=guest_uuid,
+            guest_name=payload.guest_name,
+        )
+    except QuestionNotFound:
+        raise HTTPException(status_code=404, detail="Вопрос не найден")
+
+
+@router.delete(
+    "/contest2/questions/{question_id}/first", response_model=MessageOut
+)
+async def contest2_first_clear(
+    question_id: int,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    await contest2_clear_first_correct(session, question_id=question_id)
+    return {"message": "cleared"}
+
+
+@router.post("/contest2/reset", response_model=MessageOut)
+async def contest2_reset_endpoint(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    await contest2_reset(session)
+    return {"message": "reset"}

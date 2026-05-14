@@ -16,7 +16,7 @@ const CONTESTS: { id: number; title: string; subtitle: string; href: string | nu
     id: 2,
     title: "Знаете ли вы",
     subtitle: "15 вопросов · кто первый ответил",
-    href: null,
+    href: "/host/contest2",
   },
   {
     id: 3,

@@ -1,5 +1,6 @@
 """Contest services (Module 4)."""
 
+import uuid
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy import select
@@ -8,8 +9,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import (
     Contest1Trait,
     Contest1VoteTally,
+    Contest2FirstCorrect,
+    Contest2Question,
     ContestState,
     ContestStatus,
+    Guest,
 )
 
 
@@ -18,6 +22,10 @@ class TraitNotFound(Exception):
 
 
 class InvalidStatus(Exception):
+    pass
+
+
+class QuestionNotFound(Exception):
     pass
 
 
@@ -225,4 +233,171 @@ async def contest1_reset(session: AsyncSession) -> None:
         t.votes_dad = 0
         t.votes_unique = 0
         t.votes_relatives = []
+    await session.commit()
+
+
+# -------- Contest 2: «Знаете ли вы» --------
+
+
+async def contest2_overview(session: AsyncSession, *, reveal: bool = True) -> dict:
+    """Returns full contest 2 state.
+
+    `reveal` controls whether `correct_index` is exposed to the caller.
+    Host always sees it; projector view follows active_step (only the
+    currently active answer is revealed mid-game)."""
+    state = await get_state(session, 2)
+    questions = (
+        await session.execute(
+            select(Contest2Question).order_by(Contest2Question.order_index)
+        )
+    ).scalars().all()
+    firsts = {
+        f.question_id: f
+        for f in (
+            await session.execute(select(Contest2FirstCorrect))
+        ).scalars().all()
+    }
+
+    items: List[dict] = []
+    for q in questions:
+        f = firsts.get(q.id)
+        items.append(
+            {
+                "id": q.id,
+                "order_index": q.order_index,
+                "text": q.text,
+                "options": q.options,
+                "correct_index": q.correct_index if reveal else None,
+                "first_correct_name": f.guest_name if f else None,
+                "first_correct_guest_id": str(f.guest_id) if f and f.guest_id else None,
+            }
+        )
+
+    # Leaderboard — count of firsts by name.
+    tally: Dict[str, int] = {}
+    for f in firsts.values():
+        name = (f.guest_name or "").strip()
+        if name:
+            tally[name] = tally.get(name, 0) + 1
+    leaderboard = sorted(
+        ({"name": n, "wins": c} for n, c in tally.items()),
+        key=lambda x: (-x["wins"], x["name"]),
+    )
+    winner_name = leaderboard[0]["name"] if leaderboard else None
+
+    return {
+        "state": state,
+        "questions": items,
+        "leaderboard": leaderboard,
+        "winner_name": winner_name,
+        "answered": sum(1 for it in items if it["first_correct_name"]),
+        "total": len(items),
+    }
+
+
+async def contest2_set_active(
+    session: AsyncSession, *, question_id: Optional[int], show_answer: bool
+) -> dict:
+    """Update what is currently shown on projector."""
+    row = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 2)
+        )
+    ).scalar_one_or_none()
+    if row is None:
+        row = ContestState(contest_id=2)
+        session.add(row)
+    if question_id is not None:
+        q = (
+            await session.execute(
+                select(Contest2Question).where(Contest2Question.id == question_id)
+            )
+        ).scalar_one_or_none()
+        if q is None:
+            raise QuestionNotFound()
+    row.active_step = {
+        "question_id": question_id,
+        "show_answer": bool(show_answer),
+    }
+    await session.commit()
+    return await get_state(session, 2)
+
+
+async def contest2_set_first_correct(
+    session: AsyncSession,
+    *,
+    question_id: int,
+    guest_id: Optional[uuid.UUID] = None,
+    guest_name: Optional[str] = None,
+) -> dict:
+    q = (
+        await session.execute(
+            select(Contest2Question).where(Contest2Question.id == question_id)
+        )
+    ).scalar_one_or_none()
+    if q is None:
+        raise QuestionNotFound()
+
+    # Resolve guest_id → name (canonical) if given
+    if guest_id is not None and not guest_name:
+        g = (
+            await session.execute(select(Guest).where(Guest.id == guest_id))
+        ).scalar_one_or_none()
+        if g is not None:
+            guest_name = g.name
+
+    name = (guest_name or "").strip() or None
+
+    row = (
+        await session.execute(
+            select(Contest2FirstCorrect).where(
+                Contest2FirstCorrect.question_id == question_id
+            )
+        )
+    ).scalar_one_or_none()
+    if row is None:
+        row = Contest2FirstCorrect(
+            question_id=question_id, guest_id=guest_id, guest_name=name
+        )
+        session.add(row)
+    else:
+        row.guest_id = guest_id
+        row.guest_name = name
+    await session.commit()
+    return {
+        "question_id": question_id,
+        "guest_id": str(guest_id) if guest_id else None,
+        "guest_name": name,
+    }
+
+
+async def contest2_clear_first_correct(
+    session: AsyncSession, *, question_id: int
+) -> None:
+    row = (
+        await session.execute(
+            select(Contest2FirstCorrect).where(
+                Contest2FirstCorrect.question_id == question_id
+            )
+        )
+    ).scalar_one_or_none()
+    if row is not None:
+        await session.delete(row)
+        await session.commit()
+
+
+async def contest2_reset(session: AsyncSession) -> None:
+    """Clear all winners and active step (for re-runs)."""
+    firsts = (
+        await session.execute(select(Contest2FirstCorrect))
+    ).scalars().all()
+    for f in firsts:
+        await session.delete(f)
+    state = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 2)
+        )
+    ).scalar_one_or_none()
+    if state is not None:
+        state.active_step = {}
     await session.commit()
