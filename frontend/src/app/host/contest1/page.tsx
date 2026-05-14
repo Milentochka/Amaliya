@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -58,8 +59,7 @@ export default function HostContest1Page() {
     }
   }
 
-  if (!data && !error)
-    return <p className="text-mocha-400">Загрузка…</p>;
+  if (!data && !error) return <p className="text-mocha-400">Загрузка…</p>;
   if (error && !data)
     return (
       <p className="rounded-2xl border border-blush-200 bg-blush-100/60 px-4 py-3 text-sm text-blush-700">
@@ -80,8 +80,8 @@ export default function HostContest1Page() {
         >
           ← к списку конкурсов
         </Link>
-        <h1 className="text-2xl font-light text-mocha-900">
-          На кого <span className="font-medium text-blush-600">похожа</span>
+        <h1 className="text-3xl font-light text-mocha-900">
+          На кого <span className="font-medium text-blush-600">похожа Амалия?</span>
         </h1>
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-cream-200 px-3 py-1 text-xs text-mocha-700">
@@ -120,12 +120,15 @@ export default function HostContest1Page() {
         </div>
       </header>
 
-      {error && (
-        <p className="rounded-2xl border border-blush-200 bg-blush-100/60 px-4 py-3 text-sm text-blush-700">
-          {error}
-        </p>
-      )}
+      {/* Photo collage — like the PDF */}
+      <section className="flex flex-wrap items-end justify-center gap-3 rounded-3xl border border-cream-200 bg-white/70 p-5 shadow-gentle">
+        <Polaroid src="/contests/contest1/mom-young.jpg" caption="мама" rotate={-6} />
+        <Polaroid src="/contests/contest1/amalia.jpg" caption="Амалия" rotate={0} bigger />
+        <Polaroid src="/contests/contest1/dad-young.jpg" caption="папа" rotate={6} />
+        <Polaroid src="/contests/contest1/parents-now.jpg" caption="мама и папа" rotate={-3} wide />
+      </section>
 
+      {/* PDF download */}
       <section className="grid grid-cols-2 gap-3">
         <a
           href="/api/host/contest1/blank.pdf"
@@ -143,27 +146,52 @@ export default function HostContest1Page() {
         </a>
       </section>
 
-      <section className="rounded-3xl border border-blush-200 bg-blush-100/40 p-4">
-        <p className="text-xs uppercase tracking-wider text-blush-700">Итог</p>
-        <p className="mt-1 text-xl font-medium text-mocha-900">
+      {error && (
+        <p className="rounded-2xl border border-blush-200 bg-blush-100/60 px-4 py-3 text-sm text-blush-700">
+          {error}
+        </p>
+      )}
+
+      {/* Tally table — like the paper results blank */}
+      <section className="overflow-hidden rounded-3xl border border-cream-200 bg-white/70 shadow-gentle">
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr className="border-b border-cream-200 bg-cream-50 text-xs uppercase tracking-wider text-mocha-400">
+              <th className="px-4 py-3 text-left">Черта</th>
+              <th className="px-2 py-3 text-center">Мама</th>
+              <th className="px-2 py-3 text-center">Папа</th>
+              <th className="px-4 py-3 text-left">Родственники</th>
+              <th className="px-2 py-3 text-center">Уникально</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.traits.map((t, idx) => (
+              <TraitRow
+                key={t.id}
+                trait={t}
+                even={idx % 2 === 0}
+                onChanged={refresh}
+              />
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      {/* Verdict */}
+      <section className="rounded-3xl border border-blush-200 bg-blush-100/40 p-6">
+        <p className="text-xs uppercase tracking-wider text-blush-700">
+          Итог конкурса
+        </p>
+        <p className="mt-1 text-2xl font-medium text-mocha-900">
           {summary.verdict ?? "—"}
         </p>
-        <p className="mt-1 text-xs text-mocha-500">
+        <p className="mt-2 text-xs text-mocha-500">
           мама {summary.totals.mom} · папа {summary.totals.dad} · родственники{" "}
           {summary.totals.relatives}
           {summary.top_relative_name &&
-            ` (топ: ${summary.top_relative_name})`}{" "}
-          · уникально {summary.totals.unique}
+            ` (топ: ${summary.top_relative_name})`}
+          {" "}· уникально {summary.totals.unique}
         </p>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wider text-mocha-400">
-          Черты — впишите количество голосов
-        </h2>
-        {data.traits.map((t) => (
-          <TraitCard key={t.id} trait={t} onChanged={refresh} />
-        ))}
       </section>
 
       {confirmReset && (
@@ -196,18 +224,51 @@ export default function HostContest1Page() {
   );
 }
 
-function TraitCard({
+function Polaroid({
+  src,
+  caption,
+  rotate,
+  bigger,
+  wide,
+}: {
+  src: string;
+  caption: string;
+  rotate: number;
+  bigger?: boolean;
+  wide?: boolean;
+}) {
+  const w = wide ? 140 : bigger ? 110 : 90;
+  const h = wide ? 90 : bigger ? 136 : 112;
+  return (
+    <div
+      className="rounded-2xl bg-white p-2 shadow-soft"
+      style={{ transform: `rotate(${rotate}deg)` }}
+    >
+      <div
+        className="relative overflow-hidden rounded-xl bg-cream-100"
+        style={{ width: w, height: h }}
+      >
+        <Image src={src} alt={caption} fill className="object-cover" unoptimized />
+      </div>
+      <p className="mt-1 text-center text-xs text-mocha-500">{caption}</p>
+    </div>
+  );
+}
+
+function TraitRow({
   trait,
+  even,
   onChanged,
 }: {
   trait: Contest1Trait;
+  even: boolean;
   onChanged: () => void;
 }) {
   const [mom, setMom] = useState<number>(trait.votes_mom);
   const [dad, setDad] = useState<number>(trait.votes_dad);
   const [uniq, setUniq] = useState<number>(trait.votes_unique);
   const [rels, setRels] = useState<RelativeVote[]>(trait.votes_relatives);
-  const [savingField, setSavingField] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setMom(trait.votes_mom);
@@ -216,140 +277,122 @@ function TraitCard({
     setRels(trait.votes_relatives);
   }, [trait]);
 
-  async function save(payload: Parameters<typeof hostContest1SetTally>[1], field: string) {
-    setSavingField(field);
+  async function save(payload: Parameters<typeof hostContest1SetTally>[1]) {
+    setSaving(true);
     try {
       await hostContest1SetTally(trait.id, payload);
       onChanged();
     } finally {
-      setSavingField(null);
+      setSaving(false);
     }
   }
 
-  function updateRelative(idx: number, patch: Partial<RelativeVote>) {
+  function patchRel(idx: number, patch: Partial<RelativeVote>) {
     setRels((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
   }
 
-  function addRelative() {
-    setRels((prev) => [...prev, { name: "", count: 0 }]);
+  async function addRel() {
+    const next = [...rels, { name: "", count: 1 }];
+    setRels(next);
   }
 
-  function removeRelative(idx: number) {
-    setRels((prev) => prev.filter((_, i) => i !== idx));
+  async function removeRel(idx: number) {
+    const next = rels.filter((_, i) => i !== idx);
+    setRels(next);
+    await save({ votes_relatives: next });
   }
 
   return (
-    <div className="rounded-3xl border border-cream-200 bg-white/70 p-4 shadow-gentle">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-mocha-900">
-          {trait.order_index}. {trait.name}
-        </h3>
-      </div>
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        <CountField
-          label="мама"
+    <tr
+      className={
+        "border-b border-cream-100 last:border-0 " +
+        (even ? "bg-white" : "bg-cream-50/50") +
+        (saving ? " ring-1 ring-blush-300" : "")
+      }
+    >
+      <td className="px-4 py-3 text-mocha-900 align-top">
+        <span className="text-mocha-400 mr-1">{trait.order_index}.</span>
+        {trait.name}
+      </td>
+      <td className="px-2 py-3 align-top">
+        <NumberCell
           value={mom}
           onChange={setMom}
-          onBlur={() => save({ votes_mom: mom }, "mom")}
-          saving={savingField === "mom"}
+          onCommit={() => save({ votes_mom: mom })}
         />
-        <CountField
-          label="папа"
+      </td>
+      <td className="px-2 py-3 align-top">
+        <NumberCell
           value={dad}
           onChange={setDad}
-          onBlur={() => save({ votes_dad: dad }, "dad")}
-          saving={savingField === "dad"}
+          onCommit={() => save({ votes_dad: dad })}
         />
-        <CountField
-          label="уникально"
+      </td>
+      <td className="px-4 py-3 align-top">
+        <div className="space-y-1">
+          {rels.map((r, i) => (
+            <div key={i} className="flex items-center gap-1">
+              <input
+                value={r.name}
+                onChange={(e) => patchRel(i, { name: e.target.value })}
+                onBlur={() => save({ votes_relatives: rels })}
+                placeholder="имя"
+                className="flex-1 rounded-full border border-cream-300 bg-white px-2 py-1 text-xs text-mocha-900 outline-none focus:border-blush-400"
+              />
+              <input
+                type="number"
+                min={0}
+                value={r.count}
+                onChange={(e) =>
+                  patchRel(i, { count: Number(e.target.value || 0) })
+                }
+                onBlur={() => save({ votes_relatives: rels })}
+                className="w-12 rounded-full border border-cream-300 bg-white px-2 py-1 text-center text-xs outline-none focus:border-blush-400"
+              />
+              <button
+                onClick={() => removeRel(i)}
+                className="rounded-full px-1.5 py-0.5 text-xs text-mocha-400 hover:bg-blush-100 hover:text-blush-700"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={addRel}
+            className="rounded-full border border-cream-300 px-2 py-0.5 text-xs text-mocha-500 hover:bg-cream-100"
+          >
+            + добавить
+          </button>
+        </div>
+      </td>
+      <td className="px-2 py-3 align-top">
+        <NumberCell
           value={uniq}
           onChange={setUniq}
-          onBlur={() => save({ votes_unique: uniq }, "uniq")}
-          saving={savingField === "uniq"}
+          onCommit={() => save({ votes_unique: uniq })}
         />
-      </div>
-      <div className="mt-3 space-y-2">
-        <div className="text-xs uppercase tracking-wider text-mocha-400">
-          Родственники
-        </div>
-        {rels.length === 0 && (
-          <p className="text-xs text-mocha-400">
-            Нажмите «+» если кто-то отметил «другой родственник».
-          </p>
-        )}
-        {rels.map((r, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <input
-              value={r.name}
-              onChange={(e) => updateRelative(i, { name: e.target.value })}
-              onBlur={() => save({ votes_relatives: rels }, "rels")}
-              placeholder="Имя"
-              className="flex-1 rounded-full border border-cream-300 bg-white px-3 py-1.5 text-sm text-mocha-900 outline-none focus:border-blush-400"
-            />
-            <input
-              type="number"
-              min={0}
-              value={r.count}
-              onChange={(e) =>
-                updateRelative(i, { count: Number(e.target.value) })
-              }
-              onBlur={() => save({ votes_relatives: rels }, "rels")}
-              className="w-16 rounded-full border border-cream-300 bg-white px-3 py-1.5 text-center text-sm text-mocha-900 outline-none focus:border-blush-400"
-            />
-            <button
-              onClick={async () => {
-                const newRels = rels.filter((_, idx) => idx !== i);
-                setRels(newRels);
-                await save({ votes_relatives: newRels }, "rels");
-              }}
-              className="rounded-full px-2 py-1 text-xs text-mocha-400 hover:bg-blush-100 hover:text-blush-700"
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-        <button
-          onClick={addRelative}
-          className="rounded-full border border-cream-300 px-3 py-1 text-xs text-mocha-500 hover:bg-cream-100"
-        >
-          + добавить
-        </button>
-      </div>
-    </div>
+      </td>
+    </tr>
   );
 }
 
-function CountField({
-  label,
+function NumberCell({
   value,
   onChange,
-  onBlur,
-  saving,
+  onCommit,
 }: {
-  label: string;
   value: number;
   onChange: (v: number) => void;
-  onBlur: () => void;
-  saving: boolean;
+  onCommit: () => void;
 }) {
   return (
-    <label className="block">
-      <span className="text-xs uppercase tracking-wider text-mocha-400">
-        {label}
-      </span>
-      <input
-        type="number"
-        min={0}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value || 0))}
-        onBlur={onBlur}
-        className={
-          "mt-0.5 w-full rounded-2xl border bg-white px-3 py-2 text-center text-base outline-none transition " +
-          (saving
-            ? "border-blush-400"
-            : "border-cream-300 focus:border-blush-400")
-        }
-      />
-    </label>
+    <input
+      type="number"
+      min={0}
+      value={value}
+      onChange={(e) => onChange(Number(e.target.value || 0))}
+      onBlur={onCommit}
+      className="mx-auto block w-16 rounded-xl border border-cream-300 bg-white px-2 py-1.5 text-center text-base text-mocha-900 outline-none focus:border-blush-400"
+    />
   );
 }
