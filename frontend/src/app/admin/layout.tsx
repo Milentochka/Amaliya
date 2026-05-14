@@ -12,6 +12,7 @@ const NAV = [
   { href: "/admin/wishlist", label: "Виш-лист" },
   { href: "/admin/bookings", label: "Брони" },
   { href: "/admin/game", label: "Игра" },
+  { href: "/host", label: "Ведущий" },
 ];
 
 export default function AdminLayout({
