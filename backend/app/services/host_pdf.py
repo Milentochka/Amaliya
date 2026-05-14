@@ -1,0 +1,475 @@
+"""PDF generation for host blanks (Contest 1, Contest 4)."""
+
+import io
+from pathlib import Path
+
+from reportlab.lib.colors import HexColor
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.lib.utils import ImageReader
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.models import Contest1Trait, Contest1VoteTally
+from app.services.contests import contest1_overview
+
+
+_BASE = Path(__file__).resolve().parent.parent
+_FONT_DIR = _BASE / "fonts"
+# Photos shipped with the frontend public folder.
+_PHOTO_DIR = _BASE.parent.parent / "frontend" / "public" / "contests" / "contest1"
+_FONT_REGULAR = "Comfortaa"
+_FONT_BOLD = "Comfortaa-Bold"  # imitated via fill+stroke render mode
+_fonts_registered = False
+
+# Site palette (mirrors frontend tailwind.config.ts).
+COLOR_CREAM_50 = HexColor("#fdfaf5")
+COLOR_CREAM_200 = HexColor("#f4e8d4")
+COLOR_CREAM_300 = HexColor("#ecdac0")
+COLOR_BLUSH_500 = HexColor("#c4897a")
+COLOR_BLUSH_600 = HexColor("#a86f60")
+COLOR_MOCHA_400 = HexColor("#a08e80")
+COLOR_MOCHA_500 = HexColor("#7d6c5f")
+COLOR_MOCHA_700 = HexColor("#574a40")
+COLOR_MOCHA_900 = HexColor("#3b322c")
+
+
+def _ensure_fonts() -> None:
+    global _fonts_registered
+    if _fonts_registered:
+        return
+    pdfmetrics.registerFont(TTFont(_FONT_REGULAR, str(_FONT_DIR / "Comfortaa.ttf")))
+    # Same TTF — "bold" is drawn via setTextRenderMode(2) (fill + stroke).
+    pdfmetrics.registerFont(TTFont(_FONT_BOLD, str(_FONT_DIR / "Comfortaa.ttf")))
+    _fonts_registered = True
+
+
+def _set_regular(c: canvas.Canvas, size: float, color=COLOR_MOCHA_900) -> None:
+    c.setFont(_FONT_REGULAR, size)
+    c.setFillColor(color)
+    c.setStrokeColor(color)
+
+
+def _draw_bold(c: canvas.Canvas, x: float, y: float, text: str, size: float, color=COLOR_MOCHA_900) -> None:
+    """Imitate bold by overlaying the glyph with a tiny offset."""
+    c.setFont(_FONT_REGULAR, size)
+    c.setFillColor(color)
+    c.drawString(x, y, text)
+    c.drawString(x + 0.25, y, text)
+    c.drawString(x, y + 0.15, text)
+
+
+def _draw_bold_centred(c: canvas.Canvas, x: float, y: float, text: str, size: float, color=COLOR_MOCHA_900) -> None:
+    c.setFont(_FONT_REGULAR, size)
+    c.setFillColor(color)
+    c.drawCentredString(x, y, text)
+    c.drawCentredString(x + 0.25, y, text)
+    c.drawCentredString(x, y + 0.15, text)
+
+
+def _draw_photo(
+    c: canvas.Canvas,
+    filename: str,
+    cx: float,
+    cy: float,
+    w: float,
+    h: float,
+    caption: str,
+    angle: float = 0,
+) -> None:
+    """Draw one photo with caption underneath, rotated around its center (cx, cy).
+    Image is enclosed in a soft rounded frame."""
+    path = _PHOTO_DIR / filename
+    c.saveState()
+    c.translate(cx, cy)
+    c.rotate(angle)
+    radius = 4 * mm
+    # Soft cream backdrop (a touch larger than the image for a "polaroid" feel)
+    pad = 2 * mm
+    c.setFillColor(HexColor("#ffffff"))
+    c.setStrokeColor(COLOR_CREAM_300)
+    c.setLineWidth(0.6)
+    c.roundRect(
+        -w / 2 - pad,
+        -h / 2 - pad - 5 * mm,
+        w + 2 * pad,
+        h + 2 * pad + 5 * mm,
+        radius,
+        stroke=1,
+        fill=1,
+    )
+    if path.exists():
+        try:
+            img = ImageReader(str(path))
+            iw, ih = img.getSize()
+            ratio = min(w / iw, h / ih)
+            dw, dh = iw * ratio, ih * ratio
+            c.drawImage(
+                img,
+                -dw / 2,
+                -dh / 2,
+                dw,
+                dh,
+                preserveAspectRatio=True,
+                mask="auto",
+            )
+        except Exception:
+            c.rect(-w / 2, -h / 2, w, h, stroke=1, fill=0)
+    else:
+        c.rect(-w / 2, -h / 2, w, h, stroke=1, fill=0)
+    _set_regular(c, 8, COLOR_MOCHA_500)
+    c.drawCentredString(0, -h / 2 - 3.5 * mm, caption)
+    c.restoreState()
+
+
+async def build_contest1_pdf(session: AsyncSession) -> bytes:
+    """One A4 page: title, photo collage, then 16 traits × 4 checkboxes."""
+    _ensure_fonts()
+
+    traits = (
+        await session.execute(
+            select(Contest1Trait).order_by(Contest1Trait.order_index)
+        )
+    ).scalars().all()
+
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    width, height = A4
+
+    # Background — cream wash like the site
+    c.setFillColor(COLOR_CREAM_50)
+    c.rect(0, 0, width, height, stroke=0, fill=1)
+
+    # Title — blush accent on the second word, like the H1s on site
+    _draw_bold(c, 20 * mm, height - 20 * mm, "На кого похожа ", 22, COLOR_MOCHA_900)
+    title_w = c.stringWidth("На кого похожа ", _FONT_REGULAR, 22)
+    _draw_bold(c, 20 * mm + title_w, height - 20 * mm, "Амалия?", 22, COLOR_BLUSH_600)
+
+    _set_regular(c, 10, COLOR_MOCHA_500)
+    c.drawString(
+        20 * mm,
+        height - 28 * mm,
+        "Отметьте по каждой черте — на кого больше похожа малышка.",
+    )
+
+    # Photo collage: mom-young | Amalia (center) | dad-young — large, tilted.
+    # Then parents-now centered below.
+    row_y = height - 60 * mm
+    side_w, side_h = 38 * mm, 48 * mm
+    center_w, center_h = 44 * mm, 54 * mm
+    gap = 8 * mm
+    center_x = width / 2
+    _draw_photo(
+        c,
+        "mom-young.jpg",
+        center_x - (center_w / 2 + gap + side_w / 2),
+        row_y,
+        side_w,
+        side_h,
+        "мама в детстве",
+        angle=8,
+    )
+    _draw_photo(
+        c,
+        "amalia.jpg",
+        center_x,
+        row_y,
+        center_w,
+        center_h,
+        "Амалия",
+        angle=0,
+    )
+    _draw_photo(
+        c,
+        "dad-young.jpg",
+        center_x + (center_w / 2 + gap + side_w / 2),
+        row_y,
+        side_w,
+        side_h,
+        "папа в детстве",
+        angle=-8,
+    )
+    parents_y = row_y - center_h / 2 - 22 * mm
+    _draw_photo(
+        c,
+        "parents-now.jpg",
+        center_x,
+        parents_y,
+        52 * mm,
+        30 * mm,
+        "мама и папа сейчас",
+        angle=-3,
+    )
+
+    # Guest-name line below the collage
+    name_y = parents_y - 25 * mm
+    _set_regular(c, 10, COLOR_MOCHA_500)
+    c.drawString(20 * mm, name_y, "Имя гостя:")
+    c.setStrokeColor(COLOR_CREAM_300)
+    c.setLineWidth(0.6)
+    c.line(
+        20 * mm + 22 * mm,
+        name_y - 1 * mm,
+        20 * mm + 92 * mm,
+        name_y - 1 * mm,
+    )
+
+    # Table card — rounded background like cards on the site
+    table_x = 18 * mm
+    table_w = width - 36 * mm
+    table_top = name_y - 10 * mm
+    table_bottom = 22 * mm
+    table_h = table_top - table_bottom
+    c.setFillColor(HexColor("#ffffff"))
+    c.setStrokeColor(COLOR_CREAM_200)
+    c.setLineWidth(0.6)
+    c.roundRect(table_x, table_bottom, table_w, table_h, 6 * mm, stroke=1, fill=1)
+
+    # Column headers
+    col_x = [95 * mm, 115 * mm, 135 * mm, 165 * mm]
+    headers = ["мама", "папа", "родственник", "уникально"]
+    y = table_top - 8 * mm
+    _set_regular(c, 8, COLOR_MOCHA_400)  # uppercase tracker-style header
+    c.drawString(24 * mm, y, "ЧЕРТА")
+    for i, h in enumerate(headers):
+        c.drawString(col_x[i], y, h.upper())
+    c.setStrokeColor(COLOR_CREAM_200)
+    c.setLineWidth(0.6)
+    c.line(table_x + 6 * mm, y - 3 * mm, table_x + table_w - 6 * mm, y - 3 * mm)
+
+    # Rows
+    box = 4.2 * mm
+    row_h = 7 * mm
+    start_y = y - 9 * mm
+    for i, t in enumerate(traits):
+        ry = start_y - i * row_h
+        # alternating row tint
+        if i % 2 == 0:
+            c.setFillColor(COLOR_CREAM_50)
+            c.setStrokeColor(COLOR_CREAM_50)
+            c.roundRect(
+                table_x + 4 * mm,
+                ry - 2.5 * mm,
+                table_w - 8 * mm,
+                row_h - 1 * mm,
+                2 * mm,
+                stroke=0,
+                fill=1,
+            )
+        _set_regular(c, 10, COLOR_MOCHA_900)
+        c.drawString(24 * mm, ry, f"{t.order_index}.  {t.name}")
+        c.setStrokeColor(COLOR_MOCHA_400)
+        c.setFillColor(HexColor("#ffffff"))
+        c.setLineWidth(0.7)
+        for x in col_x:
+            c.roundRect(x, ry - 1 * mm, box, box, 1 * mm, stroke=1, fill=1)
+        # Underline for "родственник" name
+        c.setStrokeColor(COLOR_CREAM_300)
+        c.setLineWidth(0.5)
+        c.line(
+            col_x[2] + box + 1.5 * mm,
+            ry - 1 * mm,
+            col_x[3] - 2 * mm,
+            ry - 1 * mm,
+        )
+
+    # Footer
+    _set_regular(c, 9, COLOR_MOCHA_500)
+    c.drawCentredString(width / 2, 13 * mm, "Спасибо! Передайте бланк ведущему.")
+
+    c.showPage()
+    c.save()
+    return buf.getvalue()
+
+
+async def build_contest1_results_pdf(session: AsyncSession) -> bytes:
+    """Results summary blank — for paper confirmation after counting.
+
+    If counts are already entered in the system, prints the actual numbers
+    next to each trait. If counts are zero (counting in progress / not yet
+    started), prints empty fields the host can fill in by hand."""
+    _ensure_fonts()
+
+    data = await contest1_overview(session)
+    traits = data["traits"]
+    summary = data["summary"]
+    any_data = any(
+        t["votes_mom"] + t["votes_dad"] + t["votes_unique"] + sum(r["count"] for r in t["votes_relatives"])
+        for t in traits
+    )
+
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    width, height = A4
+
+    # Background
+    c.setFillColor(COLOR_CREAM_50)
+    c.rect(0, 0, width, height, stroke=0, fill=1)
+
+    # Title
+    _draw_bold(c, 20 * mm, height - 20 * mm, "Итоги конкурса ", 22, COLOR_MOCHA_900)
+    title_w = c.stringWidth("Итоги конкурса ", _FONT_REGULAR, 22)
+    _draw_bold(c, 20 * mm + title_w, height - 20 * mm, "«На кого похожа»", 22, COLOR_BLUSH_600)
+    _set_regular(c, 10, COLOR_MOCHA_500)
+    subtitle = (
+        "Сводка для бумажного подтверждения."
+        if any_data
+        else "Распечатайте, посчитайте по бумажным бланкам и впишите цифры."
+    )
+    c.drawString(20 * mm, height - 28 * mm, subtitle)
+
+    # Compact photo strip centered under the title
+    photo_y = height - 55 * mm
+    side_w, side_h = 24 * mm, 30 * mm
+    center_w, center_h = 28 * mm, 34 * mm
+    gap = 6 * mm
+    cx = width / 2
+    _draw_photo(
+        c,
+        "mom-young.jpg",
+        cx - (center_w / 2 + gap + side_w / 2),
+        photo_y,
+        side_w,
+        side_h,
+        "мама",
+        angle=6,
+    )
+    _draw_photo(c, "amalia.jpg", cx, photo_y, center_w, center_h, "Амалия", angle=0)
+    _draw_photo(
+        c,
+        "dad-young.jpg",
+        cx + (center_w / 2 + gap + side_w / 2),
+        photo_y,
+        side_w,
+        side_h,
+        "папа",
+        angle=-6,
+    )
+
+    # Results table card
+    table_x = 18 * mm
+    table_w = width - 36 * mm
+    table_top = photo_y - center_h / 2 - 14 * mm
+    table_bottom = 60 * mm
+    c.setFillColor(HexColor("#ffffff"))
+    c.setStrokeColor(COLOR_CREAM_200)
+    c.setLineWidth(0.6)
+    c.roundRect(
+        table_x,
+        table_bottom,
+        table_w,
+        table_top - table_bottom,
+        6 * mm,
+        stroke=1,
+        fill=1,
+    )
+
+    # Column positions (numbers fit in narrow columns)
+    col_mom_x = 95 * mm
+    col_dad_x = 113 * mm
+    col_rel_x = 131 * mm
+    col_uniq_x = 168 * mm
+    y = table_top - 8 * mm
+    _set_regular(c, 8, COLOR_MOCHA_400)
+    c.drawString(24 * mm, y, "ЧЕРТА")
+    c.drawString(col_mom_x, y, "МАМА")
+    c.drawString(col_dad_x, y, "ПАПА")
+    c.drawString(col_rel_x, y, "РОДСТВЕННИКИ")
+    c.drawString(col_uniq_x, y, "УНИКАЛЬНО")
+    c.setStrokeColor(COLOR_CREAM_200)
+    c.line(table_x + 6 * mm, y - 3 * mm, table_x + table_w - 6 * mm, y - 3 * mm)
+
+    row_h = 7 * mm
+    start_y = y - 9 * mm
+    for i, t in enumerate(traits):
+        ry = start_y - i * row_h
+        if i % 2 == 0:
+            c.setFillColor(COLOR_CREAM_50)
+            c.roundRect(
+                table_x + 4 * mm,
+                ry - 2.5 * mm,
+                table_w - 8 * mm,
+                row_h - 1 * mm,
+                2 * mm,
+                stroke=0,
+                fill=1,
+            )
+        _set_regular(c, 10, COLOR_MOCHA_900)
+        c.drawString(24 * mm, ry, f"{t['order_index']}.  {t['name']}")
+
+        # Numbers (or empty boxes if data not entered yet)
+        for cx, value in (
+            (col_mom_x, t["votes_mom"]),
+            (col_dad_x, t["votes_dad"]),
+            (col_uniq_x, t["votes_unique"]),
+        ):
+            if any_data:
+                _set_regular(c, 11, COLOR_MOCHA_900)
+                c.drawString(cx + 1 * mm, ry, str(value))
+            else:
+                c.setStrokeColor(COLOR_CREAM_300)
+                c.setLineWidth(0.5)
+                c.line(cx, ry - 1 * mm, cx + 10 * mm, ry - 1 * mm)
+
+        # Relatives — list of "name × count"
+        rel_text = (
+            ", ".join(f"{r['name']} ({r['count']})" for r in t["votes_relatives"])
+            if t["votes_relatives"]
+            else ("—" if any_data else "")
+        )
+        if rel_text:
+            _set_regular(c, 9, COLOR_MOCHA_700 if any_data else COLOR_MOCHA_400)
+            c.drawString(col_rel_x, ry, rel_text[:30])
+        else:
+            c.setStrokeColor(COLOR_CREAM_300)
+            c.setLineWidth(0.5)
+            c.line(col_rel_x, ry - 1 * mm, col_rel_x + 32 * mm, ry - 1 * mm)
+
+    # Verdict card at the bottom
+    verdict_top = 52 * mm
+    c.setFillColor(HexColor("#fbe8e0"))  # blush-100
+    c.setStrokeColor(COLOR_BLUSH_500)
+    c.setLineWidth(0.8)
+    c.roundRect(18 * mm, 18 * mm, width - 36 * mm, verdict_top - 18 * mm, 6 * mm, stroke=1, fill=1)
+
+    _set_regular(c, 9, COLOR_BLUSH_600)
+    c.drawString(26 * mm, verdict_top - 8 * mm, "ИТОГ КОНКУРСА")
+
+    if any_data and summary["verdict"]:
+        _draw_bold(c, 26 * mm, verdict_top - 18 * mm, summary["verdict"], 18, COLOR_BLUSH_600)
+        totals = summary["totals"]
+        breakdown = (
+            f"мама: {totals['mom']}   ·   папа: {totals['dad']}   ·   "
+            f"родственники: {totals['relatives']}   ·   уникально: {totals['unique']}"
+        )
+        _set_regular(c, 9, COLOR_MOCHA_500)
+        c.drawString(26 * mm, verdict_top - 26 * mm, breakdown)
+    else:
+        _draw_bold(
+            c, 26 * mm, verdict_top - 18 * mm, "____________________________", 14, COLOR_BLUSH_600
+        )
+        _set_regular(c, 8, COLOR_MOCHA_400)
+        c.drawString(
+            26 * mm,
+            verdict_top - 24 * mm,
+            "Заполните после подсчёта одним из вариантов:",
+        )
+        c.drawString(
+            26 * mm,
+            verdict_top - 28 * mm,
+            "«Мама фейс»   ·   «Папа фейс»   ·   «Сама уникальность»   ·   «В кого-то из родни — имя».",
+        )
+
+    # Signature area
+    _set_regular(c, 8, COLOR_MOCHA_400)
+    c.drawString(20 * mm, 12 * mm, "Подпись ведущего: ________________________")
+    c.drawString(width - 80 * mm, 12 * mm, "Дата: ________________")
+
+    c.showPage()
+    c.save()
+    return buf.getvalue()
+
+

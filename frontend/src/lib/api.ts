@@ -467,6 +467,122 @@ export async function adminListGame(): Promise<GamePlayer[]> {
   return (await res.json()) as GamePlayer[];
 }
 
+// -------- Host / Projector (Contests) --------
+
+export type ContestStatus = "not_started" | "active" | "closed";
+
+export interface ContestState {
+  contest_id: number;
+  status: ContestStatus;
+  active_step: Record<string, unknown>;
+}
+
+export interface RelativeVote {
+  name: string;
+  count: number;
+}
+
+export interface Contest1Trait {
+  id: number;
+  order_index: number;
+  name: string;
+  votes_mom: number;
+  votes_dad: number;
+  votes_unique: number;
+  votes_relatives: RelativeVote[];
+}
+
+export interface Contest1Summary {
+  totals: { mom: number; dad: number; unique: number; relatives: number };
+  top_relative_name: string | null;
+  top_relative_count: number;
+  verdict: string | null;
+}
+
+export interface Contest1Overview {
+  state: ContestState;
+  traits: Contest1Trait[];
+  summary: Contest1Summary;
+}
+
+export async function hostContestsList(): Promise<ContestState[]> {
+  const res = await fetch(`${API_URL}/api/host/contests`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as ContestState[];
+}
+
+export async function hostSetContestStatus(
+  contestId: number,
+  status: ContestStatus,
+): Promise<ContestState> {
+  const res = await fetch(`${API_URL}/api/host/contests/${contestId}/status`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as ContestState;
+}
+
+export async function hostContest1Overview(): Promise<Contest1Overview> {
+  const res = await fetch(`${API_URL}/api/host/contest1`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest1Overview;
+}
+
+export interface Contest1TallyUpdate {
+  votes_mom?: number;
+  votes_dad?: number;
+  votes_unique?: number;
+  votes_relatives?: RelativeVote[];
+}
+
+export async function hostContest1SetTally(
+  traitId: number,
+  payload: Contest1TallyUpdate,
+): Promise<Contest1Trait> {
+  const res = await fetch(
+    `${API_URL}/api/host/contest1/traits/${traitId}/tally`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    },
+  );
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest1Trait;
+}
+
+export async function hostContest1Reset(): Promise<void> {
+  const res = await fetch(`${API_URL}/api/host/contest1/reset`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function projectorContest1Overview(): Promise<Contest1Overview> {
+  const res = await fetch(`${API_URL}/api/projector/contest1`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest1Overview;
+}
+
+export async function projectorContestsList(): Promise<ContestState[]> {
+  const res = await fetch(`${API_URL}/api/projector/contests`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as ContestState[];
+}
+
 // -------- Admin wishlist CRUD --------
 
 export interface WishlistItemAdmin extends WishlistItem {

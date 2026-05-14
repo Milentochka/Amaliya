@@ -2,6 +2,12 @@
 
 from app.db.models.admin import Admin, AdminRole
 from app.db.models.avatar import Avatar
+from app.db.models.contest import (
+    Contest1Trait,
+    Contest1VoteTally,
+    ContestState,
+    ContestStatus,
+)
 from app.db.models.event import EventMeta, EventPart, Parent, ParentRole
 from app.db.models.game import GameAttempt
 from app.db.models.guest import Guest, GuestGender
@@ -18,6 +24,10 @@ __all__ = [
     "AdminRole",
     "Avatar",
     "Booking",
+    "Contest1Trait",
+    "Contest1VoteTally",
+    "ContestState",
+    "ContestStatus",
     "EventMeta",
     "EventPart",
     "EventPartType",

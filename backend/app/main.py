@@ -11,6 +11,8 @@ from app.api.auth import router as auth_router
 from app.api.event import router as event_router
 from app.api.game import router as game_router
 from app.api.health import router as health_router
+from app.api.host import router as host_router
+from app.api.projector import router as projector_router
 from app.api.wishlist import router as wishlist_router
 from app.bot.main import build_bot_and_dp, shutdown_bot, start_polling_task
 from app.config import get_settings
@@ -60,6 +62,8 @@ def create_app() -> FastAPI:
     app.include_router(admin_data_router, prefix="/api")
     app.include_router(event_router, prefix="/api")
     app.include_router(game_router, prefix="/api")
+    app.include_router(host_router, prefix="/api")
+    app.include_router(projector_router, prefix="/api")
     return app
 
 
