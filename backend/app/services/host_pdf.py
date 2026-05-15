@@ -25,8 +25,9 @@ from app.services.contests import (
 
 _BASE = Path(__file__).resolve().parent.parent
 _FONT_DIR = _BASE / "fonts"
-# Photos shipped with the frontend public folder.
-_PHOTO_DIR = _BASE.parent.parent / "frontend" / "public" / "contests" / "contest1"
+# Photos shipped inside the backend container; mirrors frontend/public/contests/contest1
+# so the same files are available both for the projector UI and for PDF rendering.
+_PHOTO_DIR = _BASE / "contests" / "contest1"
 _FONT_REGULAR = "Comfortaa"
 _FONT_BOLD = "Comfortaa-Bold"  # imitated via fill+stroke render mode
 _fonts_registered = False
