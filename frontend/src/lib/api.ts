@@ -673,6 +673,103 @@ export async function projectorContest2Overview(): Promise<Contest2Overview> {
   return (await res.json()) as Contest2Overview;
 }
 
+// -------- Contest 3 («50 обещаний») --------
+
+export interface Contest3Stats {
+  state: ContestState;
+  total_promises: number;
+  assigned_total: number;
+  read_total: number;
+  guests_total: number;
+  guests_with_assignments: number;
+  guests_done: number;
+}
+
+export interface Contest3PromiseView {
+  id: number;
+  text: string;
+  read_aloud_at: string | null;
+}
+
+export interface Contest3CurrentGuest {
+  guest_id: string;
+  guest_name: string;
+  avatar_url: string;
+  avatar_name: string;
+  promises: Contest3PromiseView[];
+}
+
+export interface Contest3ProjectorView {
+  state: ContestState;
+  current: Contest3CurrentGuest | null;
+}
+
+export async function hostContest3Stats(): Promise<Contest3Stats> {
+  const res = await fetch(`${API_URL}/api/host/contest3`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest3Stats;
+}
+
+export async function hostContest3Assign(
+  perGuest: number = 2,
+): Promise<Contest3Stats> {
+  const res = await fetch(`${API_URL}/api/host/contest3/assign`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ per_guest: perGuest }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest3Stats;
+}
+
+export async function hostContest3Next(): Promise<Contest3CurrentGuest> {
+  const res = await fetch(`${API_URL}/api/host/contest3/next`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest3CurrentGuest;
+}
+
+export async function hostContest3MarkRead(
+  promiseIds: number[],
+): Promise<void> {
+  const res = await fetch(`${API_URL}/api/host/contest3/mark-read`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ promise_ids: promiseIds }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function hostContest3ClearActive(): Promise<void> {
+  const res = await fetch(`${API_URL}/api/host/contest3/clear-active`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function hostContest3Reset(): Promise<void> {
+  const res = await fetch(`${API_URL}/api/host/contest3/reset`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function projectorContest3View(): Promise<Contest3ProjectorView> {
+  const res = await fetch(`${API_URL}/api/projector/contest3`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest3ProjectorView;
+}
+
 // -------- Admin wishlist CRUD --------
 
 export interface WishlistItemAdmin extends WishlistItem {

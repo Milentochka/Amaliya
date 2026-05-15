@@ -96,3 +96,16 @@ class Contest2FirstCorrect(Base):
         onupdate=func.now(),
         nullable=False,
     )
+
+
+class Contest3Promise(Base):
+    __tablename__ = "contest3_promise"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    assigned_guest_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        Uuid, ForeignKey("guests.id", ondelete="SET NULL"), nullable=True
+    )
+    read_aloud_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )

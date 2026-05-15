@@ -1,16 +1,20 @@
 """Contest services (Module 4)."""
 
+import random
 import uuid
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
+    Avatar,
     Contest1Trait,
     Contest1VoteTally,
     Contest2FirstCorrect,
     Contest2Question,
+    Contest3Promise,
     ContestState,
     ContestStatus,
     Guest,
@@ -26,6 +30,14 @@ class InvalidStatus(Exception):
 
 
 class QuestionNotFound(Exception):
+    pass
+
+
+class PromiseNotFound(Exception):
+    pass
+
+
+class NoGuestPending(Exception):
     pass
 
 
@@ -401,3 +413,261 @@ async def contest2_reset(session: AsyncSession) -> None:
     if state is not None:
         state.active_step = {}
     await session.commit()
+
+
+# -------- Contest 3: «50 обещаний» --------
+
+
+async def contest3_admin_overview(session: AsyncSession) -> dict:
+    """Admin view — never reveals which promise belongs to which guest.
+
+    Returns aggregated counters (assigned / read / total) and pacing info so the
+    host knows what's left without spoiling who gets what."""
+    state = await get_state(session, 3)
+    promises = (
+        await session.execute(select(Contest3Promise))
+    ).scalars().all()
+    guests_count = (
+        await session.execute(select(Guest))
+    ).scalars().all()
+
+    assigned = [p for p in promises if p.assigned_guest_id is not None]
+    read = [p for p in assigned if p.read_aloud_at is not None]
+
+    assigned_guests = {p.assigned_guest_id for p in assigned}
+    read_guest_ids = {
+        p.assigned_guest_id for p in read
+    }
+    # A guest is "done" only when ALL their assigned promises have been read.
+    by_guest_read: Dict[uuid.UUID, int] = {}
+    by_guest_total: Dict[uuid.UUID, int] = {}
+    for p in assigned:
+        by_guest_total[p.assigned_guest_id] = (
+            by_guest_total.get(p.assigned_guest_id, 0) + 1
+        )
+        if p.read_aloud_at is not None:
+            by_guest_read[p.assigned_guest_id] = (
+                by_guest_read.get(p.assigned_guest_id, 0) + 1
+            )
+    done_guests = sum(
+        1
+        for gid, t in by_guest_total.items()
+        if by_guest_read.get(gid, 0) >= t
+    )
+
+    return {
+        "state": state,
+        "total_promises": len(promises),
+        "assigned_total": len(assigned),
+        "read_total": len(read),
+        "guests_total": len(guests_count),
+        "guests_with_assignments": len(assigned_guests),
+        "guests_done": done_guests,
+    }
+
+
+async def contest3_assign_random(
+    session: AsyncSession, *, per_guest: int = 2
+) -> dict:
+    """Shuffle promises and assign N to each guest. Idempotent: clears any
+    previous assignment first. Lefovers stay in the pool with NULL guest."""
+    # Reset state
+    all_promises = (
+        await session.execute(select(Contest3Promise))
+    ).scalars().all()
+    for p in all_promises:
+        p.assigned_guest_id = None
+        p.read_aloud_at = None
+    state = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 3)
+        )
+    ).scalar_one_or_none()
+    if state is not None:
+        state.active_step = {}
+
+    guests = (
+        await session.execute(select(Guest).order_by(Guest.created_at))
+    ).scalars().all()
+    pool = list(all_promises)
+    random.shuffle(pool)
+
+    i = 0
+    for g in guests:
+        for _ in range(per_guest):
+            if i >= len(pool):
+                break
+            pool[i].assigned_guest_id = g.id
+            i += 1
+
+    await session.commit()
+    return await contest3_admin_overview(session)
+
+
+async def contest3_pick_next(session: AsyncSession) -> dict:
+    """Return a random guest whose assignments are NOT fully read, with their
+    promises. Sets active_step so the projector shows them."""
+    assigned = (
+        await session.execute(
+            select(Contest3Promise).where(
+                Contest3Promise.assigned_guest_id.is_not(None)
+            )
+        )
+    ).scalars().all()
+    by_guest: Dict[uuid.UUID, List[Contest3Promise]] = {}
+    for p in assigned:
+        by_guest.setdefault(p.assigned_guest_id, []).append(p)
+
+    pending_guest_ids = [
+        gid for gid, ps in by_guest.items() if any(p.read_aloud_at is None for p in ps)
+    ]
+    if not pending_guest_ids:
+        raise NoGuestPending()
+
+    next_gid = random.choice(pending_guest_ids)
+    row = (
+        await session.execute(
+            select(Guest, Avatar)
+            .join(Avatar, Avatar.id == Guest.avatar_id)
+            .where(Guest.id == next_gid)
+        )
+    ).first()
+    guest, avatar = row
+    promise_ids = [p.id for p in by_guest[next_gid]]
+
+    # Pin into active_step so projector shows the same set.
+    state = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 3)
+        )
+    ).scalar_one_or_none()
+    if state is None:
+        state = ContestState(contest_id=3)
+        session.add(state)
+    state.active_step = {
+        "guest_id": str(guest.id),
+        "promise_ids": promise_ids,
+    }
+    await session.commit()
+
+    return {
+        "guest_id": str(guest.id),
+        "guest_name": guest.name,
+        "avatar_url": avatar.image_url,
+        "avatar_name": avatar.name,
+        "promises": [
+            {
+                "id": p.id,
+                "text": p.text,
+                "read_aloud_at": p.read_aloud_at.isoformat()
+                if p.read_aloud_at
+                else None,
+            }
+            for p in by_guest[next_gid]
+        ],
+    }
+
+
+async def contest3_mark_read(
+    session: AsyncSession, *, promise_ids: List[int]
+) -> None:
+    if not promise_ids:
+        return
+    rows = (
+        await session.execute(
+            select(Contest3Promise).where(Contest3Promise.id.in_(promise_ids))
+        )
+    ).scalars().all()
+    now = datetime.now(timezone.utc)
+    for p in rows:
+        p.read_aloud_at = now
+    await session.commit()
+
+
+async def contest3_clear_active(session: AsyncSession) -> None:
+    state = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 3)
+        )
+    ).scalar_one_or_none()
+    if state is not None:
+        state.active_step = {}
+        await session.commit()
+
+
+async def contest3_projector_view(session: AsyncSession) -> dict:
+    """What the projector shows. Either nothing (idle) or the current guest's
+    full reveal."""
+    state = await get_state(session, 3)
+    step = state["active_step"] or {}
+    guest_id_str = step.get("guest_id")
+    if not guest_id_str:
+        return {"state": state, "current": None}
+    try:
+        guest_id = uuid.UUID(guest_id_str)
+    except ValueError:
+        return {"state": state, "current": None}
+    row = (
+        await session.execute(
+            select(Guest, Avatar)
+            .join(Avatar, Avatar.id == Guest.avatar_id)
+            .where(Guest.id == guest_id)
+        )
+    ).first()
+    if row is None:
+        return {"state": state, "current": None}
+    guest, avatar = row
+    promise_ids = step.get("promise_ids") or []
+    promises = (
+        await session.execute(
+            select(Contest3Promise).where(Contest3Promise.id.in_(promise_ids))
+        )
+    ).scalars().all()
+    promises_sorted = sorted(promises, key=lambda p: p.id)
+    return {
+        "state": state,
+        "current": {
+            "guest_id": str(guest.id),
+            "guest_name": guest.name,
+            "avatar_url": avatar.image_url,
+            "avatar_name": avatar.name,
+            "promises": [
+                {
+                    "id": p.id,
+                    "text": p.text,
+                    "read_aloud_at": p.read_aloud_at.isoformat()
+                    if p.read_aloud_at
+                    else None,
+                }
+                for p in promises_sorted
+            ],
+        },
+    }
+
+
+async def contest3_reset(session: AsyncSession) -> None:
+    promises = (
+        await session.execute(select(Contest3Promise))
+    ).scalars().all()
+    for p in promises:
+        p.assigned_guest_id = None
+        p.read_aloud_at = None
+    state = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 3)
+        )
+    ).scalar_one_or_none()
+    if state is not None:
+        state.active_step = {}
+    await session.commit()
+
+
+async def contest3_all_promises_for_pdf(
+    session: AsyncSession,
+) -> List[str]:
+    rows = (
+        await session.execute(
+            select(Contest3Promise).order_by(Contest3Promise.id)
+        )
+    ).scalars().all()
+    return [p.text for p in rows]

@@ -6,10 +6,16 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_session
-from app.schemas.contests import Contest1Overview, Contest2Overview, ContestStateOut
+from app.schemas.contests import (
+    Contest1Overview,
+    Contest2Overview,
+    Contest3ProjectorView,
+    ContestStateOut,
+)
 from app.services.contests import (
     contest1_overview,
     contest2_overview,
+    contest3_projector_view,
     list_all_states,
 )
 
@@ -24,6 +30,11 @@ async def all_states(session: AsyncSession = Depends(get_session)):
 @router.get("/contest1", response_model=Contest1Overview)
 async def contest1(session: AsyncSession = Depends(get_session)):
     return await contest1_overview(session)
+
+
+@router.get("/contest3", response_model=Contest3ProjectorView)
+async def contest3(session: AsyncSession = Depends(get_session)):
+    return await contest3_projector_view(session)
 
 
 @router.get("/contest2", response_model=Contest2Overview)

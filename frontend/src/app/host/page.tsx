@@ -22,7 +22,7 @@ const CONTESTS: { id: number; title: string; subtitle: string; href: string | nu
     id: 3,
     title: "50 обещаний",
     subtitle: "Раздача и зачитывание на проекторе",
-    href: null,
+    href: "/host/contest3",
   },
   {
     id: 4,

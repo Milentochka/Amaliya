@@ -16,11 +16,16 @@ from app.schemas.contests import (
     Contest2ActiveIn,
     Contest2FirstCorrectIn,
     Contest2Overview,
+    Contest3AssignIn,
+    Contest3CurrentGuest,
+    Contest3MarkReadIn,
+    Contest3Stats,
     ContestStateOut,
     ContestStatusIn,
 )
 from app.services.contests import (
     InvalidStatus,
+    NoGuestPending,
     QuestionNotFound,
     TraitNotFound,
     contest1_overview,
@@ -31,10 +36,20 @@ from app.services.contests import (
     contest2_reset,
     contest2_set_active,
     contest2_set_first_correct,
+    contest3_admin_overview,
+    contest3_assign_random,
+    contest3_clear_active,
+    contest3_mark_read,
+    contest3_pick_next,
+    contest3_reset,
     list_all_states,
     set_status,
 )
-from app.services.host_pdf import build_contest1_pdf, build_contest1_results_pdf
+from app.services.host_pdf import (
+    build_contest1_pdf,
+    build_contest1_results_pdf,
+    build_contest3_cards_pdf,
+)
 from app.services.wishlist import resolve_admin_id_from_token
 
 router = APIRouter(prefix="/host", tags=["host"])
@@ -225,3 +240,87 @@ async def contest2_reset_endpoint(
     await _require_admin(session, amaliya_admin_session)
     await contest2_reset(session)
     return {"message": "reset"}
+
+
+# -------- Contest 3 «50 обещаний» --------
+
+
+@router.get("/contest3", response_model=Contest3Stats)
+async def contest3(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await contest3_admin_overview(session)
+
+
+@router.post("/contest3/assign", response_model=Contest3Stats)
+async def contest3_assign(
+    payload: Contest3AssignIn,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await contest3_assign_random(session, per_guest=payload.per_guest)
+
+
+@router.post("/contest3/next", response_model=Contest3CurrentGuest)
+async def contest3_next(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    try:
+        return await contest3_pick_next(session)
+    except NoGuestPending:
+        raise HTTPException(
+            status_code=409,
+            detail="Все гости с обещаниями уже зачитали свои",
+        )
+
+
+@router.post("/contest3/mark-read", response_model=MessageOut)
+async def contest3_mark(
+    payload: Contest3MarkReadIn,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    await contest3_mark_read(session, promise_ids=payload.promise_ids)
+    return {"message": "marked"}
+
+
+@router.post("/contest3/clear-active", response_model=MessageOut)
+async def contest3_clear(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    await contest3_clear_active(session)
+    return {"message": "cleared"}
+
+
+@router.post("/contest3/reset", response_model=MessageOut)
+async def contest3_reset_endpoint(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    await contest3_reset(session)
+    return {"message": "reset"}
+
+
+@router.get("/contest3/cards.pdf")
+async def contest3_cards_pdf(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    pdf_bytes = await build_contest3_cards_pdf(session)
+    return StreamingResponse(
+        iter([pdf_bytes]),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="contest3-cards.pdf"'
+        },
+    )

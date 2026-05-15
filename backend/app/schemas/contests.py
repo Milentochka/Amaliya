@@ -85,3 +85,43 @@ class Contest2ActiveIn(BaseModel):
 class Contest2FirstCorrectIn(BaseModel):
     guest_id: Optional[str] = None
     guest_name: Optional[str] = None
+
+
+# -------- Contest 3 --------
+
+
+class Contest3Stats(BaseModel):
+    state: ContestStateOut
+    total_promises: int
+    assigned_total: int
+    read_total: int
+    guests_total: int
+    guests_with_assignments: int
+    guests_done: int
+
+
+class Contest3AssignIn(BaseModel):
+    per_guest: int = 2
+
+
+class Contest3PromiseView(BaseModel):
+    id: int
+    text: str
+    read_aloud_at: Optional[str] = None
+
+
+class Contest3CurrentGuest(BaseModel):
+    guest_id: str
+    guest_name: str
+    avatar_url: str
+    avatar_name: str
+    promises: List[Contest3PromiseView]
+
+
+class Contest3ProjectorView(BaseModel):
+    state: ContestStateOut
+    current: Optional[Contest3CurrentGuest] = None
+
+
+class Contest3MarkReadIn(BaseModel):
+    promise_ids: List[int]

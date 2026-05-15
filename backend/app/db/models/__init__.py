@@ -7,6 +7,7 @@ from app.db.models.contest import (
     Contest1VoteTally,
     Contest2FirstCorrect,
     Contest2Question,
+    Contest3Promise,
     ContestState,
     ContestStatus,
 )
@@ -30,6 +31,7 @@ __all__ = [
     "Contest1VoteTally",
     "Contest2FirstCorrect",
     "Contest2Question",
+    "Contest3Promise",
     "ContestState",
     "ContestStatus",
     "EventMeta",

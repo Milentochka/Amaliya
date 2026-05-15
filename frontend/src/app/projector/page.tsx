@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ContestState, projectorContestsList } from "@/lib/api";
 import { Contest1Projector } from "./contest1-view";
 import { Contest2Projector } from "./contest2-view";
+import { Contest3Projector } from "./contest3-view";
 
 function Idle() {
   return (
@@ -47,5 +48,6 @@ export default function ProjectorPage() {
 
   if (active?.contest_id === 1) return <Contest1Projector />;
   if (active?.contest_id === 2) return <Contest2Projector />;
+  if (active?.contest_id === 3) return <Contest3Projector />;
   return <Idle />;
 }

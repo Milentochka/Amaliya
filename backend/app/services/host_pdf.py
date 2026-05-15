@@ -2,6 +2,7 @@
 
 import io
 from pathlib import Path
+from typing import List
 
 from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import A4
@@ -14,7 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Contest1Trait, Contest1VoteTally
-from app.services.contests import contest1_overview
+from app.services.contests import contest1_overview, contest3_all_promises_for_pdf
 
 
 _BASE = Path(__file__).resolve().parent.parent
@@ -467,6 +468,132 @@ async def build_contest1_results_pdf(session: AsyncSession) -> bytes:
     _set_regular(c, 8, COLOR_MOCHA_400)
     c.drawString(20 * mm, 12 * mm, "Подпись ведущего: ________________________")
     c.drawString(width - 80 * mm, 12 * mm, "Дата: ________________")
+
+    c.showPage()
+    c.save()
+    return buf.getvalue()
+
+
+def _wrap_lines_by_width(
+    c: canvas.Canvas,
+    text: str,
+    font: str,
+    size: float,
+    max_width: float,
+) -> List[str]:
+    """Word-wrap measured against the real font metrics."""
+    words = text.split()
+    lines: List[str] = []
+    cur = ""
+    for w in words:
+        candidate = w if not cur else cur + " " + w
+        if c.stringWidth(candidate, font, size) <= max_width:
+            cur = candidate
+        else:
+            if cur:
+                lines.append(cur)
+            cur = w
+    if cur:
+        lines.append(cur)
+    return lines
+
+
+async def build_contest3_cards_pdf(session: AsyncSession) -> bytes:
+    """All 50 promises laid out as 5×2 cards per A4 page with dashed cut
+    lines. Designed for paper cutting + manual handout if the host prefers
+    the analog variant over the digital random assignment."""
+    _ensure_fonts()
+    promises = await contest3_all_promises_for_pdf(session)
+
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    width, height = A4
+
+    cols, rows = 2, 5
+    per_page = cols * rows
+    margin_x = 12 * mm
+    margin_y = 14 * mm
+    card_w = (width - 2 * margin_x) / cols
+    card_h = (height - 2 * margin_y) / rows
+
+    for idx, text in enumerate(promises):
+        slot = idx % per_page
+        if slot == 0:
+            if idx > 0:
+                c.showPage()
+            c.setFillColor(COLOR_CREAM_50)
+            c.rect(0, 0, width, height, stroke=0, fill=1)
+            # Page-level dashed grid (cut guides)
+            c.setStrokeColor(COLOR_CREAM_300)
+            c.setLineWidth(0.4)
+            c.setDash(2, 3)
+            for r in range(1, rows):
+                y = margin_y + r * card_h
+                c.line(margin_x, y, width - margin_x, y)
+            for col in range(1, cols):
+                x = margin_x + col * card_w
+                c.line(x, margin_y, x, height - margin_y)
+            # Outer cut frame
+            c.rect(
+                margin_x,
+                margin_y,
+                width - 2 * margin_x,
+                height - 2 * margin_y,
+                stroke=1,
+                fill=0,
+            )
+            c.setDash()
+
+        col = slot % cols
+        row = slot // cols
+        x = margin_x + col * card_w
+        y = height - margin_y - (row + 1) * card_h  # bottom-left of card
+
+        # Soft card body
+        pad = 4 * mm
+        c.setFillColor(HexColor("#ffffff"))
+        c.setStrokeColor(COLOR_CREAM_200)
+        c.setLineWidth(0.5)
+        c.roundRect(
+            x + pad,
+            y + pad,
+            card_w - 2 * pad,
+            card_h - 2 * pad,
+            5 * mm,
+            stroke=1,
+            fill=1,
+        )
+
+        # Header pill: «обещаю №X»
+        _set_regular(c, 8, COLOR_BLUSH_600)
+        c.drawString(
+            x + pad + 5 * mm,
+            y + card_h - pad - 6 * mm,
+            f"ОБЕЩАНИЕ № {idx + 1}",
+        )
+
+        # Promise text — wrap by real width
+        text_x = x + pad + 5 * mm
+        text_w = card_w - 2 * pad - 10 * mm
+        font_size = 12
+        wrapped = _wrap_lines_by_width(c, text, _FONT_REGULAR, font_size, text_w)
+        # If too tall, drop a size
+        if len(wrapped) > 4:
+            font_size = 10
+            wrapped = _wrap_lines_by_width(c, text, _FONT_REGULAR, font_size, text_w)
+        line_y = y + card_h - pad - 13 * mm
+        _set_regular(c, font_size, COLOR_MOCHA_900)
+        for line in wrapped:
+            c.drawString(text_x, line_y, line)
+            line_y -= font_size * 1.3  # pt-based line height
+
+        # Tiny footer signature line
+        _set_regular(c, 7, COLOR_MOCHA_400)
+        c.drawString(
+            x + pad + 5 * mm,
+            y + pad + 4 * mm,
+            "— Амалии, с любовью",
+        )
 
     c.showPage()
     c.save()
