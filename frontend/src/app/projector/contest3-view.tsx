@@ -38,17 +38,16 @@ export function Contest3Projector() {
   // Closed → thank-you screen
   if (isClosed && !data.current) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-cream-100 via-cream-50 to-white">
+      <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-cream-100 via-cream-50 to-white px-12">
         <div className="text-center">
           <p className="text-xs uppercase tracking-widest text-mocha-400">
             Конкурс 3 · итог
           </p>
-          <h1 className="mt-3 text-6xl font-light text-mocha-900">
-            Спасибо за <span className="font-medium text-blush-600">обещания</span>
+          <h1 className="mt-3 text-6xl font-light leading-tight text-mocha-900">
+            Спасибо за <span className="font-medium text-blush-600">обещания</span>,
+            <br />
+            мы все записали! <span className="inline-block">😊</span>
           </h1>
-          <p className="mt-4 text-mocha-500">
-            Амалия запомнит каждое.
-          </p>
         </div>
       </main>
     );
