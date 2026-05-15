@@ -632,10 +632,10 @@ def _render_zodiac_blank(c: canvas.Canvas, z: dict) -> None:
     )
 
     # Card with traits
-    card_x = 25 * mm
-    card_w = width - 50 * mm
-    card_top = height - 52 * mm
-    card_bottom = 30 * mm
+    card_x = 18 * mm
+    card_w = width - 36 * mm
+    card_top = height - 50 * mm
+    card_bottom = 28 * mm
     c.setFillColor(HexColor("#ffffff"))
     c.setStrokeColor(COLOR_CREAM_200)
     c.setLineWidth(0.6)
@@ -649,22 +649,50 @@ def _render_zodiac_blank(c: canvas.Canvas, z: dict) -> None:
         fill=1,
     )
 
-    # Guest-name line
-    _set_regular(c, 10, COLOR_MOCHA_500)
-    c.drawString(card_x + 8 * mm, card_top - 12 * mm, "Имя гостя:")
-    c.setStrokeColor(COLOR_CREAM_300)
-    c.setLineWidth(0.5)
-    c.line(
-        card_x + 30 * mm,
-        card_top - 13 * mm,
-        card_x + card_w - 8 * mm,
-        card_top - 13 * mm,
-    )
+    # Five guest-name lines so multiple guests of the same sign can share one sheet
+    _set_regular(c, 9, COLOR_BLUSH_600)
+    c.drawString(card_x + 8 * mm, card_top - 10 * mm, "ГОСТИ")
+    name_x = card_x + 8 * mm
+    name_top_y = card_top - 17 * mm
+    name_line_h = 6 * mm
+    for i in range(5):
+        ry = name_top_y - i * name_line_h
+        _set_regular(c, 10, COLOR_MOCHA_500)
+        c.drawString(name_x, ry, f"№{i + 1}.")
+        c.setStrokeColor(COLOR_CREAM_300)
+        c.setLineWidth(0.5)
+        c.line(
+            name_x + 9 * mm,
+            ry - 1 * mm,
+            card_x + card_w - 8 * mm,
+            ry - 1 * mm,
+        )
 
-    # 10 traits with checkboxes
-    box = 6 * mm
-    row_h = 16 * mm
-    start_y = card_top - 28 * mm
+    # Divider before traits
+    traits_top = name_top_y - 5 * name_line_h - 4 * mm
+    c.setStrokeColor(COLOR_CREAM_200)
+    c.setLineWidth(0.6)
+    c.line(card_x + 8 * mm, traits_top, card_x + card_w - 8 * mm, traits_top)
+
+    # Column header for the 5 guest checkboxes
+    box = 5 * mm
+    col_count = 5
+    col_gap = 1.5 * mm
+    cols_total_w = col_count * box + (col_count - 1) * col_gap
+    cols_right_x = card_x + card_w - 8 * mm
+    cols_left_x = cols_right_x - cols_total_w
+
+    _set_regular(c, 7, COLOR_MOCHA_400)
+    header_y = traits_top - 5 * mm
+    for ci in range(col_count):
+        cx = cols_left_x + ci * (box + col_gap) + box / 2
+        c.drawCentredString(cx, header_y, f"№{ci + 1}")
+    _set_regular(c, 7, COLOR_MOCHA_400)
+    c.drawString(card_x + 8 * mm, header_y, "ЧЕРТА")
+
+    # 10 traits with 5 checkboxes each
+    row_h = 9 * mm
+    start_y = header_y - 6 * mm
     for i, trait in enumerate(z["traits"]):
         ry = start_y - i * row_h
         if i % 2 == 0:
@@ -672,30 +700,26 @@ def _render_zodiac_blank(c: canvas.Canvas, z: dict) -> None:
             c.setStrokeColor(COLOR_CREAM_50)
             c.roundRect(
                 card_x + 6 * mm,
-                ry - 4 * mm,
+                ry - 2.5 * mm,
                 card_w - 12 * mm,
-                row_h - 4 * mm,
-                3 * mm,
+                row_h - 1 * mm,
+                2 * mm,
                 stroke=0,
                 fill=1,
             )
+        # Trait text
+        _set_regular(c, 11, COLOR_MOCHA_900)
+        c.drawString(card_x + 12 * mm, ry + 0.5 * mm, f"{i + 1}.  {trait}")
+        # 5 checkboxes
         c.setStrokeColor(COLOR_MOCHA_400)
         c.setFillColor(HexColor("#ffffff"))
-        c.setLineWidth(0.8)
-        c.roundRect(
-            card_x + 12 * mm,
-            ry - 0.5 * mm,
-            box,
-            box,
-            1.5 * mm,
-            stroke=1,
-            fill=1,
-        )
-        _set_regular(c, 14, COLOR_MOCHA_900)
-        c.drawString(card_x + 24 * mm, ry + 1 * mm, f"{i + 1}.  {trait}")
+        c.setLineWidth(0.7)
+        for ci in range(col_count):
+            cx = cols_left_x + ci * (box + col_gap)
+            c.roundRect(cx, ry - 1 * mm, box, box, 1 * mm, stroke=1, fill=1)
 
     _set_regular(c, 8, COLOR_MOCHA_500)
-    c.drawCentredString(width / 2, 18 * mm, "Спасибо! Передайте бланк ведущему.")
+    c.drawCentredString(width / 2, 16 * mm, "Спасибо! Передайте бланк ведущему.")
 
 
 async def build_contest4_blank_pdf(
