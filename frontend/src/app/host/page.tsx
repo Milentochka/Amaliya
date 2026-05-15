@@ -28,7 +28,7 @@ const CONTESTS: { id: number; title: string; subtitle: string; href: string | nu
     id: 4,
     title: "Знак зодиака",
     subtitle: "12 знаков × 10 черт · бумажные бланки",
-    href: null,
+    href: "/host/contest4",
   },
 ];
 

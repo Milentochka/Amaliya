@@ -18,7 +18,24 @@ from app.db.models import (
     ContestState,
     ContestStatus,
     Guest,
+    ZodiacTraitTemplate,
 )
+from app.services.zodiac import western_zodiac
+
+_ZODIAC_NAME_TO_KEY = {
+    "Овен": "aries",
+    "Телец": "taurus",
+    "Близнецы": "gemini",
+    "Рак": "cancer",
+    "Лев": "leo",
+    "Дева": "virgo",
+    "Весы": "libra",
+    "Скорпион": "scorpio",
+    "Стрелец": "sagittarius",
+    "Козерог": "capricorn",
+    "Водолей": "aquarius",
+    "Рыбы": "pisces",
+}
 
 
 class TraitNotFound(Exception):
@@ -671,3 +688,171 @@ async def contest3_all_promises_for_pdf(
         )
     ).scalars().all()
     return [p.text for p in rows]
+
+
+# -------- Contest 4: «Знак зодиака» --------
+
+
+_ZODIAC_ORDER = [
+    "aries", "taurus", "gemini", "cancer", "leo", "virgo",
+    "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces",
+]
+
+
+async def contest4_overview(session: AsyncSession) -> dict:
+    """Overview for host: 12 zodiacs, their traits, list of guests in each,
+    plus current active step (which zodiac is on the projector)."""
+    state = await get_state(session, 4)
+    rows = (
+        await session.execute(
+            select(ZodiacTraitTemplate).order_by(
+                ZodiacTraitTemplate.zodiac_key,
+                ZodiacTraitTemplate.order_index,
+            )
+        )
+    ).scalars().all()
+
+    by_key: Dict[str, dict] = {}
+    for r in rows:
+        z = by_key.setdefault(
+            r.zodiac_key,
+            {
+                "key": r.zodiac_key,
+                "name": r.zodiac_name,
+                "glyph": r.glyph,
+                "traits": [],
+                "guests": [],
+            },
+        )
+        z["traits"].append({"order_index": r.order_index, "text": r.trait_text})
+
+    # Compute guests per zodiac from their birth_date
+    guests = (
+        await session.execute(
+            select(Guest, Avatar)
+            .join(Avatar, Avatar.id == Guest.avatar_id)
+            .order_by(Guest.name)
+        )
+    ).all()
+    for g, av in guests:
+        name = western_zodiac(g.birth_date)
+        key = _ZODIAC_NAME_TO_KEY.get(name)
+        if key and key in by_key:
+            by_key[key]["guests"].append(
+                {
+                    "id": str(g.id),
+                    "name": g.name,
+                    "avatar_url": av.image_url,
+                    "avatar_name": av.name,
+                }
+            )
+
+    # Preserve canonical zodiac order
+    zodiacs = [by_key[k] for k in _ZODIAC_ORDER if k in by_key]
+    return {"state": state, "zodiacs": zodiacs}
+
+
+async def contest4_set_active(
+    session: AsyncSession, *, zodiac_key: Optional[str]
+) -> dict:
+    if zodiac_key is not None and zodiac_key not in _ZODIAC_ORDER:
+        raise ValueError("unknown zodiac")
+    row = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 4)
+        )
+    ).scalar_one_or_none()
+    if row is None:
+        row = ContestState(contest_id=4)
+        session.add(row)
+    row.active_step = {"zodiac_key": zodiac_key} if zodiac_key else {}
+    await session.commit()
+    return await get_state(session, 4)
+
+
+async def contest4_projector_view(session: AsyncSession) -> dict:
+    state = await get_state(session, 4)
+    step = state["active_step"] or {}
+    zk = step.get("zodiac_key")
+    if not zk:
+        return {"state": state, "current": None}
+    rows = (
+        await session.execute(
+            select(ZodiacTraitTemplate)
+            .where(ZodiacTraitTemplate.zodiac_key == zk)
+            .order_by(ZodiacTraitTemplate.order_index)
+        )
+    ).scalars().all()
+    if not rows:
+        return {"state": state, "current": None}
+    z = rows[0]
+
+    # List guests for this zodiac
+    guests_rows = (
+        await session.execute(
+            select(Guest, Avatar)
+            .join(Avatar, Avatar.id == Guest.avatar_id)
+            .order_by(Guest.name)
+        )
+    ).all()
+    matched = []
+    for g, av in guests_rows:
+        if _ZODIAC_NAME_TO_KEY.get(western_zodiac(g.birth_date)) == zk:
+            matched.append(
+                {
+                    "id": str(g.id),
+                    "name": g.name,
+                    "avatar_url": av.image_url,
+                    "avatar_name": av.name,
+                }
+            )
+
+    return {
+        "state": state,
+        "current": {
+            "key": z.zodiac_key,
+            "name": z.zodiac_name,
+            "glyph": z.glyph,
+            "traits": [r.trait_text for r in rows],
+            "guests": matched,
+        },
+    }
+
+
+async def contest4_traits_for_pdf(
+    session: AsyncSession, zodiac_key: str
+) -> Optional[dict]:
+    rows = (
+        await session.execute(
+            select(ZodiacTraitTemplate)
+            .where(ZodiacTraitTemplate.zodiac_key == zodiac_key)
+            .order_by(ZodiacTraitTemplate.order_index)
+        )
+    ).scalars().all()
+    if not rows:
+        return None
+    return {
+        "key": rows[0].zodiac_key,
+        "name": rows[0].zodiac_name,
+        "glyph": rows[0].glyph,
+        "traits": [r.trait_text for r in rows],
+    }
+
+
+async def contest4_all_zodiacs_for_pdf(session: AsyncSession) -> List[dict]:
+    rows = (
+        await session.execute(
+            select(ZodiacTraitTemplate).order_by(
+                ZodiacTraitTemplate.zodiac_key,
+                ZodiacTraitTemplate.order_index,
+            )
+        )
+    ).scalars().all()
+    by_key: Dict[str, dict] = {}
+    for r in rows:
+        z = by_key.setdefault(
+            r.zodiac_key,
+            {"key": r.zodiac_key, "name": r.zodiac_name, "glyph": r.glyph, "traits": []},
+        )
+        z["traits"].append(r.trait_text)
+    return [by_key[k] for k in _ZODIAC_ORDER if k in by_key]

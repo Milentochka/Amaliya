@@ -10,6 +10,7 @@ from app.db.models.contest import (
     Contest3Promise,
     ContestState,
     ContestStatus,
+    ZodiacTraitTemplate,
 )
 from app.db.models.event import EventMeta, EventPart, Parent, ParentRole
 from app.db.models.game import GameAttempt
@@ -50,4 +51,5 @@ __all__ = [
     "TelegramBindingCodeOwnerType",
     "WishlistItem",
     "WishlistPriority",
+    "ZodiacTraitTemplate",
 ]

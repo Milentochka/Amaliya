@@ -109,3 +109,14 @@ class Contest3Promise(Base):
     read_aloud_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+
+
+class ZodiacTraitTemplate(Base):
+    __tablename__ = "zodiac_trait_template"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    zodiac_key: Mapped[str] = mapped_column(Text, nullable=False)
+    zodiac_name: Mapped[str] = mapped_column(Text, nullable=False)
+    glyph: Mapped[str] = mapped_column(Text, nullable=False)
+    order_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    trait_text: Mapped[str] = mapped_column(Text, nullable=False)

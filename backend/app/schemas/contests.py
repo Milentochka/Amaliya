@@ -125,3 +125,48 @@ class Contest3ProjectorView(BaseModel):
 
 class Contest3MarkReadIn(BaseModel):
     promise_ids: List[int]
+
+
+# -------- Contest 4 --------
+
+
+class Contest4Trait(BaseModel):
+    order_index: int
+    text: str
+
+
+class Contest4GuestRef(BaseModel):
+    id: str
+    name: str
+    avatar_url: str
+    avatar_name: str
+
+
+class Contest4Zodiac(BaseModel):
+    key: str
+    name: str
+    glyph: str
+    traits: List[Contest4Trait]
+    guests: List[Contest4GuestRef]
+
+
+class Contest4Overview(BaseModel):
+    state: ContestStateOut
+    zodiacs: List[Contest4Zodiac]
+
+
+class Contest4CurrentZodiac(BaseModel):
+    key: str
+    name: str
+    glyph: str
+    traits: List[str]
+    guests: List[Contest4GuestRef]
+
+
+class Contest4ProjectorView(BaseModel):
+    state: ContestStateOut
+    current: Optional[Contest4CurrentZodiac] = None
+
+
+class Contest4ActiveIn(BaseModel):
+    zodiac_key: Optional[str] = None

@@ -15,7 +15,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Contest1Trait, Contest1VoteTally
-from app.services.contests import contest1_overview, contest3_all_promises_for_pdf
+from app.services.contests import (
+    contest1_overview,
+    contest3_all_promises_for_pdf,
+    contest4_all_zodiacs_for_pdf,
+    contest4_traits_for_pdf,
+)
 
 
 _BASE = Path(__file__).resolve().parent.parent
@@ -596,6 +601,126 @@ async def build_contest3_cards_pdf(session: AsyncSession) -> bytes:
         )
 
     c.showPage()
+    c.save()
+    return buf.getvalue()
+
+
+def _render_zodiac_blank(c: canvas.Canvas, z: dict) -> None:
+    """Render one A4 page for one zodiac sign."""
+    width, height = A4
+
+    c.setFillColor(COLOR_CREAM_50)
+    c.rect(0, 0, width, height, stroke=0, fill=1)
+
+    # Title — big centered name (skip zodiac glyph; not in Comfortaa subset)
+    _set_regular(c, 9, COLOR_BLUSH_600)
+    c.drawCentredString(width / 2, height - 22 * mm, "ЗНАК ЗОДИАКА")
+    _draw_bold_centred(
+        c,
+        width / 2,
+        height - 34 * mm,
+        z["name"],
+        36,
+        COLOR_MOCHA_900,
+    )
+
+    _set_regular(c, 10, COLOR_MOCHA_500)
+    c.drawCentredString(
+        width / 2,
+        height - 44 * mm,
+        "Выберите одну черту, которую хотите передать Амалии.",
+    )
+
+    # Card with traits
+    card_x = 25 * mm
+    card_w = width - 50 * mm
+    card_top = height - 52 * mm
+    card_bottom = 30 * mm
+    c.setFillColor(HexColor("#ffffff"))
+    c.setStrokeColor(COLOR_CREAM_200)
+    c.setLineWidth(0.6)
+    c.roundRect(
+        card_x,
+        card_bottom,
+        card_w,
+        card_top - card_bottom,
+        6 * mm,
+        stroke=1,
+        fill=1,
+    )
+
+    # Guest-name line
+    _set_regular(c, 10, COLOR_MOCHA_500)
+    c.drawString(card_x + 8 * mm, card_top - 12 * mm, "Имя гостя:")
+    c.setStrokeColor(COLOR_CREAM_300)
+    c.setLineWidth(0.5)
+    c.line(
+        card_x + 30 * mm,
+        card_top - 13 * mm,
+        card_x + card_w - 8 * mm,
+        card_top - 13 * mm,
+    )
+
+    # 10 traits with checkboxes
+    box = 6 * mm
+    row_h = 16 * mm
+    start_y = card_top - 28 * mm
+    for i, trait in enumerate(z["traits"]):
+        ry = start_y - i * row_h
+        if i % 2 == 0:
+            c.setFillColor(COLOR_CREAM_50)
+            c.setStrokeColor(COLOR_CREAM_50)
+            c.roundRect(
+                card_x + 6 * mm,
+                ry - 4 * mm,
+                card_w - 12 * mm,
+                row_h - 4 * mm,
+                3 * mm,
+                stroke=0,
+                fill=1,
+            )
+        c.setStrokeColor(COLOR_MOCHA_400)
+        c.setFillColor(HexColor("#ffffff"))
+        c.setLineWidth(0.8)
+        c.roundRect(
+            card_x + 12 * mm,
+            ry - 0.5 * mm,
+            box,
+            box,
+            1.5 * mm,
+            stroke=1,
+            fill=1,
+        )
+        _set_regular(c, 14, COLOR_MOCHA_900)
+        c.drawString(card_x + 24 * mm, ry + 1 * mm, f"{i + 1}.  {trait}")
+
+    _set_regular(c, 8, COLOR_MOCHA_500)
+    c.drawCentredString(width / 2, 18 * mm, "Спасибо! Передайте бланк ведущему.")
+
+
+async def build_contest4_blank_pdf(
+    session: AsyncSession, *, zodiac_key: str
+):
+    _ensure_fonts()
+    z = await contest4_traits_for_pdf(session, zodiac_key)
+    if z is None:
+        return None
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    _render_zodiac_blank(c, z)
+    c.showPage()
+    c.save()
+    return buf.getvalue()
+
+
+async def build_contest4_all_blanks_pdf(session: AsyncSession) -> bytes:
+    _ensure_fonts()
+    zodiacs = await contest4_all_zodiacs_for_pdf(session)
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    for z in zodiacs:
+        _render_zodiac_blank(c, z)
+        c.showPage()
     c.save()
     return buf.getvalue()
 

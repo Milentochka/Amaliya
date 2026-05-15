@@ -770,6 +770,75 @@ export async function projectorContest3View(): Promise<Contest3ProjectorView> {
   return (await res.json()) as Contest3ProjectorView;
 }
 
+// -------- Contest 4 («Знак зодиака») --------
+
+export interface Contest4Trait {
+  order_index: number;
+  text: string;
+}
+
+export interface Contest4GuestRef {
+  id: string;
+  name: string;
+  avatar_url: string;
+  avatar_name: string;
+}
+
+export interface Contest4Zodiac {
+  key: string;
+  name: string;
+  glyph: string;
+  traits: Contest4Trait[];
+  guests: Contest4GuestRef[];
+}
+
+export interface Contest4Overview {
+  state: ContestState;
+  zodiacs: Contest4Zodiac[];
+}
+
+export interface Contest4CurrentZodiac {
+  key: string;
+  name: string;
+  glyph: string;
+  traits: string[];
+  guests: Contest4GuestRef[];
+}
+
+export interface Contest4ProjectorView {
+  state: ContestState;
+  current: Contest4CurrentZodiac | null;
+}
+
+export async function hostContest4Overview(): Promise<Contest4Overview> {
+  const res = await fetch(`${API_URL}/api/host/contest4`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest4Overview;
+}
+
+export async function hostContest4SetActive(
+  zodiacKey: string | null,
+): Promise<ContestState> {
+  const res = await fetch(`${API_URL}/api/host/contest4/active`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ zodiac_key: zodiacKey }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as ContestState;
+}
+
+export async function projectorContest4View(): Promise<Contest4ProjectorView> {
+  const res = await fetch(`${API_URL}/api/projector/contest4`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest4ProjectorView;
+}
+
 // -------- Admin wishlist CRUD --------
 
 export interface WishlistItemAdmin extends WishlistItem {

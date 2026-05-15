@@ -20,6 +20,8 @@ from app.schemas.contests import (
     Contest3CurrentGuest,
     Contest3MarkReadIn,
     Contest3Stats,
+    Contest4ActiveIn,
+    Contest4Overview,
     ContestStateOut,
     ContestStatusIn,
 )
@@ -42,6 +44,8 @@ from app.services.contests import (
     contest3_mark_read,
     contest3_pick_next,
     contest3_reset,
+    contest4_overview,
+    contest4_set_active,
     list_all_states,
     set_status,
 )
@@ -49,6 +53,8 @@ from app.services.host_pdf import (
     build_contest1_pdf,
     build_contest1_results_pdf,
     build_contest3_cards_pdf,
+    build_contest4_all_blanks_pdf,
+    build_contest4_blank_pdf,
 )
 from app.services.wishlist import resolve_admin_id_from_token
 
@@ -322,5 +328,65 @@ async def contest3_cards_pdf(
         media_type="application/pdf",
         headers={
             "Content-Disposition": 'inline; filename="contest3-cards.pdf"'
+        },
+    )
+
+
+# -------- Contest 4 «Знак зодиака» --------
+
+
+@router.get("/contest4", response_model=Contest4Overview)
+async def contest4(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await contest4_overview(session)
+
+
+@router.post("/contest4/active", response_model=ContestStateOut)
+async def contest4_active(
+    payload: Contest4ActiveIn,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    try:
+        return await contest4_set_active(session, zodiac_key=payload.zodiac_key)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Неизвестный знак")
+
+
+@router.get("/contest4/blanks/{zodiac_key}.pdf")
+async def contest4_one_blank(
+    zodiac_key: str,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    pdf_bytes = await build_contest4_blank_pdf(session, zodiac_key=zodiac_key)
+    if pdf_bytes is None:
+        raise HTTPException(status_code=404, detail="Знак не найден")
+    return StreamingResponse(
+        iter([pdf_bytes]),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'inline; filename="contest4-{zodiac_key}.pdf"'
+        },
+    )
+
+
+@router.get("/contest4/blanks-all.pdf")
+async def contest4_all_blanks(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    pdf_bytes = await build_contest4_all_blanks_pdf(session)
+    return StreamingResponse(
+        iter([pdf_bytes]),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="contest4-all-zodiacs.pdf"'
         },
     )
