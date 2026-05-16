@@ -36,6 +36,8 @@ _fonts_registered = False
 COLOR_CREAM_50 = HexColor("#fdfaf5")
 COLOR_CREAM_200 = HexColor("#f4e8d4")
 COLOR_CREAM_300 = HexColor("#ecdac0")
+COLOR_BLUSH_200 = HexColor("#f5d8cb")
+COLOR_BLUSH_300 = HexColor("#ecc1b0")
 COLOR_BLUSH_500 = HexColor("#c4897a")
 COLOR_BLUSH_600 = HexColor("#a86f60")
 COLOR_MOCHA_400 = HexColor("#a08e80")
@@ -165,23 +167,50 @@ def _draw_angel(c: canvas.Canvas, cx: float, cy: float, size: float, color, halo
     )
 
 
-def _decorate_corners(c: canvas.Canvas, width: float, height: float) -> None:
-    """Soft hearts, bows and sparkles in the margins, palette-matched."""
-    # Top-left: bow + sparkle
-    _draw_bow(c, 15 * mm, height - 11 * mm, 3.5 * mm, COLOR_BLUSH_500)
-    _draw_sparkle(c, 25 * mm, height - 10 * mm, 1.6 * mm, COLOR_BLUSH_600)
+def _scatter_motifs_in(
+    c: canvas.Canvas,
+    x0: float,
+    y0: float,
+    w: float,
+    h: float,
+    cols: int,
+    rows: int,
+) -> None:
+    """Scatter soft, semi-transparent motifs inside a rectangular region."""
+    cell_w = w / cols
+    cell_h = h / rows
+    c.saveState()
+    c.setFillAlpha(0.28)
+    c.setStrokeAlpha(0.28)
+    motifs = [
+        ("heart", 3.0 * mm, COLOR_BLUSH_300),
+        ("bow", 3.6 * mm, COLOR_BLUSH_300),
+        ("sparkle", 1.6 * mm, COLOR_BLUSH_500),
+    ]
+    for r in range(rows):
+        for col in range(cols):
+            i = r * cols + col
+            cx = x0 + (col + 0.5) * cell_w
+            cy = y0 + (r + 0.5) * cell_h
+            jx = ((i * 7) % 13 - 6) * 1.4
+            jy = ((i * 11) % 11 - 5) * 1.6
+            cx += jx
+            cy += jy
+            kind, size, color = motifs[i % len(motifs)]
+            if kind == "heart":
+                _draw_heart(c, cx, cy, size, color)
+            elif kind == "bow":
+                _draw_bow(c, cx, cy, size, color)
+            else:
+                _draw_sparkle(c, cx, cy, size, color)
+    c.restoreState()
 
-    # Top-right: heart + bow
-    _draw_heart(c, width - 25 * mm, height - 10 * mm, 3 * mm, COLOR_BLUSH_500)
-    _draw_bow(c, width - 15 * mm, height - 11 * mm, 3.5 * mm, COLOR_BLUSH_500)
 
-    # Bottom-left: heart + sparkle
-    _draw_heart(c, 14 * mm, 10 * mm, 2.8 * mm, COLOR_BLUSH_500)
-    _draw_sparkle(c, 22 * mm, 9 * mm, 1.4 * mm, COLOR_BLUSH_600)
-
-    # Bottom-right: sparkle + bow
-    _draw_sparkle(c, width - 24 * mm, 10 * mm, 1.4 * mm, COLOR_BLUSH_600)
-    _draw_bow(c, width - 14 * mm, 10 * mm, 3 * mm, COLOR_BLUSH_500)
+def _scatter_motifs(c: canvas.Canvas, width: float, height: float) -> None:
+    """Page-wide motif scatter — softly drops hearts/bows/sparkles across
+    the cream backdrop. Cards drawn afterwards will hide motifs underneath
+    them, leaving the watermark only in margins/breathing space."""
+    _scatter_motifs_in(c, 0, 0, width, height, cols=5, rows=8)
 
 
 def _draw_photo(
@@ -256,7 +285,7 @@ async def build_contest1_pdf(session: AsyncSession) -> bytes:
     # Background — cream wash like the site
     c.setFillColor(COLOR_CREAM_50)
     c.rect(0, 0, width, height, stroke=0, fill=1)
-    _decorate_corners(c, width, height)
+    _scatter_motifs(c, width, height)
 
     # Title — blush accent on the second word, like the H1s on site
     _draw_bold(c, 20 * mm, height - 20 * mm, "На кого похожа ", 22, COLOR_MOCHA_900)
@@ -423,7 +452,7 @@ async def build_contest1_results_pdf(session: AsyncSession) -> bytes:
     # Background
     c.setFillColor(COLOR_CREAM_50)
     c.rect(0, 0, width, height, stroke=0, fill=1)
-    _decorate_corners(c, width, height)
+    _scatter_motifs(c, width, height)
 
     # Title
     _draw_bold(c, 20 * mm, height - 20 * mm, "Итоги конкурса ", 22, COLOR_MOCHA_900)
@@ -638,7 +667,7 @@ async def build_contest3_cards_pdf(session: AsyncSession) -> bytes:
                 c.showPage()
             c.setFillColor(COLOR_CREAM_50)
             c.rect(0, 0, width, height, stroke=0, fill=1)
-            _decorate_corners(c, width, height)
+            _scatter_motifs(c, width, height)
             # Page-level dashed grid (cut guides)
             c.setStrokeColor(COLOR_CREAM_300)
             c.setLineWidth(0.4)
@@ -680,19 +709,12 @@ async def build_contest3_cards_pdf(session: AsyncSession) -> bytes:
             fill=1,
         )
 
-        # Header pill: «обещаю №X» + tiny heart
+        # Header pill: «обещаю №X»
         _set_regular(c, 8, COLOR_BLUSH_600)
         c.drawString(
             x + pad + 5 * mm,
             y + card_h - pad - 6 * mm,
             f"ОБЕЩАНИЕ № {idx + 1}",
-        )
-        _draw_heart(
-            c,
-            x + card_w - pad - 6 * mm,
-            y + card_h - pad - 5 * mm,
-            1.8 * mm,
-            COLOR_BLUSH_500,
         )
 
         # Promise text — wrap by real width
@@ -729,7 +751,7 @@ def _render_zodiac_blank(c: canvas.Canvas, z: dict) -> None:
 
     c.setFillColor(COLOR_CREAM_50)
     c.rect(0, 0, width, height, stroke=0, fill=1)
-    _decorate_corners(c, width, height)
+    _scatter_motifs(c, width, height)
 
     # Title — big centered name (skip zodiac glyph; not in Comfortaa subset)
     _set_regular(c, 9, COLOR_BLUSH_600)
@@ -879,6 +901,8 @@ def _render_thank_you_card(c: canvas.Canvas, x: float, y: float, w: float, h: fl
     # Cream backdrop
     c.setFillColor(COLOR_CREAM_50)
     c.rect(x, y, w, h, stroke=0, fill=1)
+    # Translucent motif scatter — local to the card
+    _scatter_motifs_in(c, x, y, w, h, cols=3, rows=5)
     # Soft border
     c.setStrokeColor(COLOR_CREAM_300)
     c.setLineWidth(0.6)
@@ -945,13 +969,6 @@ def _render_thank_you_card(c: canvas.Canvas, x: float, y: float, w: float, h: fl
         12,
         COLOR_BLUSH_600,
     )
-    # Tiny hearts on either side of the greeting
-    greeting_w = c.stringWidth("Дорогие гости!", _FONT_REGULAR, 12)
-    _draw_heart(c, x + w / 2 - greeting_w / 2 - 4 * mm, text_top + 1 * mm, 1.6 * mm, COLOR_BLUSH_500)
-    _draw_heart(c, x + w / 2 + greeting_w / 2 + 4 * mm, text_top + 1 * mm, 1.6 * mm, COLOR_BLUSH_500)
-    # Decorative sparkle below signature area (small accent at top-left and top-right corners of card)
-    _draw_bow(c, x + 9 * mm, y + h - 8 * mm, 2.5 * mm, COLOR_BLUSH_500)
-    _draw_sparkle(c, x + w - 9 * mm, y + h - 8 * mm, 1.4 * mm, COLOR_BLUSH_600)
 
     body_lines = [
         "Спасибо, что были с нами",
