@@ -146,6 +146,74 @@ def _draw_dot(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> Non
     c.circle(cx, cy, size * 0.5, stroke=0, fill=1)
 
 
+def _draw_cloud(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> None:
+    """Three overlapping circles forming a fluffy cloud."""
+    c.setFillColor(color)
+    c.setStrokeColor(color)
+    r1 = size * 0.42
+    r2 = size * 0.55
+    r3 = size * 0.40
+    c.circle(cx - size * 0.55, cy, r1, stroke=0, fill=1)
+    c.circle(cx, cy + size * 0.10, r2, stroke=0, fill=1)
+    c.circle(cx + size * 0.55, cy, r3, stroke=0, fill=1)
+
+
+def _draw_star5(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> None:
+    """5-point star."""
+    c.setFillColor(color)
+    c.setStrokeColor(color)
+    p = c.beginPath()
+    for i in range(10):
+        angle = math.pi / 2 + i * math.pi / 5
+        r = size if i % 2 == 0 else size * 0.42
+        px = cx + r * math.cos(angle)
+        py = cy + r * math.sin(angle)
+        if i == 0:
+            p.moveTo(px, py)
+        else:
+            p.lineTo(px, py)
+    p.close()
+    c.drawPath(p, stroke=0, fill=1)
+
+
+def _draw_flower(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> None:
+    """5-petal flower: five circles around a central dot."""
+    c.setFillColor(color)
+    c.setStrokeColor(color)
+    petal_r = size * 0.38
+    ring_r = size * 0.45
+    for i in range(5):
+        angle = math.pi / 2 + i * 2 * math.pi / 5
+        px = cx + ring_r * math.cos(angle)
+        py = cy + ring_r * math.sin(angle)
+        c.circle(px, py, petal_r, stroke=0, fill=1)
+    # Centre
+    c.circle(cx, cy, size * 0.22, stroke=0, fill=1)
+
+
+def _draw_crown(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> None:
+    """Tiny three-peak crown."""
+    c.setFillColor(color)
+    c.setStrokeColor(color)
+    s = size
+    p = c.beginPath()
+    p.moveTo(cx - s * 0.9, cy - s * 0.45)
+    p.lineTo(cx - s * 0.9, cy)
+    p.lineTo(cx - s * 0.55, cy + s * 0.55)
+    p.lineTo(cx - s * 0.25, cy + s * 0.15)
+    p.lineTo(cx, cy + s * 0.7)
+    p.lineTo(cx + s * 0.25, cy + s * 0.15)
+    p.lineTo(cx + s * 0.55, cy + s * 0.55)
+    p.lineTo(cx + s * 0.9, cy)
+    p.lineTo(cx + s * 0.9, cy - s * 0.45)
+    p.close()
+    c.drawPath(p, stroke=0, fill=1)
+    # Three peak gems
+    c.circle(cx - s * 0.55, cy + s * 0.55, s * 0.12, stroke=0, fill=1)
+    c.circle(cx, cy + s * 0.7, s * 0.14, stroke=0, fill=1)
+    c.circle(cx + s * 0.55, cy + s * 0.55, s * 0.12, stroke=0, fill=1)
+
+
 def _draw_sparkle(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> None:
     """4-point star ✦ made of two crossed thin ellipses."""
     c.setFillColor(color)
@@ -192,13 +260,15 @@ def _draw_angel(c: canvas.Canvas, cx: float, cy: float, size: float, color, halo
 _MOTIF_KINDS = [
     ("heart", 3.0 * mm, COLOR_BLUSH_300),
     ("heart", 3.4 * mm, COLOR_BLUSH_300),
-    ("bow", 3.4 * mm, COLOR_BLUSH_300),
-    ("bow", 3.8 * mm, COLOR_BLUSH_300),
-    ("balloon", 3.2 * mm, COLOR_BLUSH_300),
-    ("dot", 2.2 * mm, COLOR_BLUSH_300),
-    ("dot", 1.6 * mm, COLOR_BLUSH_500),
-    ("sparkle", 1.6 * mm, COLOR_BLUSH_500),
-    ("sparkle", 2.0 * mm, COLOR_BLUSH_500),
+    ("bow", 3.6 * mm, COLOR_BLUSH_300),
+    ("balloon", 3.4 * mm, COLOR_BLUSH_300),
+    ("cloud", 4.0 * mm, COLOR_BLUSH_200),
+    ("cloud", 4.6 * mm, COLOR_BLUSH_200),
+    ("flower", 2.8 * mm, COLOR_BLUSH_300),
+    ("star5", 2.4 * mm, COLOR_BLUSH_500),
+    ("star5", 2.0 * mm, COLOR_BLUSH_300),
+    ("crown", 2.6 * mm, COLOR_BLUSH_500),
+    ("sparkle", 1.8 * mm, COLOR_BLUSH_500),
 ]
 
 
@@ -209,10 +279,43 @@ def _draw_one_motif(c, kind, size, color):
         _draw_bow(c, 0, 0, size, color)
     elif kind == "balloon":
         _draw_balloon(c, 0, 0, size, color)
+    elif kind == "cloud":
+        _draw_cloud(c, 0, 0, size, color)
+    elif kind == "flower":
+        _draw_flower(c, 0, 0, size, color)
+    elif kind == "star5":
+        _draw_star5(c, 0, 0, size, color)
+    elif kind == "crown":
+        _draw_crown(c, 0, 0, size, color)
     elif kind == "dot":
         _draw_dot(c, 0, 0, size, color)
     else:
         _draw_sparkle(c, 0, 0, size, color)
+
+
+def _scatter_confetti(
+    c: canvas.Canvas,
+    x0: float,
+    y0: float,
+    w: float,
+    h: float,
+    seed: int = 99,
+) -> None:
+    """Thin layer of tiny dots — confetti — on top of the main scatter.
+    Roughly one dot per 200 mm²."""
+    rng = random.Random(seed)
+    count = max(20, int((w / mm) * (h / mm) / 200))
+    c.saveState()
+    c.setFillAlpha(0.32)
+    c.setStrokeAlpha(0)
+    palette = [COLOR_BLUSH_300, COLOR_BLUSH_500, COLOR_CREAM_300]
+    for _ in range(count):
+        cx = x0 + rng.random() * w
+        cy = y0 + rng.random() * h
+        r = rng.uniform(0.4, 0.9) * mm
+        c.setFillColor(rng.choice(palette))
+        c.circle(cx, cy, r, stroke=0, fill=1)
+    c.restoreState()
 
 
 def _scatter_motifs_in(
@@ -270,9 +373,10 @@ def _scatter_motifs_in(
 
 
 def _scatter_motifs(c: canvas.Canvas, width: float, height: float) -> None:
-    """Page-wide motif scatter (~1 motif per 900 mm²)."""
+    """Page-wide soft baby-girl pattern: confetti dots + scattered motifs."""
     area_mm2 = (width / mm) * (height / mm)
-    count = max(12, int(area_mm2 / 900))
+    _scatter_confetti(c, 0, 0, width, height)
+    count = max(16, int(area_mm2 / 700))
     _scatter_motifs_in(c, 0, 0, width, height, target_count=count)
 
 
@@ -964,10 +1068,11 @@ def _render_thank_you_card(c: canvas.Canvas, x: float, y: float, w: float, h: fl
     # Cream backdrop
     c.setFillColor(COLOR_CREAM_50)
     c.rect(x, y, w, h, stroke=0, fill=1)
-    # Translucent motif scatter — local to the card (each card gets its own seed)
+    # Translucent baby-girl pattern: confetti + motifs, local to each card.
     card_seed = int((x + y) * 7) % 1000
     area_mm2 = (w / mm) * (h / mm)
-    _scatter_motifs_in(c, x, y, w, h, target_count=max(12, int(area_mm2 / 700)), seed=card_seed)
+    _scatter_confetti(c, x, y, w, h, seed=card_seed + 5)
+    _scatter_motifs_in(c, x, y, w, h, target_count=max(14, int(area_mm2 / 550)), seed=card_seed)
     # Soft border
     c.setStrokeColor(COLOR_CREAM_300)
     c.setLineWidth(0.6)
