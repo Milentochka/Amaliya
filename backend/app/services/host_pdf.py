@@ -750,3 +750,134 @@ async def build_contest4_all_blanks_pdf(session: AsyncSession) -> bytes:
     return buf.getvalue()
 
 
+# -------- Thank-you cards (printable A6 × 4 per A4) --------
+
+
+_THANKYOU_DIR = _BASE / "contests" / "thankyou"
+
+
+def _render_thank_you_card(c: canvas.Canvas, x: float, y: float, w: float, h: float) -> None:
+    """One A6 thank-you card at (x, y) with width w, height h (bottom-left origin)."""
+    # Cream backdrop
+    c.setFillColor(COLOR_CREAM_50)
+    c.rect(x, y, w, h, stroke=0, fill=1)
+    # Soft border
+    c.setStrokeColor(COLOR_CREAM_300)
+    c.setLineWidth(0.6)
+    c.roundRect(x + 3 * mm, y + 3 * mm, w - 6 * mm, h - 6 * mm, 4 * mm, stroke=1, fill=0)
+
+    # Photo (top — landscape framing to fit a family portrait)
+    photo_w = 78 * mm
+    photo_h = 50 * mm
+    photo_x = x + (w - photo_w) / 2
+    photo_y = y + h - 10 * mm - photo_h
+    photo_path = None
+    if _THANKYOU_DIR.exists():
+        for p in sorted(_THANKYOU_DIR.iterdir()):
+            if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}:
+                photo_path = p
+                break
+    # White polaroid frame
+    c.setFillColor(HexColor("#ffffff"))
+    c.setStrokeColor(COLOR_CREAM_200)
+    c.setLineWidth(0.5)
+    c.roundRect(
+        photo_x - 2 * mm,
+        photo_y - 2 * mm,
+        photo_w + 4 * mm,
+        photo_h + 4 * mm,
+        3 * mm,
+        stroke=1,
+        fill=1,
+    )
+    if photo_path is not None:
+        try:
+            img = ImageReader(str(photo_path))
+            iw, ih = img.getSize()
+            ratio = max(photo_w / iw, photo_h / ih)  # cover crop
+            dw, dh = iw * ratio, ih * ratio
+            c.saveState()
+            # Clip to photo box
+            p = c.beginPath()
+            p.rect(photo_x, photo_y, photo_w, photo_h)
+            c.clipPath(p, stroke=0, fill=0)
+            c.drawImage(
+                img,
+                photo_x + (photo_w - dw) / 2,
+                photo_y + (photo_h - dh) / 2,
+                dw,
+                dh,
+                preserveAspectRatio=True,
+                mask="auto",
+            )
+            c.restoreState()
+        except Exception:
+            pass
+
+    # Text below photo
+    text_top = photo_y - 8 * mm
+    text_x = x + 10 * mm
+    text_w = w - 20 * mm
+
+    _draw_bold_centred(
+        c,
+        x + w / 2,
+        text_top,
+        "Дорогие гости!",
+        12,
+        COLOR_BLUSH_600,
+    )
+
+    body_lines = [
+        "Спасибо, что были с нами",
+        "в этот тёплый день.",
+        "",
+        "Каждая ваша улыбка теперь —",
+        "часть первого года Амалии.",
+    ]
+    line_y = text_top - 6 * mm
+    _set_regular(c, 9, COLOR_MOCHA_700)
+    for line in body_lines:
+        c.drawCentredString(x + w / 2, line_y, line)
+        line_y -= 4 * mm
+
+    # Signature
+    line_y -= 2 * mm
+    _set_regular(c, 8, COLOR_MOCHA_500)
+    c.drawCentredString(x + w / 2, line_y, "С любовью,")
+    line_y -= 3.5 * mm
+    _set_regular(c, 9, COLOR_MOCHA_900)
+    c.drawCentredString(x + w / 2, line_y, "семья Матасянц")
+    line_y -= 4 * mm
+    _set_regular(c, 8, COLOR_BLUSH_600)
+    c.drawCentredString(x + w / 2, line_y, "Микаел, Милена и Амалия")
+
+
+async def build_thank_you_cards_pdf() -> bytes:
+    """A4 sheet with 4× A6 thank-you cards (2 × 2 grid) and dashed cut lines."""
+    _ensure_fonts()
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    width, height = A4  # 210 × 297
+    card_w = width / 2  # 105 mm
+    card_h = height / 2  # 148.5 mm
+
+    # Outer dashed cut frame
+    c.setStrokeColor(COLOR_CREAM_300)
+    c.setLineWidth(0.4)
+    c.setDash(2, 3)
+    c.line(0, height / 2, width, height / 2)
+    c.line(width / 2, 0, width / 2, height)
+    c.setDash()
+
+    for row in range(2):
+        for col in range(2):
+            x = col * card_w
+            y = height - (row + 1) * card_h
+            _render_thank_you_card(c, x, y, card_w, card_h)
+
+    c.showPage()
+    c.save()
+    return buf.getvalue()
+
+

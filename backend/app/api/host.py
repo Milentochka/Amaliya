@@ -55,6 +55,7 @@ from app.services.host_pdf import (
     build_contest3_cards_pdf,
     build_contest4_all_blanks_pdf,
     build_contest4_blank_pdf,
+    build_thank_you_cards_pdf,
 )
 from app.services.wishlist import resolve_admin_id_from_token
 
@@ -388,5 +389,24 @@ async def contest4_all_blanks(
         media_type="application/pdf",
         headers={
             "Content-Disposition": 'inline; filename="contest4-all-zodiacs.pdf"'
+        },
+    )
+
+
+# -------- Thank-you cards --------
+
+
+@router.get("/thank-you.pdf")
+async def thank_you_cards_pdf(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    pdf_bytes = await build_thank_you_cards_pdf()
+    return StreamingResponse(
+        iter([pdf_bytes]),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="thank-you-cards.pdf"'
         },
     )

@@ -118,6 +118,33 @@ export default function HostHomePage() {
           );
         })}
       </ul>
+
+      <section className="space-y-3">
+        <h2 className="text-sm uppercase tracking-wider text-mocha-400">
+          Печатные материалы
+        </h2>
+        <a
+          href="/api/host/thank-you.pdf"
+          target="_blank"
+          className="block rounded-3xl border border-cream-200 bg-white/70 p-5 shadow-gentle transition hover:shadow-soft"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-mocha-400">
+                Открытка благодарности
+              </p>
+              <h3 className="mt-1 text-lg font-medium text-mocha-900">
+                Спасибо гостям
+              </h3>
+              <p className="mt-1 text-xs text-mocha-500">
+                A6 × 4 штуки на A4 · нарезка по линиям · раздача после
+                банкета
+              </p>
+            </div>
+            <div className="shrink-0 text-mocha-400">📄</div>
+          </div>
+        </a>
+      </section>
     </div>
   );
 }
