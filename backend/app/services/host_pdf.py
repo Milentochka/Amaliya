@@ -77,6 +77,113 @@ def _draw_bold_centred(c: canvas.Canvas, x: float, y: float, text: str, size: fl
     c.drawCentredString(x, y + 0.15, text)
 
 
+# -------- Little decorative motifs in site palette --------
+
+
+def _draw_heart(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> None:
+    """Plump little heart (bottom-pointing) centered at (cx, cy)."""
+    c.setFillColor(color)
+    c.setStrokeColor(color)
+    r = size / 2.4
+    c.circle(cx - r * 0.7, cy + r * 0.4, r, stroke=0, fill=1)
+    c.circle(cx + r * 0.7, cy + r * 0.4, r, stroke=0, fill=1)
+    p = c.beginPath()
+    p.moveTo(cx - r * 1.65, cy + r * 0.55)
+    p.lineTo(cx + r * 1.65, cy + r * 0.55)
+    p.lineTo(cx, cy - r * 1.8)
+    p.close()
+    c.drawPath(p, stroke=0, fill=1)
+
+
+def _draw_bow(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> None:
+    """Two-lobe little ribbon bow centered at (cx, cy)."""
+    c.setFillColor(color)
+    c.setStrokeColor(color)
+    s = size
+    # Left lobe (triangle)
+    p1 = c.beginPath()
+    p1.moveTo(cx, cy)
+    p1.lineTo(cx - s, cy + s * 0.55)
+    p1.lineTo(cx - s, cy - s * 0.55)
+    p1.close()
+    c.drawPath(p1, stroke=0, fill=1)
+    # Right lobe
+    p2 = c.beginPath()
+    p2.moveTo(cx, cy)
+    p2.lineTo(cx + s, cy + s * 0.55)
+    p2.lineTo(cx + s, cy - s * 0.55)
+    p2.close()
+    c.drawPath(p2, stroke=0, fill=1)
+    # Tiny tails
+    c.setLineWidth(0.6)
+    c.line(cx - s * 0.15, cy - s * 0.2, cx - s * 0.4, cy - s * 1.0)
+    c.line(cx + s * 0.15, cy - s * 0.2, cx + s * 0.4, cy - s * 1.0)
+    # Knot
+    c.circle(cx, cy, s * 0.22, stroke=0, fill=1)
+
+
+def _draw_sparkle(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> None:
+    """4-point star ✦ made of two crossed thin ellipses."""
+    c.setFillColor(color)
+    c.setStrokeColor(color)
+    thin = size * 0.18
+    c.ellipse(cx - thin, cy - size, cx + thin, cy + size, stroke=0, fill=1)
+    c.ellipse(cx - size, cy - thin, cx + size, cy + thin, stroke=0, fill=1)
+
+
+def _draw_angel(c: canvas.Canvas, cx: float, cy: float, size: float, color, halo_color) -> None:
+    """Tiny cherub: round head, two wing arcs, halo dot."""
+    head_r = size * 0.35
+    c.setFillColor(color)
+    c.setStrokeColor(color)
+    # Head
+    c.circle(cx, cy, head_r, stroke=0, fill=1)
+    # Wings — two ellipses on the sides, slightly tilted
+    wing_w = size * 0.55
+    wing_h = size * 0.32
+    c.saveState()
+    c.translate(cx - head_r * 0.6, cy)
+    c.rotate(15)
+    c.ellipse(-wing_w, -wing_h, 0, wing_h, stroke=0, fill=1)
+    c.restoreState()
+    c.saveState()
+    c.translate(cx + head_r * 0.6, cy)
+    c.rotate(-15)
+    c.ellipse(0, -wing_h, wing_w, wing_h, stroke=0, fill=1)
+    c.restoreState()
+    # Halo
+    c.setStrokeColor(halo_color)
+    c.setFillColor(HexColor("#ffffff"))
+    c.setLineWidth(0.7)
+    c.ellipse(
+        cx - head_r * 0.7,
+        cy + head_r * 0.9,
+        cx + head_r * 0.7,
+        cy + head_r * 1.25,
+        stroke=1,
+        fill=0,
+    )
+
+
+def _decorate_corners(c: canvas.Canvas, width: float, height: float) -> None:
+    """Soft hearts, bows and sparkles in the margins, palette-matched."""
+    # Top-left: bow + sparkle
+    _draw_bow(c, 15 * mm, height - 11 * mm, 3.5 * mm, COLOR_BLUSH_500)
+    _draw_sparkle(c, 25 * mm, height - 10 * mm, 1.6 * mm, COLOR_BLUSH_600)
+
+    # Top-right: heart + bow
+    _draw_heart(c, width - 25 * mm, height - 10 * mm, 3 * mm, COLOR_BLUSH_500)
+    _draw_bow(c, width - 15 * mm, height - 11 * mm, 3.5 * mm, COLOR_BLUSH_500)
+
+    # Bottom-left: heart + sparkle
+    _draw_heart(c, 14 * mm, 10 * mm, 2.8 * mm, COLOR_BLUSH_500)
+    _draw_sparkle(c, 22 * mm, 9 * mm, 1.4 * mm, COLOR_BLUSH_600)
+
+    # Bottom-right: sparkle + bow
+    _draw_sparkle(c, width - 24 * mm, 10 * mm, 1.4 * mm, COLOR_BLUSH_600)
+    _draw_bow(c, width - 14 * mm, 10 * mm, 3 * mm, COLOR_BLUSH_500)
+
+
 def _draw_photo(
     c: canvas.Canvas,
     filename: str,
@@ -149,6 +256,7 @@ async def build_contest1_pdf(session: AsyncSession) -> bytes:
     # Background — cream wash like the site
     c.setFillColor(COLOR_CREAM_50)
     c.rect(0, 0, width, height, stroke=0, fill=1)
+    _decorate_corners(c, width, height)
 
     # Title — blush accent on the second word, like the H1s on site
     _draw_bold(c, 20 * mm, height - 20 * mm, "На кого похожа ", 22, COLOR_MOCHA_900)
@@ -315,6 +423,7 @@ async def build_contest1_results_pdf(session: AsyncSession) -> bytes:
     # Background
     c.setFillColor(COLOR_CREAM_50)
     c.rect(0, 0, width, height, stroke=0, fill=1)
+    _decorate_corners(c, width, height)
 
     # Title
     _draw_bold(c, 20 * mm, height - 20 * mm, "Итоги конкурса ", 22, COLOR_MOCHA_900)
@@ -529,6 +638,7 @@ async def build_contest3_cards_pdf(session: AsyncSession) -> bytes:
                 c.showPage()
             c.setFillColor(COLOR_CREAM_50)
             c.rect(0, 0, width, height, stroke=0, fill=1)
+            _decorate_corners(c, width, height)
             # Page-level dashed grid (cut guides)
             c.setStrokeColor(COLOR_CREAM_300)
             c.setLineWidth(0.4)
@@ -570,12 +680,19 @@ async def build_contest3_cards_pdf(session: AsyncSession) -> bytes:
             fill=1,
         )
 
-        # Header pill: «обещаю №X»
+        # Header pill: «обещаю №X» + tiny heart
         _set_regular(c, 8, COLOR_BLUSH_600)
         c.drawString(
             x + pad + 5 * mm,
             y + card_h - pad - 6 * mm,
             f"ОБЕЩАНИЕ № {idx + 1}",
+        )
+        _draw_heart(
+            c,
+            x + card_w - pad - 6 * mm,
+            y + card_h - pad - 5 * mm,
+            1.8 * mm,
+            COLOR_BLUSH_500,
         )
 
         # Promise text — wrap by real width
@@ -612,6 +729,7 @@ def _render_zodiac_blank(c: canvas.Canvas, z: dict) -> None:
 
     c.setFillColor(COLOR_CREAM_50)
     c.rect(0, 0, width, height, stroke=0, fill=1)
+    _decorate_corners(c, width, height)
 
     # Title — big centered name (skip zodiac glyph; not in Comfortaa subset)
     _set_regular(c, 9, COLOR_BLUSH_600)
@@ -827,6 +945,13 @@ def _render_thank_you_card(c: canvas.Canvas, x: float, y: float, w: float, h: fl
         12,
         COLOR_BLUSH_600,
     )
+    # Tiny hearts on either side of the greeting
+    greeting_w = c.stringWidth("Дорогие гости!", _FONT_REGULAR, 12)
+    _draw_heart(c, x + w / 2 - greeting_w / 2 - 4 * mm, text_top + 1 * mm, 1.6 * mm, COLOR_BLUSH_500)
+    _draw_heart(c, x + w / 2 + greeting_w / 2 + 4 * mm, text_top + 1 * mm, 1.6 * mm, COLOR_BLUSH_500)
+    # Decorative sparkle below signature area (small accent at top-left and top-right corners of card)
+    _draw_bow(c, x + 9 * mm, y + h - 8 * mm, 2.5 * mm, COLOR_BLUSH_500)
+    _draw_sparkle(c, x + w - 9 * mm, y + h - 8 * mm, 1.4 * mm, COLOR_BLUSH_600)
 
     body_lines = [
         "Спасибо, что были с нами",
