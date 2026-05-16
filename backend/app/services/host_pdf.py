@@ -1,6 +1,7 @@
 """PDF generation for host blanks (Contest 1, Contest 4)."""
 
 import io
+import math
 import random
 from pathlib import Path
 from typing import List
@@ -99,20 +100,50 @@ def _draw_heart(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> N
 
 
 def _draw_bow(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> None:
-    """Plump ribbon bow with rounded loops centered at (cx, cy)."""
+    """Ribbon bow — two angled loops meeting at a round knot, with curly tails."""
     c.setFillColor(color)
     c.setStrokeColor(color)
     s = size
-    # Left rounded loop (ellipse)
-    c.ellipse(cx - s * 1.05, cy - s * 0.55, cx - s * 0.05, cy + s * 0.55, stroke=0, fill=1)
-    # Right rounded loop
-    c.ellipse(cx + s * 0.05, cy - s * 0.55, cx + s * 1.05, cy + s * 0.55, stroke=0, fill=1)
-    # Curly tails
-    c.setLineWidth(0.7)
-    c.line(cx - s * 0.15, cy - s * 0.25, cx - s * 0.45, cy - s * 1.1)
-    c.line(cx + s * 0.15, cy - s * 0.25, cx + s * 0.45, cy - s * 1.1)
-    # Centre knot (slightly tall)
-    c.ellipse(cx - s * 0.22, cy - s * 0.32, cx + s * 0.22, cy + s * 0.32, stroke=0, fill=1)
+
+    # Left loop: ellipse rotated outward by 20°, inner edge at the knot.
+    c.saveState()
+    c.translate(cx - s * 0.55, cy)
+    c.rotate(20)
+    c.ellipse(-s * 0.55, -s * 0.4, s * 0.55, s * 0.4, stroke=0, fill=1)
+    c.restoreState()
+
+    # Right loop: mirrored.
+    c.saveState()
+    c.translate(cx + s * 0.55, cy)
+    c.rotate(-20)
+    c.ellipse(-s * 0.55, -s * 0.4, s * 0.55, s * 0.4, stroke=0, fill=1)
+    c.restoreState()
+
+    # Centre knot — small circle on top of the meeting point.
+    c.circle(cx, cy, s * 0.24, stroke=0, fill=1)
+
+    # Curly tails dropping from below the knot.
+    c.setLineWidth(0.9)
+    c.line(cx - s * 0.12, cy - s * 0.20, cx - s * 0.32, cy - s * 1.05)
+    c.line(cx + s * 0.12, cy - s * 0.20, cx + s * 0.32, cy - s * 1.05)
+
+
+def _draw_balloon(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> None:
+    """Little balloon — circle body with a tiny string."""
+    c.setFillColor(color)
+    c.setStrokeColor(color)
+    # Body (slightly oval, taller than wide)
+    c.ellipse(cx - size * 0.55, cy - size * 0.5, cx + size * 0.55, cy + size * 0.65, stroke=0, fill=1)
+    # String
+    c.setLineWidth(0.6)
+    c.line(cx, cy - size * 0.5, cx + size * 0.15, cy - size * 1.4)
+
+
+def _draw_dot(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> None:
+    """Plain little ball / dot."""
+    c.setFillColor(color)
+    c.setStrokeColor(color)
+    c.circle(cx, cy, size * 0.5, stroke=0, fill=1)
 
 
 def _draw_sparkle(c: canvas.Canvas, cx: float, cy: float, size: float, color) -> None:
@@ -158,59 +189,91 @@ def _draw_angel(c: canvas.Canvas, cx: float, cy: float, size: float, color, halo
     )
 
 
+_MOTIF_KINDS = [
+    ("heart", 3.0 * mm, COLOR_BLUSH_300),
+    ("heart", 3.4 * mm, COLOR_BLUSH_300),
+    ("bow", 3.4 * mm, COLOR_BLUSH_300),
+    ("bow", 3.8 * mm, COLOR_BLUSH_300),
+    ("balloon", 3.2 * mm, COLOR_BLUSH_300),
+    ("dot", 2.2 * mm, COLOR_BLUSH_300),
+    ("dot", 1.6 * mm, COLOR_BLUSH_500),
+    ("sparkle", 1.6 * mm, COLOR_BLUSH_500),
+    ("sparkle", 2.0 * mm, COLOR_BLUSH_500),
+]
+
+
+def _draw_one_motif(c, kind, size, color):
+    if kind == "heart":
+        _draw_heart(c, 0, 0, size, color)
+    elif kind == "bow":
+        _draw_bow(c, 0, 0, size, color)
+    elif kind == "balloon":
+        _draw_balloon(c, 0, 0, size, color)
+    elif kind == "dot":
+        _draw_dot(c, 0, 0, size, color)
+    else:
+        _draw_sparkle(c, 0, 0, size, color)
+
+
 def _scatter_motifs_in(
     c: canvas.Canvas,
     x0: float,
     y0: float,
     w: float,
     h: float,
-    count: int,
+    target_count: int,
     seed: int = 17,
 ) -> None:
-    """Scatter `count` semi-transparent motifs at pseudo-random positions
-    inside the rectangle. Each motif gets a random kind and rotation, but
-    seeding makes the layout identical between PDF re-builds."""
+    """Even, organic scatter via a jittered grid: split the area into
+    roughly target_count cells, drop one motif per cell at a small random
+    offset from the cell centre. Mixes kinds + rotations from a shuffled
+    bag so the result is varied but balanced."""
     rng = random.Random(seed)
-    margin = 4 * mm
+    aspect = w / h if h > 0 else 1
+    cols = max(1, int(round(math.sqrt(target_count * aspect))))
+    rows = max(1, int(round(target_count / cols)))
+    cell_w = w / cols
+    cell_h = h / rows
+    margin = 3 * mm
 
-    motifs = [
-        ("heart", 3.0 * mm, COLOR_BLUSH_300),
-        ("heart", 3.4 * mm, COLOR_BLUSH_300),
-        ("bow", 3.4 * mm, COLOR_BLUSH_300),
-        ("bow", 3.8 * mm, COLOR_BLUSH_300),
-        ("sparkle", 1.6 * mm, COLOR_BLUSH_500),
-        ("sparkle", 2.0 * mm, COLOR_BLUSH_500),
-    ]
+    # Pre-shuffle a bag of motif slots so adjacent cells aren't identical.
+    bag = []
+    while len(bag) < cols * rows:
+        bag.extend(_MOTIF_KINDS)
+    rng.shuffle(bag)
 
     c.saveState()
-    c.setFillAlpha(0.28)
-    c.setStrokeAlpha(0.28)
+    c.setFillAlpha(0.30)
+    c.setStrokeAlpha(0.30)
 
-    for _ in range(count):
-        cx = x0 + margin + rng.random() * (w - 2 * margin)
-        cy = y0 + margin + rng.random() * (h - 2 * margin)
-        kind, size, color = rng.choice(motifs)
-        angle = rng.uniform(-30, 30)
-        c.saveState()
-        c.translate(cx, cy)
-        c.rotate(angle)
-        if kind == "heart":
-            _draw_heart(c, 0, 0, size, color)
-        elif kind == "bow":
-            _draw_bow(c, 0, 0, size, color)
-        else:
-            _draw_sparkle(c, 0, 0, size, color)
-        c.restoreState()
+    for r in range(rows):
+        for col in range(cols):
+            i = r * cols + col
+            # Position inside the cell with mild jitter (centred around 0.5).
+            jitter_x = (rng.random() - 0.5) * 0.5
+            jitter_y = (rng.random() - 0.5) * 0.5
+            cx = x0 + (col + 0.5 + jitter_x) * cell_w
+            cy = y0 + (r + 0.5 + jitter_y) * cell_h
+            # Clamp inside the inner margin
+            cx = min(max(cx, x0 + margin), x0 + w - margin)
+            cy = min(max(cy, y0 + margin), y0 + h - margin)
+
+            kind, size, color = bag[i]
+            angle = rng.uniform(-25, 25)
+            c.saveState()
+            c.translate(cx, cy)
+            c.rotate(angle)
+            _draw_one_motif(c, kind, size, color)
+            c.restoreState()
 
     c.restoreState()
 
 
 def _scatter_motifs(c: canvas.Canvas, width: float, height: float) -> None:
-    """Page-wide scatter — density proportional to area (~1 motif per
-    1100 mm², so ~55 on A4, ~14 on A6)."""
+    """Page-wide motif scatter (~1 motif per 900 mm²)."""
     area_mm2 = (width / mm) * (height / mm)
-    count = max(8, int(area_mm2 / 1100))
-    _scatter_motifs_in(c, 0, 0, width, height, count=count)
+    count = max(12, int(area_mm2 / 900))
+    _scatter_motifs_in(c, 0, 0, width, height, target_count=count)
 
 
 def _draw_photo(
@@ -904,7 +967,7 @@ def _render_thank_you_card(c: canvas.Canvas, x: float, y: float, w: float, h: fl
     # Translucent motif scatter — local to the card (each card gets its own seed)
     card_seed = int((x + y) * 7) % 1000
     area_mm2 = (w / mm) * (h / mm)
-    _scatter_motifs_in(c, x, y, w, h, count=max(10, int(area_mm2 / 900)), seed=card_seed)
+    _scatter_motifs_in(c, x, y, w, h, target_count=max(12, int(area_mm2 / 700)), seed=card_seed)
     # Soft border
     c.setStrokeColor(COLOR_CREAM_300)
     c.setLineWidth(0.6)
