@@ -258,17 +258,17 @@ def _draw_angel(c: canvas.Canvas, cx: float, cy: float, size: float, color, halo
 
 
 _MOTIF_KINDS = [
-    ("heart", 3.0 * mm, COLOR_BLUSH_300),
-    ("heart", 3.4 * mm, COLOR_BLUSH_300),
-    ("bow", 3.6 * mm, COLOR_BLUSH_300),
-    ("balloon", 3.4 * mm, COLOR_BLUSH_300),
-    ("cloud", 4.0 * mm, COLOR_BLUSH_200),
-    ("cloud", 4.6 * mm, COLOR_BLUSH_200),
-    ("flower", 2.8 * mm, COLOR_BLUSH_300),
-    ("star5", 2.4 * mm, COLOR_BLUSH_500),
-    ("star5", 2.0 * mm, COLOR_BLUSH_300),
-    ("crown", 2.6 * mm, COLOR_BLUSH_500),
-    ("sparkle", 1.8 * mm, COLOR_BLUSH_500),
+    ("heart", 3.0 * mm, COLOR_BLUSH_200),
+    ("heart", 3.4 * mm, COLOR_BLUSH_200),
+    ("bow", 3.6 * mm, COLOR_BLUSH_200),
+    ("balloon", 3.4 * mm, COLOR_BLUSH_200),
+    ("cloud", 4.0 * mm, COLOR_CREAM_200),
+    ("cloud", 4.6 * mm, COLOR_CREAM_200),
+    ("flower", 2.8 * mm, COLOR_BLUSH_200),
+    ("star5", 2.4 * mm, COLOR_BLUSH_300),
+    ("star5", 2.0 * mm, COLOR_BLUSH_200),
+    ("crown", 2.6 * mm, COLOR_BLUSH_300),
+    ("sparkle", 1.8 * mm, COLOR_BLUSH_300),
 ]
 
 
@@ -306,9 +306,9 @@ def _scatter_confetti(
     rng = random.Random(seed)
     count = max(20, int((w / mm) * (h / mm) / 200))
     c.saveState()
-    c.setFillAlpha(0.32)
+    c.setFillAlpha(0.22)
     c.setStrokeAlpha(0)
-    palette = [COLOR_BLUSH_300, COLOR_BLUSH_500, COLOR_CREAM_300]
+    palette = [COLOR_BLUSH_200, COLOR_BLUSH_300, COLOR_CREAM_300]
     for _ in range(count):
         cx = x0 + rng.random() * w
         cy = y0 + rng.random() * h
@@ -346,8 +346,8 @@ def _scatter_motifs_in(
     rng.shuffle(bag)
 
     c.saveState()
-    c.setFillAlpha(0.30)
-    c.setStrokeAlpha(0.30)
+    c.setFillAlpha(0.22)
+    c.setStrokeAlpha(0.22)
 
     for r in range(rows):
         for col in range(cols):
@@ -1126,8 +1126,9 @@ def _render_thank_you_card(c: canvas.Canvas, x: float, y: float, w: float, h: fl
         except Exception:
             pass
 
-    # Text below photo
-    text_top = photo_y - 8 * mm
+    # Text below photo — placed so the gap above (photo→text) equals the
+    # gap below (text→card bottom).
+    text_top = photo_y - 18 * mm
     text_x = x + 10 * mm
     text_w = w - 20 * mm
 
@@ -1136,7 +1137,7 @@ def _render_thank_you_card(c: canvas.Canvas, x: float, y: float, w: float, h: fl
         x + w / 2,
         text_top,
         "Дорогие гости!",
-        12,
+        15,
         COLOR_BLUSH_600,
     )
 
@@ -1147,21 +1148,21 @@ def _render_thank_you_card(c: canvas.Canvas, x: float, y: float, w: float, h: fl
         "Каждая ваша улыбка теперь —",
         "часть первого года Амалии.",
     ]
-    line_y = text_top - 6 * mm
-    _set_regular(c, 9, COLOR_MOCHA_700)
+    line_y = text_top - 8 * mm
+    _set_regular(c, 11, COLOR_MOCHA_700)
     for line in body_lines:
         c.drawCentredString(x + w / 2, line_y, line)
-        line_y -= 4 * mm
+        line_y -= 5 * mm
 
     # Signature
-    line_y -= 2 * mm
-    _set_regular(c, 8, COLOR_MOCHA_500)
+    line_y -= 3 * mm
+    _set_regular(c, 10, COLOR_MOCHA_500)
     c.drawCentredString(x + w / 2, line_y, "С любовью,")
-    line_y -= 3.5 * mm
-    _set_regular(c, 9, COLOR_MOCHA_900)
+    line_y -= 5 * mm
+    _set_regular(c, 12, COLOR_MOCHA_900)
     c.drawCentredString(x + w / 2, line_y, "семья Матасянц")
-    line_y -= 4 * mm
-    _set_regular(c, 8, COLOR_BLUSH_600)
+    line_y -= 5.5 * mm
+    _set_regular(c, 10, COLOR_BLUSH_600)
     c.drawCentredString(x + w / 2, line_y, "Микаел, Милена и Амалия")
 
 
