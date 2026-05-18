@@ -9,7 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_session
 from app.schemas.admin import (
     AdminGuestCreateIn,
+    AdminGuestUpdateIn,
     AdminRsvpUpdateIn,
+    AvatarShort,
     BookingAdminOut,
     DashboardStats,
     GamePlayerOut,
@@ -23,8 +25,10 @@ from app.services.admin import (
     admin_cancel_booking,
     admin_create_guest,
     admin_delete_guest,
+    admin_update_guest,
     admin_update_guest_rsvp,
     get_dashboard_stats,
+    list_avatars,
     list_bookings,
     list_game_players,
     list_guests,
@@ -85,6 +89,45 @@ async def create_guest(
         raise HTTPException(status_code=409, detail="Все аватары заняты")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/avatars", response_model=List[AvatarShort])
+async def avatars(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await list_avatars(session)
+
+
+@router.patch("/guests/{guest_id}", response_model=GuestAdminOut)
+async def update_guest(
+    guest_id: uuid.UUID,
+    payload: AdminGuestUpdateIn,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    try:
+        return await admin_update_guest(
+            session,
+            guest_id=guest_id,
+            name=payload.name,
+            birth_date_str=payload.birth_date,
+            gender=payload.gender,
+            avatar_id=payload.avatar_id,
+            unbind_telegram=payload.unbind_telegram,
+        )
+    except GuestNotFound:
+        raise HTTPException(status_code=404, detail="Гость не найден")
+    except ValueError as e:
+        msg = str(e)
+        labels = {
+            "avatar_not_found": "Такой аватар не существует",
+            "avatar_reserved_for_admin": "Этот аватар закреплён за админом",
+            "avatar_taken": "Этот аватар уже занят другим гостем",
+        }
+        raise HTTPException(status_code=400, detail=labels.get(msg, msg))
 
 
 @router.patch("/guests/{guest_id}/rsvp", response_model=RsvpStatusOut)

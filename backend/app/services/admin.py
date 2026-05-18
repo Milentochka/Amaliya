@@ -295,6 +295,103 @@ async def admin_create_guest(
     }
 
 
+async def admin_update_guest(
+    session: AsyncSession,
+    *,
+    guest_id: uuid.UUID,
+    name: Optional[str] = None,
+    birth_date_str: Optional[str] = None,
+    gender: Optional[str] = None,
+    avatar_id: Optional[int] = None,
+    unbind_telegram: Optional[bool] = None,
+) -> dict:
+    guest = (
+        await session.execute(select(Guest).where(Guest.id == guest_id))
+    ).scalar_one_or_none()
+    if guest is None:
+        raise GuestNotFound()
+
+    if name is not None:
+        n = name.strip()
+        if n:
+            guest.name = n
+
+    if birth_date_str is not None and birth_date_str.strip():
+        guest.birth_date = parse_dd_mm_yy(birth_date_str)
+
+    if gender is not None:
+        guest.gender = GuestGender(gender)
+
+    if avatar_id is not None and avatar_id != guest.avatar_id:
+        new_av = (
+            await session.execute(select(Avatar).where(Avatar.id == avatar_id))
+        ).scalar_one_or_none()
+        if new_av is None:
+            raise ValueError("avatar_not_found")
+        if new_av.reserved_for_admin:
+            raise ValueError("avatar_reserved_for_admin")
+        if new_av.is_taken and new_av.id != guest.avatar_id:
+            # Allow swap if another guest holds it? We forbid — admins should
+            # pick a free avatar. Surface a friendly message.
+            raise ValueError("avatar_taken")
+        # free old avatar
+        old_av = (
+            await session.execute(select(Avatar).where(Avatar.id == guest.avatar_id))
+        ).scalar_one_or_none()
+        if old_av is not None and not old_av.reserved_for_admin:
+            old_av.is_taken = False
+        new_av.is_taken = True
+        guest.avatar_id = new_av.id
+
+    if unbind_telegram:
+        guest.telegram_id = None
+        guest.telegram_username = None
+
+    await session.commit()
+
+    avatar = (
+        await session.execute(select(Avatar).where(Avatar.id == guest.avatar_id))
+    ).scalar_one()
+    rsvp_rows = (
+        await session.execute(select(Rsvp).where(Rsvp.guest_id == guest.id))
+    ).scalars().all()
+    rsvp = {"christening": "maybe", "banquet": "maybe"}
+    for r in rsvp_rows:
+        rsvp[r.event_part_type.value] = r.status.value
+
+    return {
+        "id": str(guest.id),
+        "name": guest.name,
+        "birth_date": guest.birth_date.isoformat(),
+        "gender": guest.gender.value,
+        "avatar_name": avatar.name,
+        "avatar_url": avatar.image_url,
+        "has_telegram": guest.telegram_id is not None,
+        "telegram_username": guest.telegram_username,
+        "rsvp_christening": rsvp["christening"],
+        "rsvp_banquet": rsvp["banquet"],
+        "bookings_count": 0,  # not recomputed here
+        "last_activity": None,
+        "created_at": guest.created_at.isoformat(),
+    }
+
+
+async def list_avatars(session: AsyncSession) -> List[dict]:
+    rows = (
+        await session.execute(select(Avatar).order_by(Avatar.id))
+    ).scalars().all()
+    return [
+        {
+            "id": a.id,
+            "name": a.name,
+            "image_url": a.image_url,
+            "is_taken": a.is_taken,
+            "reserved_for_admin": a.reserved_for_admin,
+        }
+        for a in rows
+    ]
+
+
 async def admin_delete_guest(
     session: AsyncSession, *, guest_id: uuid.UUID
 ) -> None:

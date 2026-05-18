@@ -418,6 +418,44 @@ export async function adminCreateGuest(
   return (await res.json()) as GuestAdmin;
 }
 
+export interface AdminGuestUpdatePayload {
+  name?: string;
+  birth_date?: string; // DD/MM/YY
+  gender?: "M" | "F";
+  avatar_id?: number;
+  unbind_telegram?: boolean;
+}
+
+export async function adminUpdateGuest(
+  guestId: string,
+  payload: AdminGuestUpdatePayload,
+): Promise<GuestAdmin> {
+  const res = await fetch(`${API_URL}/api/admin/guests/${guestId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as GuestAdmin;
+}
+
+export interface AvatarShort {
+  id: number;
+  name: string;
+  image_url: string;
+  is_taken: boolean;
+  reserved_for_admin: boolean;
+}
+
+export async function adminListAvatars(): Promise<AvatarShort[]> {
+  const res = await fetch(`${API_URL}/api/admin/avatars`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as AvatarShort[];
+}
+
 export async function adminPatchGuestRsvp(
   guestId: string,
   updates: { christening?: RsvpStatus; banquet?: RsvpStatus },

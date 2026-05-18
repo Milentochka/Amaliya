@@ -53,6 +53,22 @@ class AdminGuestCreateIn(BaseModel):
     rsvp_banquet: Literal["coming", "not_coming", "maybe"] = "maybe"
 
 
+class AdminGuestUpdateIn(BaseModel):
+    name: Optional[str] = None
+    birth_date: Optional[str] = None  # DD/MM/YY
+    gender: Optional[Literal["M", "F"]] = None
+    avatar_id: Optional[int] = None
+    unbind_telegram: Optional[bool] = None
+
+
+class AvatarShort(BaseModel):
+    id: int
+    name: str
+    image_url: str
+    is_taken: bool
+    reserved_for_admin: bool
+
+
 class BookingAdminOut(BaseModel):
     booking_id: str
     item_id: str
