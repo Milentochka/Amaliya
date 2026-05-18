@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_session
 from app.schemas.admin import (
+    AdminGuestCreateIn,
     AdminRsvpUpdateIn,
     BookingAdminOut,
     DashboardStats,
@@ -17,8 +18,10 @@ from app.schemas.admin import (
 from app.schemas.auth import MessageOut, RsvpStatusOut
 from app.services.admin import (
     BookingNotFound,
+    GuestAlreadyExists,
     GuestNotFound,
     admin_cancel_booking,
+    admin_create_guest,
     admin_delete_guest,
     admin_update_guest_rsvp,
     get_dashboard_stats,
@@ -26,6 +29,7 @@ from app.services.admin import (
     list_game_players,
     list_guests,
 )
+from app.services.auth import AvatarsExhausted
 from app.services.wishlist import resolve_admin_id_from_token
 
 router = APIRouter(prefix="/admin", tags=["admin-data"])
@@ -57,6 +61,30 @@ async def guests(
 ):
     await _require_admin(session, amaliya_admin_session)
     return await list_guests(session)
+
+
+@router.post("/guests", response_model=GuestAdminOut, status_code=201)
+async def create_guest(
+    payload: AdminGuestCreateIn,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    try:
+        return await admin_create_guest(
+            session,
+            name=payload.name,
+            birth_date_str=payload.birth_date,
+            gender=payload.gender,
+            rsvp_christening=payload.rsvp_christening,
+            rsvp_banquet=payload.rsvp_banquet,
+        )
+    except GuestAlreadyExists:
+        raise HTTPException(status_code=409, detail="Гость с таким именем и ДР уже есть")
+    except AvatarsExhausted:
+        raise HTTPException(status_code=409, detail="Все аватары заняты")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.patch("/guests/{guest_id}/rsvp", response_model=RsvpStatusOut)

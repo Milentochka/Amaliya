@@ -13,16 +13,24 @@ from app.db.models import (
     EventPartType,
     GameAttempt,
     Guest,
+    GuestGender,
     Rsvp,
     RsvpStatus,
     WishlistItem,
 )
+from app.schemas.auth import parse_dd_mm_yy
+from app.services.auth import AvatarsExhausted, _pick_random_free_avatar
+from app.services.zodiac import chinese_zodiac, western_zodiac
 
 
 # -------- Errors --------
 
 
 class GuestNotFound(Exception):
+    pass
+
+
+class GuestAlreadyExists(Exception):
     pass
 
 
@@ -220,6 +228,71 @@ async def admin_update_guest_rsvp(
     for r in rsvp_rows:
         out[r.event_part_type.value] = r.status.value
     return out
+
+
+async def admin_create_guest(
+    session: AsyncSession,
+    *,
+    name: str,
+    birth_date_str: str,
+    gender: str,
+    rsvp_christening: str,
+    rsvp_banquet: str,
+) -> dict:
+    """Create a guest from the admin panel — no auto-login, no session."""
+    name = name.strip()
+    if not name:
+        raise ValueError("empty name")
+    bd = parse_dd_mm_yy(birth_date_str)
+
+    existing = (
+        await session.execute(
+            select(Guest).where(Guest.name == name, Guest.birth_date == bd)
+        )
+    ).scalar_one_or_none()
+    if existing is not None:
+        raise GuestAlreadyExists()
+
+    avatar = await _pick_random_free_avatar(session)
+    new_guest = Guest(
+        id=uuid.uuid4(),
+        name=name,
+        birth_date=bd,
+        gender=GuestGender(gender),
+        avatar_id=avatar.id,
+    )
+    session.add(new_guest)
+    session.add(
+        Rsvp(
+            guest_id=new_guest.id,
+            event_part_type=EventPartType.CHRISTENING,
+            status=RsvpStatus(rsvp_christening),
+        )
+    )
+    session.add(
+        Rsvp(
+            guest_id=new_guest.id,
+            event_part_type=EventPartType.BANQUET,
+            status=RsvpStatus(rsvp_banquet),
+        )
+    )
+    await session.commit()
+
+    return {
+        "id": str(new_guest.id),
+        "name": new_guest.name,
+        "birth_date": new_guest.birth_date.isoformat(),
+        "gender": new_guest.gender.value,
+        "avatar_name": avatar.name,
+        "avatar_url": avatar.image_url,
+        "has_telegram": False,
+        "telegram_username": None,
+        "rsvp_christening": rsvp_christening,
+        "rsvp_banquet": rsvp_banquet,
+        "bookings_count": 0,
+        "last_activity": None,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 async def admin_delete_guest(

@@ -45,6 +45,14 @@ class AdminRsvpUpdateIn(BaseModel):
     banquet: Optional[Literal["coming", "not_coming", "maybe"]] = None
 
 
+class AdminGuestCreateIn(BaseModel):
+    name: str
+    birth_date: str  # DD/MM/YY
+    gender: Literal["M", "F"]
+    rsvp_christening: Literal["coming", "not_coming", "maybe"] = "maybe"
+    rsvp_banquet: Literal["coming", "not_coming", "maybe"] = "maybe"
+
+
 class BookingAdminOut(BaseModel):
     booking_id: str
     item_id: str

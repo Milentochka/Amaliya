@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import {
+  adminCreateGuest,
   adminDeleteGuest,
   adminListGuests,
   adminPatchGuestRsvp,
@@ -38,6 +39,7 @@ export default function AdminGuestsPage() {
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<GuestAdmin | null>(null);
+  const [creating, setCreating] = useState(false);
 
   async function refresh() {
     try {
@@ -104,6 +106,12 @@ export default function AdminGuestsPage() {
               : "Загружаю…"}
           </p>
         </div>
+        <button
+          onClick={() => setCreating(true)}
+          className="rounded-full bg-blush-500 px-4 py-2 text-sm font-medium text-white hover:bg-blush-600"
+        >
+          + Добавить гостя
+        </button>
       </header>
 
       {error && (
@@ -193,6 +201,16 @@ export default function AdminGuestsPage() {
         </table>
       </div>
 
+      {creating && (
+        <CreateGuestModal
+          onCancel={() => setCreating(false)}
+          onCreated={async () => {
+            setCreating(false);
+            await refresh();
+          }}
+        />
+      )}
+
       {confirmDelete && (
         <div className="fixed inset-0 z-30 flex items-center justify-center bg-mocha-900/30 px-5">
           <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-soft">
@@ -220,6 +238,161 @@ export default function AdminGuestsPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function maskDob(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 6);
+  if (d.length <= 2) return d;
+  if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`;
+  return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
+}
+
+function CreateGuestModal({
+  onCancel,
+  onCreated,
+}: {
+  onCancel: () => void;
+  onCreated: () => Promise<void>;
+}) {
+  const [name, setName] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [gender, setGender] = useState<"M" | "F">("F");
+  const [rsvpC, setRsvpC] = useState<RsvpStatus>("coming");
+  const [rsvpB, setRsvpB] = useState<RsvpStatus>("coming");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      await adminCreateGuest({
+        name: name.trim(),
+        birth_date: birthDate,
+        gender,
+        rsvp_christening: rsvpC,
+        rsvp_banquet: rsvpB,
+      });
+      await onCreated();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-30 flex items-center justify-center bg-mocha-900/30 px-5 py-8">
+      <form
+        onSubmit={submit}
+        className="w-full max-w-md space-y-4 overflow-y-auto rounded-3xl bg-white p-6 shadow-soft"
+        style={{ maxHeight: "90vh" }}
+      >
+        <h3 className="text-lg font-medium text-mocha-900">
+          Добавить гостя вручную
+        </h3>
+        <p className="text-xs text-mocha-500">
+          Полезно, если гость не может зарегистрироваться сам. Аватар
+          присвоится случайно.
+        </p>
+
+        <label className="block">
+          <span className="text-xs uppercase tracking-wider text-mocha-400">
+            Имя
+          </span>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="mt-1 w-full rounded-2xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-blush-400"
+          />
+        </label>
+
+        <div className="grid grid-cols-2 gap-3">
+          <label className="block">
+            <span className="text-xs uppercase tracking-wider text-mocha-400">
+              ДР (ДД/ММ/ГГ)
+            </span>
+            <input
+              value={birthDate}
+              onChange={(e) => setBirthDate(maskDob(e.target.value))}
+              placeholder="05/02/90"
+              required
+              className="mt-1 w-full rounded-2xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-blush-400"
+            />
+          </label>
+          <label className="block">
+            <span className="text-xs uppercase tracking-wider text-mocha-400">
+              Пол
+            </span>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value as "M" | "F")}
+              className="mt-1 w-full rounded-2xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-blush-400"
+            >
+              <option value="F">Ж</option>
+              <option value="M">М</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <label className="block">
+            <span className="text-xs uppercase tracking-wider text-mocha-400">
+              Крестины
+            </span>
+            <select
+              value={rsvpC}
+              onChange={(e) => setRsvpC(e.target.value as RsvpStatus)}
+              className="mt-1 w-full rounded-2xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-blush-400"
+            >
+              <option value="coming">{RSVP_LABEL.coming}</option>
+              <option value="not_coming">{RSVP_LABEL.not_coming}</option>
+              <option value="maybe">{RSVP_LABEL.maybe}</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className="text-xs uppercase tracking-wider text-mocha-400">
+              Банкет
+            </span>
+            <select
+              value={rsvpB}
+              onChange={(e) => setRsvpB(e.target.value as RsvpStatus)}
+              className="mt-1 w-full rounded-2xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-blush-400"
+            >
+              <option value="coming">{RSVP_LABEL.coming}</option>
+              <option value="not_coming">{RSVP_LABEL.not_coming}</option>
+              <option value="maybe">{RSVP_LABEL.maybe}</option>
+            </select>
+          </label>
+        </div>
+
+        {error && (
+          <div className="rounded-2xl border border-blush-200 bg-blush-100/60 px-3 py-2 text-xs text-blush-700">
+            {error}
+          </div>
+        )}
+
+        <div className="flex justify-end gap-2 pt-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-full px-4 py-2 text-sm text-mocha-500 hover:bg-cream-100"
+          >
+            Отмена
+          </button>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="rounded-full bg-blush-500 px-4 py-2 text-sm font-medium text-white hover:bg-blush-600 disabled:opacity-50"
+          >
+            {submitting ? "Добавляю…" : "Добавить"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

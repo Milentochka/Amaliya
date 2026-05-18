@@ -397,6 +397,27 @@ export async function adminListGuests(): Promise<GuestAdmin[]> {
   return (await res.json()) as GuestAdmin[];
 }
 
+export interface AdminGuestCreatePayload {
+  name: string;
+  birth_date: string; // DD/MM/YY
+  gender: "M" | "F";
+  rsvp_christening?: RsvpStatus;
+  rsvp_banquet?: RsvpStatus;
+}
+
+export async function adminCreateGuest(
+  payload: AdminGuestCreatePayload,
+): Promise<GuestAdmin> {
+  const res = await fetch(`${API_URL}/api/admin/guests`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as GuestAdmin;
+}
+
 export async function adminPatchGuestRsvp(
   guestId: string,
   updates: { christening?: RsvpStatus; banquet?: RsvpStatus },
