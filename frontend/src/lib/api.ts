@@ -898,6 +898,180 @@ export async function projectorContest4View(): Promise<Contest4ProjectorView> {
   return (await res.json()) as Contest4ProjectorView;
 }
 
+// -------- Contest 5 («Своя игра») --------
+
+export interface Contest5QuestionCell {
+  id: number;
+  value: number;
+  answered_status: "unanswered" | "correct" | "wrong" | "skipped";
+  answered_team_id: number | null;
+  text: string | null;
+  answer: string | null;
+  image_key: string | null;
+}
+
+export interface Contest5Category {
+  id: number;
+  name: string;
+  slug: string;
+  order_index: number;
+  questions: Contest5QuestionCell[];
+}
+
+export interface Contest5Team {
+  id: number;
+  name: string;
+  color: string;
+  score: number;
+  final_wager: number;
+  final_correct: boolean | null;
+  order_index: number;
+}
+
+export interface Contest5Final {
+  text: string | null;
+  answer: string | null;
+  revealed: boolean;
+}
+
+export interface Contest5Overview {
+  state: ContestState;
+  categories: Contest5Category[];
+  teams: Contest5Team[];
+  final: Contest5Final | null;
+}
+
+export interface Contest5ActiveQuestion {
+  id: number;
+  category_name: string;
+  value: number;
+  text: string;
+  answer: string | null;
+  image_key: string | null;
+}
+
+export interface Contest5ProjectorView extends Contest5Overview {
+  active_question: Contest5ActiveQuestion | null;
+  final_active: boolean;
+  final_question: Contest5Final | null;
+}
+
+export async function hostContest5Overview(): Promise<Contest5Overview> {
+  const res = await fetch(`${API_URL}/api/host/contest5`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest5Overview;
+}
+
+export async function hostContest5Open(questionId: number): Promise<Contest5Overview> {
+  const res = await fetch(`${API_URL}/api/host/contest5/open`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ question_id: questionId }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest5Overview;
+}
+
+export async function hostContest5ShowAnswer(): Promise<Contest5Overview> {
+  const res = await fetch(`${API_URL}/api/host/contest5/show-answer`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest5Overview;
+}
+
+export async function hostContest5Resolve(
+  questionId: number,
+  teamId: number | null,
+  correct: boolean,
+): Promise<Contest5Overview> {
+  const res = await fetch(`${API_URL}/api/host/contest5/resolve`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ question_id: questionId, team_id: teamId, correct }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest5Overview;
+}
+
+export async function hostContest5Close(): Promise<Contest5Overview> {
+  const res = await fetch(`${API_URL}/api/host/contest5/close`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest5Overview;
+}
+
+export async function hostContest5UpdateTeam(
+  teamId: number,
+  patch: {
+    name?: string;
+    color?: string;
+    score?: number;
+    final_wager?: number;
+    final_correct?: boolean | null;
+  },
+): Promise<Contest5Overview> {
+  const res = await fetch(`${API_URL}/api/host/contest5/teams/${teamId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest5Overview;
+}
+
+export async function hostContest5OpenFinal(): Promise<Contest5Overview> {
+  const res = await fetch(`${API_URL}/api/host/contest5/final/open`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest5Overview;
+}
+
+export async function hostContest5RevealFinal(): Promise<Contest5Overview> {
+  const res = await fetch(`${API_URL}/api/host/contest5/final/reveal`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest5Overview;
+}
+
+export async function hostContest5ResolveFinal(): Promise<Contest5Overview> {
+  const res = await fetch(`${API_URL}/api/host/contest5/final/resolve`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest5Overview;
+}
+
+export async function hostContest5Reset(): Promise<Contest5Overview> {
+  const res = await fetch(`${API_URL}/api/host/contest5/reset`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest5Overview;
+}
+
+export async function projectorContest5View(): Promise<Contest5ProjectorView> {
+  const res = await fetch(`${API_URL}/api/projector/contest5`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest5ProjectorView;
+}
+
 // -------- Admin wishlist CRUD --------
 
 export interface WishlistItemAdmin extends WishlistItem {

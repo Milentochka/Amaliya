@@ -22,6 +22,10 @@ from app.schemas.contests import (
     Contest3Stats,
     Contest4ActiveIn,
     Contest4Overview,
+    Contest5OpenIn,
+    Contest5Overview,
+    Contest5ResolveIn,
+    Contest5TeamUpdateIn,
     ContestStateOut,
     ContestStatusIn,
 )
@@ -29,6 +33,7 @@ from app.services.contests import (
     InvalidStatus,
     NoGuestPending,
     QuestionNotFound,
+    TeamNotFound,
     TraitNotFound,
     contest1_overview,
     contest1_reset,
@@ -46,6 +51,16 @@ from app.services.contests import (
     contest3_reset,
     contest4_overview,
     contest4_set_active,
+    contest5_close_active,
+    contest5_open_final,
+    contest5_open_question,
+    contest5_overview,
+    contest5_reset,
+    contest5_resolve,
+    contest5_resolve_final,
+    contest5_reveal_final,
+    contest5_show_answer,
+    contest5_update_team,
     list_all_states,
     set_status,
 )
@@ -375,6 +390,127 @@ async def contest4_one_blank(
             "Content-Disposition": f'inline; filename="contest4-{zodiac_key}.pdf"'
         },
     )
+
+
+# -------- Contest 5 «Своя игра» --------
+
+
+@router.get("/contest5", response_model=Contest5Overview)
+async def contest5(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await contest5_overview(session)
+
+
+@router.post("/contest5/open", response_model=Contest5Overview)
+async def contest5_open(
+    payload: Contest5OpenIn,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    try:
+        return await contest5_open_question(session, question_id=payload.question_id)
+    except QuestionNotFound:
+        raise HTTPException(status_code=404, detail="Вопрос не найден")
+
+
+@router.post("/contest5/show-answer", response_model=Contest5Overview)
+async def contest5_reveal(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await contest5_show_answer(session)
+
+
+@router.post("/contest5/resolve", response_model=Contest5Overview)
+async def contest5_resolve_q(
+    payload: Contest5ResolveIn,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    try:
+        return await contest5_resolve(
+            session,
+            question_id=payload.question_id,
+            team_id=payload.team_id,
+            correct=payload.correct,
+        )
+    except QuestionNotFound:
+        raise HTTPException(status_code=404, detail="Вопрос не найден")
+    except TeamNotFound:
+        raise HTTPException(status_code=404, detail="Команда не найдена")
+
+
+@router.post("/contest5/close", response_model=Contest5Overview)
+async def contest5_close(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await contest5_close_active(session)
+
+
+@router.patch("/contest5/teams/{team_id}", response_model=Contest5Overview)
+async def contest5_team_update(
+    team_id: int,
+    payload: Contest5TeamUpdateIn,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    try:
+        return await contest5_update_team(
+            session,
+            team_id=team_id,
+            name=payload.name,
+            color=payload.color,
+            score=payload.score,
+            final_wager=payload.final_wager,
+            final_correct=payload.final_correct,
+        )
+    except TeamNotFound:
+        raise HTTPException(status_code=404, detail="Команда не найдена")
+
+
+@router.post("/contest5/final/open", response_model=Contest5Overview)
+async def contest5_final_open(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await contest5_open_final(session)
+
+
+@router.post("/contest5/final/reveal", response_model=Contest5Overview)
+async def contest5_final_reveal(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await contest5_reveal_final(session)
+
+
+@router.post("/contest5/final/resolve", response_model=Contest5Overview)
+async def contest5_final_resolve(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await contest5_resolve_final(session)
+
+
+@router.post("/contest5/reset", response_model=Contest5Overview)
+async def contest5_reset_endpoint(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await contest5_reset(session)
 
 
 @router.get("/contest4/blanks-all.pdf")

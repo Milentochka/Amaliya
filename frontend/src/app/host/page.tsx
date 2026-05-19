@@ -30,6 +30,12 @@ const CONTESTS: { id: number; title: string; subtitle: string; href: string | nu
     subtitle: "12 знаков × 10 черт · бумажные бланки",
     href: "/host/contest4",
   },
+  {
+    id: 5,
+    title: "Своя игра",
+    subtitle: "5 × 5 = 25 вопросов · 2 команды · финал с тайной ставкой",
+    href: "/host/contest5",
+  },
 ];
 
 const STATUS_LABEL: Record<ContestStatus, string> = {

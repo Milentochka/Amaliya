@@ -170,3 +170,80 @@ class Contest4ProjectorView(BaseModel):
 
 class Contest4ActiveIn(BaseModel):
     zodiac_key: Optional[str] = None
+
+
+# -------- Contest 5 «Своя игра» --------
+
+
+class Contest5QuestionCell(BaseModel):
+    id: int
+    value: int
+    answered_status: str
+    answered_team_id: Optional[int] = None
+    text: Optional[str] = None
+    answer: Optional[str] = None
+    image_key: Optional[str] = None
+
+
+class Contest5CategoryOut(BaseModel):
+    id: int
+    name: str
+    slug: str
+    order_index: int
+    questions: List[Contest5QuestionCell]
+
+
+class Contest5TeamOut(BaseModel):
+    id: int
+    name: str
+    color: str
+    score: int
+    final_wager: int
+    final_correct: Optional[bool] = None
+    order_index: int
+
+
+class Contest5FinalOut(BaseModel):
+    text: Optional[str] = None
+    answer: Optional[str] = None
+    revealed: bool
+
+
+class Contest5Overview(BaseModel):
+    state: ContestStateOut
+    categories: List[Contest5CategoryOut]
+    teams: List[Contest5TeamOut]
+    final: Optional[Contest5FinalOut] = None
+
+
+class Contest5ActiveQuestion(BaseModel):
+    id: int
+    category_name: str
+    value: int
+    text: str
+    answer: Optional[str] = None
+    image_key: Optional[str] = None
+
+
+class Contest5ProjectorOut(Contest5Overview):
+    active_question: Optional[Contest5ActiveQuestion] = None
+    final_active: bool = False
+    final_question: Optional[Contest5FinalOut] = None
+
+
+class Contest5OpenIn(BaseModel):
+    question_id: int
+
+
+class Contest5ResolveIn(BaseModel):
+    question_id: int
+    team_id: Optional[int] = None
+    correct: bool = False
+
+
+class Contest5TeamUpdateIn(BaseModel):
+    name: Optional[str] = None
+    color: Optional[str] = None
+    score: Optional[int] = None
+    final_wager: Optional[int] = None
+    final_correct: Optional[bool] = None

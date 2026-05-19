@@ -120,3 +120,58 @@ class ZodiacTraitTemplate(Base):
     glyph: Mapped[str] = mapped_column(Text, nullable=False)
     order_index: Mapped[int] = mapped_column(Integer, nullable=False)
     trait_text: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+# -------- Contest 5 «Своя игра» --------
+
+
+from sqlalchemy import Boolean  # noqa: E402
+
+
+class Contest5Category(Base):
+    __tablename__ = "contest5_category"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    slug: Mapped[str] = mapped_column(Text, nullable=False)
+    order_index: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
+class Contest5Team(Base):
+    __tablename__ = "contest5_team"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    color: Mapped[str] = mapped_column(Text, nullable=False, default="#c4897a")
+    score: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    final_wager: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    final_correct: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+
+class Contest5Question(Base):
+    __tablename__ = "contest5_question"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    category_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("contest5_category.id", ondelete="CASCADE")
+    )
+    value: Mapped[int] = mapped_column(Integer, nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    answer: Mapped[str] = mapped_column(Text, nullable=False)
+    image_key: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    answered_status: Mapped[str] = mapped_column(
+        Text, nullable=False, default="unanswered"
+    )
+    answered_team_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("contest5_team.id", ondelete="SET NULL"), nullable=True
+    )
+
+
+class Contest5Final(Base):
+    __tablename__ = "contest5_final"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    answer: Mapped[str] = mapped_column(Text, nullable=False)
+    revealed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

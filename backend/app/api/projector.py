@@ -11,6 +11,7 @@ from app.schemas.contests import (
     Contest2Overview,
     Contest3ProjectorView,
     Contest4ProjectorView,
+    Contest5ProjectorOut,
     ContestStateOut,
 )
 from app.services.contests import (
@@ -18,6 +19,7 @@ from app.services.contests import (
     contest2_overview,
     contest3_projector_view,
     contest4_projector_view,
+    contest5_projector_view,
     list_all_states,
 )
 
@@ -42,6 +44,11 @@ async def contest3(session: AsyncSession = Depends(get_session)):
 @router.get("/contest4", response_model=Contest4ProjectorView)
 async def contest4(session: AsyncSession = Depends(get_session)):
     return await contest4_projector_view(session)
+
+
+@router.get("/contest5", response_model=Contest5ProjectorOut)
+async def contest5(session: AsyncSession = Depends(get_session)):
+    return await contest5_projector_view(session)
 
 
 @router.get("/contest2", response_model=Contest2Overview)

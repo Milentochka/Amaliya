@@ -15,6 +15,10 @@ from app.db.models import (
     Contest2FirstCorrect,
     Contest2Question,
     Contest3Promise,
+    Contest5Category,
+    Contest5Final,
+    Contest5Question,
+    Contest5Team,
     ContestState,
     ContestStatus,
     Guest,
@@ -837,6 +841,351 @@ async def contest4_traits_for_pdf(
         "glyph": rows[0].glyph,
         "traits": [r.trait_text for r in rows],
     }
+
+
+class TeamNotFound(Exception):
+    pass
+
+
+# -------- Contest 5: «Своя игра» --------
+
+
+async def contest5_overview(
+    session: AsyncSession, *, reveal_answers: bool = True
+) -> dict:
+    """Overview for host: full state with categories, questions, teams,
+    active question, final question reveal status."""
+    state = await get_state(session, 5)
+    categories = (
+        await session.execute(
+            select(Contest5Category).order_by(Contest5Category.order_index)
+        )
+    ).scalars().all()
+    questions = (
+        await session.execute(select(Contest5Question))
+    ).scalars().all()
+    teams = (
+        await session.execute(
+            select(Contest5Team).order_by(Contest5Team.order_index)
+        )
+    ).scalars().all()
+    final = (
+        await session.execute(select(Contest5Final).where(Contest5Final.id == 1))
+    ).scalar_one_or_none()
+
+    by_cat: Dict[int, List[Contest5Question]] = {}
+    for q in questions:
+        by_cat.setdefault(q.category_id, []).append(q)
+
+    cat_views = []
+    for cat in categories:
+        cell_list = sorted(by_cat.get(cat.id, []), key=lambda x: x.value)
+        cat_views.append(
+            {
+                "id": cat.id,
+                "name": cat.name,
+                "slug": cat.slug,
+                "order_index": cat.order_index,
+                "questions": [
+                    {
+                        "id": q.id,
+                        "value": q.value,
+                        "answered_status": q.answered_status,
+                        "answered_team_id": q.answered_team_id,
+                        # Hide text/answer here — projector fetches them only
+                        # when a question is active.
+                        "text": q.text if reveal_answers else None,
+                        "answer": q.answer if reveal_answers else None,
+                        "image_key": q.image_key,
+                    }
+                    for q in cell_list
+                ],
+            }
+        )
+
+    return {
+        "state": state,
+        "categories": cat_views,
+        "teams": [
+            {
+                "id": t.id,
+                "name": t.name,
+                "color": t.color,
+                "score": t.score,
+                "final_wager": t.final_wager,
+                "final_correct": t.final_correct,
+                "order_index": t.order_index,
+            }
+            for t in teams
+        ],
+        "final": {
+            "text": final.text if (final and reveal_answers) else None,
+            "answer": final.answer if (final and reveal_answers and final.revealed) else None,
+            "revealed": bool(final and final.revealed),
+        }
+        if final
+        else None,
+    }
+
+
+def _active_question_id(state: dict) -> Optional[int]:
+    step = state.get("active_step") or {}
+    v = step.get("question_id")
+    return int(v) if isinstance(v, int) else None
+
+
+def _show_answer(state: dict) -> bool:
+    step = state.get("active_step") or {}
+    return bool(step.get("show_answer"))
+
+
+def _final_active(state: dict) -> bool:
+    step = state.get("active_step") or {}
+    return bool(step.get("final"))
+
+
+async def contest5_projector_view(session: AsyncSession) -> dict:
+    state = await get_state(session, 5)
+    overview = await contest5_overview(session, reveal_answers=False)
+    qid = _active_question_id(state)
+    final_on = _final_active(state)
+    active_q = None
+    final_q = None
+
+    if qid is not None:
+        q = (
+            await session.execute(
+                select(Contest5Question, Contest5Category)
+                .join(Contest5Category, Contest5Category.id == Contest5Question.category_id)
+                .where(Contest5Question.id == qid)
+            )
+        ).first()
+        if q is not None:
+            qrow, crow = q
+            active_q = {
+                "id": qrow.id,
+                "category_name": crow.name,
+                "value": qrow.value,
+                "text": qrow.text,
+                "answer": qrow.answer if _show_answer(state) else None,
+                "image_key": qrow.image_key,
+            }
+
+    if final_on:
+        f = (
+            await session.execute(select(Contest5Final).where(Contest5Final.id == 1))
+        ).scalar_one_or_none()
+        if f is not None:
+            final_q = {
+                "text": f.text,
+                "answer": f.answer if f.revealed else None,
+                "revealed": f.revealed,
+            }
+
+    overview["active_question"] = active_q
+    overview["final_active"] = final_on
+    overview["final_question"] = final_q
+    return overview
+
+
+async def contest5_open_question(
+    session: AsyncSession, *, question_id: int
+) -> dict:
+    q = (
+        await session.execute(
+            select(Contest5Question).where(Contest5Question.id == question_id)
+        )
+    ).scalar_one_or_none()
+    if q is None:
+        raise QuestionNotFound()
+    state = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 5)
+        )
+    ).scalar_one_or_none()
+    if state is None:
+        state = ContestState(contest_id=5)
+        session.add(state)
+    state.active_step = {
+        "question_id": question_id,
+        "show_answer": False,
+        "final": False,
+    }
+    await session.commit()
+    return await contest5_overview(session)
+
+
+async def contest5_show_answer(session: AsyncSession) -> dict:
+    state = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 5)
+        )
+    ).scalar_one_or_none()
+    if state is None:
+        return await contest5_overview(session)
+    step = dict(state.active_step or {})
+    step["show_answer"] = True
+    state.active_step = step
+    await session.commit()
+    return await contest5_overview(session)
+
+
+async def contest5_resolve(
+    session: AsyncSession,
+    *,
+    question_id: int,
+    team_id: Optional[int],
+    correct: bool,
+) -> dict:
+    q = (
+        await session.execute(
+            select(Contest5Question).where(Contest5Question.id == question_id)
+        )
+    ).scalar_one_or_none()
+    if q is None:
+        raise QuestionNotFound()
+
+    # Reverse previous resolution if re-resolving the same question.
+    if q.answered_status in ("correct", "wrong") and q.answered_team_id is not None:
+        prev = (
+            await session.execute(
+                select(Contest5Team).where(Contest5Team.id == q.answered_team_id)
+            )
+        ).scalar_one_or_none()
+        if prev is not None:
+            if q.answered_status == "correct":
+                prev.score -= q.value
+            else:
+                prev.score += q.value
+
+    if team_id is not None:
+        t = (
+            await session.execute(
+                select(Contest5Team).where(Contest5Team.id == team_id)
+            )
+        ).scalar_one_or_none()
+        if t is None:
+            raise TeamNotFound()
+        if correct:
+            t.score += q.value
+            q.answered_status = "correct"
+        else:
+            t.score -= q.value
+            q.answered_status = "wrong"
+        q.answered_team_id = team_id
+    else:
+        # No team — skipped
+        q.answered_status = "skipped"
+        q.answered_team_id = None
+
+    await session.commit()
+    return await contest5_overview(session)
+
+
+async def contest5_close_active(session: AsyncSession) -> dict:
+    state = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 5)
+        )
+    ).scalar_one_or_none()
+    if state is not None:
+        state.active_step = {}
+        await session.commit()
+    return await contest5_overview(session)
+
+
+async def contest5_update_team(
+    session: AsyncSession,
+    *,
+    team_id: int,
+    name: Optional[str] = None,
+    color: Optional[str] = None,
+    score: Optional[int] = None,
+    final_wager: Optional[int] = None,
+    final_correct: Optional[bool] = None,
+) -> dict:
+    t = (
+        await session.execute(select(Contest5Team).where(Contest5Team.id == team_id))
+    ).scalar_one_or_none()
+    if t is None:
+        raise TeamNotFound()
+    if name is not None and name.strip():
+        t.name = name.strip()
+    if color is not None and color.strip():
+        t.color = color.strip()
+    if score is not None:
+        t.score = int(score)
+    if final_wager is not None:
+        t.final_wager = max(0, int(final_wager))
+    if final_correct is not None:
+        t.final_correct = bool(final_correct)
+    await session.commit()
+    return await contest5_overview(session)
+
+
+async def contest5_open_final(session: AsyncSession) -> dict:
+    state = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 5)
+        )
+    ).scalar_one_or_none()
+    if state is None:
+        state = ContestState(contest_id=5)
+        session.add(state)
+    state.active_step = {"final": True, "show_answer": False, "question_id": None}
+    await session.commit()
+    return await contest5_overview(session)
+
+
+async def contest5_reveal_final(session: AsyncSession) -> dict:
+    f = (
+        await session.execute(select(Contest5Final).where(Contest5Final.id == 1))
+    ).scalar_one_or_none()
+    if f is not None:
+        f.revealed = True
+        await session.commit()
+    return await contest5_overview(session)
+
+
+async def contest5_resolve_final(
+    session: AsyncSession,
+) -> dict:
+    """Apply each team's final_wager based on their final_correct flag."""
+    teams = (await session.execute(select(Contest5Team))).scalars().all()
+    for t in teams:
+        if t.final_correct is True:
+            t.score += t.final_wager
+        elif t.final_correct is False:
+            t.score -= t.final_wager
+    await session.commit()
+    return await contest5_overview(session)
+
+
+async def contest5_reset(session: AsyncSession) -> dict:
+    """Reset all answered statuses, scores, wagers; clear active state."""
+    questions = (await session.execute(select(Contest5Question))).scalars().all()
+    for q in questions:
+        q.answered_status = "unanswered"
+        q.answered_team_id = None
+    teams = (await session.execute(select(Contest5Team))).scalars().all()
+    for t in teams:
+        t.score = 0
+        t.final_wager = 0
+        t.final_correct = None
+    f = (
+        await session.execute(select(Contest5Final).where(Contest5Final.id == 1))
+    ).scalar_one_or_none()
+    if f is not None:
+        f.revealed = False
+    state = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 5)
+        )
+    ).scalar_one_or_none()
+    if state is not None:
+        state.active_step = {}
+    await session.commit()
+    return await contest5_overview(session)
 
 
 async def contest4_all_zodiacs_for_pdf(session: AsyncSession) -> List[dict]:
