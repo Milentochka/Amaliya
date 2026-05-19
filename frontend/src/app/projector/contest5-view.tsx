@@ -116,19 +116,31 @@ export function Contest5Projector() {
           {q.text}
         </h1>
         {q.image_key && (
-          <div className="mx-auto mt-8 max-h-[40vh] max-w-3xl overflow-hidden rounded-3xl bg-mocha-900/30">
+          <div className="mx-auto mt-8 flex max-h-[40vh] max-w-3xl items-center justify-center overflow-hidden rounded-3xl bg-mocha-900/30">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/contests/contest5/${q.image_key}.jpg`}
               alt=""
-              className="h-full w-full object-contain"
+              className="max-h-[40vh] w-auto object-contain"
             />
           </div>
         )}
         {q.answer && (
-          <p className="mx-auto mt-10 max-w-3xl rounded-3xl bg-emerald-600/30 px-8 py-6 text-center text-3xl font-medium text-emerald-200">
-            {q.answer}
-          </p>
+          <>
+            <p className="mx-auto mt-10 max-w-3xl rounded-3xl bg-emerald-600/30 px-8 py-6 text-center text-3xl font-medium text-emerald-200">
+              {q.answer}
+            </p>
+            {q.answer_image_key && (
+              <div className="mx-auto mt-6 flex max-h-[35vh] max-w-2xl items-center justify-center overflow-hidden rounded-3xl bg-mocha-900/30">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/contests/contest5/${q.answer_image_key}.jpg`}
+                  alt=""
+                  className="max-h-[35vh] w-auto object-contain"
+                />
+              </div>
+            )}
+          </>
         )}
         <section className="mx-auto mt-12 flex max-w-4xl flex-wrap justify-center gap-6">
           {data.teams.map((t) => (

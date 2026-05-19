@@ -897,6 +897,7 @@ async def contest5_overview(
                         "text": q.text if reveal_answers else None,
                         "answer": q.answer if reveal_answers else None,
                         "image_key": q.image_key,
+                        "answer_image_key": q.answer_image_key,
                     }
                     for q in cell_list
                 ],
@@ -969,6 +970,7 @@ async def contest5_projector_view(session: AsyncSession) -> dict:
                 "text": qrow.text,
                 "answer": qrow.answer if _show_answer(state) else None,
                 "image_key": qrow.image_key,
+                "answer_image_key": qrow.answer_image_key,
             }
 
     if final_on:

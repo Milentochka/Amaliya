@@ -908,6 +908,7 @@ export interface Contest5QuestionCell {
   text: string | null;
   answer: string | null;
   image_key: string | null;
+  answer_image_key: string | null;
 }
 
 export interface Contest5Category {
@@ -948,6 +949,7 @@ export interface Contest5ActiveQuestion {
   text: string;
   answer: string | null;
   image_key: string | null;
+  answer_image_key: string | null;
 }
 
 export interface Contest5ProjectorView extends Contest5Overview {

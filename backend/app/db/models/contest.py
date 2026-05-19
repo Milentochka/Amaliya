@@ -160,6 +160,7 @@ class Contest5Question(Base):
     text: Mapped[str] = mapped_column(Text, nullable=False)
     answer: Mapped[str] = mapped_column(Text, nullable=False)
     image_key: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    answer_image_key: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     answered_status: Mapped[str] = mapped_column(
         Text, nullable=False, default="unanswered"
     )

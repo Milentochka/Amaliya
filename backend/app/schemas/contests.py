@@ -183,6 +183,7 @@ class Contest5QuestionCell(BaseModel):
     text: Optional[str] = None
     answer: Optional[str] = None
     image_key: Optional[str] = None
+    answer_image_key: Optional[str] = None
 
 
 class Contest5CategoryOut(BaseModel):
@@ -223,6 +224,7 @@ class Contest5ActiveQuestion(BaseModel):
     text: str
     answer: Optional[str] = None
     image_key: Optional[str] = None
+    answer_image_key: Optional[str] = None
 
 
 class Contest5ProjectorOut(Contest5Overview):
