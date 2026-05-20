@@ -42,6 +42,14 @@ export default function HostLayout({
             <span className="text-mocha-500">Амалия</span>
           </Link>
           <div className="flex-1" />
+          <a
+            href="/projector"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full bg-mocha-900 px-3 py-1.5 text-xs text-cream-50 transition hover:bg-mocha-700"
+          >
+            📽 Проектор ↗
+          </a>
           <Link
             href="/admin"
             className="text-xs text-mocha-400 hover:text-mocha-700"

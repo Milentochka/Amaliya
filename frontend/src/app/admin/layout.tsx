@@ -81,6 +81,14 @@ export default function AdminLayout({
               );
             })}
           </nav>
+          <a
+            href="/projector"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full bg-mocha-900 px-3 py-1.5 text-xs text-cream-50 transition hover:bg-mocha-700"
+          >
+            📽 Проектор ↗
+          </a>
           <button
             onClick={async () => {
               await adminLogout();
