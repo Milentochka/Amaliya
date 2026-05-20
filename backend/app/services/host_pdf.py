@@ -936,7 +936,7 @@ def _render_zodiac_blank(c: canvas.Canvas, z: dict) -> None:
     c.drawCentredString(
         width / 2,
         height - 44 * mm,
-        "Выберите одну черту, которую хотите передать Амалии.",
+        "Выберите две черты, которые хотите передать Амалии.",
     )
 
     # Card with traits

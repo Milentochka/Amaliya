@@ -67,7 +67,7 @@ export function Contest4Projector() {
           </h1>
           <p className="mt-6 max-w-xl text-lg text-mocha-500">
             Каждый знак передаст <span className="text-blush-600">Амалии</span>{" "}
-            по одной своей черте. Берите бумажные бланки и выбирайте.
+            по две своих черты. Берите бумажные бланки и выбирайте.
           </p>
         </div>
       </main>
@@ -119,7 +119,7 @@ export function Contest4Projector() {
       )}
 
       <p className="mt-14 text-center text-xl tracking-wide text-mocha-500">
-        Каждый выбирает одну черту, отмечает в бланке и зачитывает её{" "}
+        Каждый выбирает две черты, отмечает в бланке и зачитывает их{" "}
         <span className="text-blush-600">Амалии</span>.
       </p>
     </main>
