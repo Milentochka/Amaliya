@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 
 import { Contest5ProjectorView, projectorContest5View } from "@/lib/api";
+import { withNames } from "@/lib/highlightNames";
+
+const ACCENT_DARK = "font-semibold text-blush-300";
 
 export function Contest5Projector() {
   const [data, setData] = useState<Contest5ProjectorView | null>(null);
@@ -44,7 +47,7 @@ export function Contest5Projector() {
             Своя игра · итог
           </p>
           <h1 className="mt-4 text-8xl font-bold tracking-wide">
-            Победитель — {sorted[0]?.name ?? "?"}
+            Победитель — {withNames(sorted[0]?.name ?? "?", ACCENT_DARK)}
           </h1>
         </div>
         <section className="mx-auto mt-14 max-w-3xl space-y-5">
@@ -74,11 +77,11 @@ export function Contest5Projector() {
           Финальный вопрос
         </p>
         <h1 className="mx-auto mt-8 max-w-5xl text-center text-7xl font-medium leading-snug tracking-wide">
-          {data.final_question.text}
+          {withNames(data.final_question.text, ACCENT_DARK)}
         </h1>
         {data.final_question.revealed && data.final_question.answer && (
           <p className="mx-auto mt-10 max-w-4xl rounded-3xl bg-emerald-600/30 px-10 py-8 text-center text-6xl font-semibold tracking-wide text-emerald-200">
-            {data.final_question.answer}
+            {withNames(data.final_question.answer, "font-bold text-emerald-100")}
           </p>
         )}
         <section className="mx-auto mt-14 grid max-w-5xl gap-5 sm:grid-cols-2">
@@ -115,7 +118,7 @@ export function Contest5Projector() {
           {q.category_name} · {q.value}
         </p>
         <h1 className="mx-auto mt-6 max-w-6xl text-center text-7xl font-medium leading-snug tracking-wide">
-          {q.text}
+          {withNames(q.text, ACCENT_DARK)}
         </h1>
         {q.image_key && (
           <div className="mx-auto mt-8 flex max-h-[40vh] max-w-3xl items-center justify-center overflow-hidden rounded-3xl bg-mocha-900/30">
@@ -130,7 +133,7 @@ export function Contest5Projector() {
         {q.answer && (
           <>
             <p className="mx-auto mt-10 max-w-5xl rounded-3xl bg-emerald-600/30 px-10 py-8 text-center text-5xl font-semibold leading-snug tracking-wide text-emerald-200">
-              {q.answer}
+              {withNames(q.answer, "font-bold text-emerald-100")}
             </p>
             {q.answer_image_key && (
               <div className="mx-auto mt-6 flex max-h-[35vh] max-w-2xl items-center justify-center overflow-hidden rounded-3xl bg-mocha-900/30">

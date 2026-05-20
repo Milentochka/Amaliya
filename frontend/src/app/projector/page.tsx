@@ -14,7 +14,7 @@ function Idle() {
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-cream-100 via-cream-50 to-white">
       <div className="text-center">
         <p className="text-lg uppercase tracking-widest text-mocha-400">
-          Амалия · 24 мая 2026
+          <span className="text-blush-600">Амалия</span> · 24 мая 2026
         </p>
         <h1 className="mt-4 text-8xl font-medium tracking-wide text-mocha-900">
           Минуточку <span className="text-blush-600">…</span>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { Contest2Overview, projectorContest2Overview } from "@/lib/api";
+import { withNames } from "@/lib/highlightNames";
 
 function activeQid(data: Contest2Overview | null): number | null {
   if (!data) return null;
@@ -84,7 +85,7 @@ export function Contest2Projector() {
           Вопрос {q.order_index} из {data.total}
         </p>
         <h1 className="mt-4 text-7xl font-medium leading-snug tracking-wide text-mocha-900">
-          {q.text}
+          {withNames(q.text)}
         </h1>
       </header>
 
@@ -111,7 +112,7 @@ export function Contest2Projector() {
               >
                 {String.fromCharCode(0x0410 + i)}
               </span>
-              <span className="flex-1">{o}</span>
+              <span className="flex-1">{withNames(o)}</span>
               {correct && <span className="text-5xl">✓</span>}
             </div>
           );
@@ -124,7 +125,7 @@ export function Contest2Projector() {
             первым угадал
           </p>
           <p className="mt-3 text-6xl font-medium tracking-wide text-mocha-900">
-            {q.first_correct_name}
+            {withNames(q.first_correct_name)}
           </p>
         </section>
       )}

@@ -66,8 +66,8 @@ export function Contest4Projector() {
             Знак <span className="font-medium text-blush-600">зодиака</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-mocha-500">
-            Каждый знак передаст Амалии по одной своей черте.
-            Берите бумажные бланки и выбирайте.
+            Каждый знак передаст <span className="text-blush-600">Амалии</span>{" "}
+            по одной своей черте. Берите бумажные бланки и выбирайте.
           </p>
         </div>
       </main>
@@ -119,7 +119,8 @@ export function Contest4Projector() {
       )}
 
       <p className="mt-14 text-center text-xl tracking-wide text-mocha-500">
-        Каждый выбирает одну черту, отмечает в бланке и зачитывает её Амалии.
+        Каждый выбирает одну черту, отмечает в бланке и зачитывает её{" "}
+        <span className="text-blush-600">Амалии</span>.
       </p>
     </main>
   );

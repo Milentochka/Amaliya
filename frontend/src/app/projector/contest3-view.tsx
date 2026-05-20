@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { Contest3ProjectorView, projectorContest3View } from "@/lib/api";
+import { withNames } from "@/lib/highlightNames";
 
 export function Contest3Projector() {
   const [data, setData] = useState<Contest3ProjectorView | null>(null);
@@ -65,8 +66,9 @@ export function Contest3Projector() {
             50 <span className="font-medium text-blush-600">обещаний</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-mocha-500">
-            Каждому из гостей досталось по два обещания для Амалии.
-            Ведущий покажет, кто что обещал — встань и зачитай!
+            Каждому из гостей досталось по два обещания для{" "}
+            <span className="text-blush-600">Амалии</span>. Ведущий покажет,
+            кто что обещал — встань и зачитай!
           </p>
         </div>
       </main>
@@ -79,7 +81,7 @@ export function Contest3Projector() {
     <main className="min-h-screen bg-gradient-to-b from-cream-100 via-cream-50 to-white px-12 py-12">
       <header className="flex flex-col items-center text-center">
         <p className="text-xl uppercase tracking-widest text-mocha-400">
-          Твои обещания, Амалия — от
+          Твои обещания, <span className="text-blush-600">Амалия</span> — от
         </p>
         <div className="mt-5 flex items-center gap-6">
           <div className="relative h-40 w-40 overflow-hidden rounded-full bg-cream-100 ring-4 ring-cream-100 shadow-soft">
@@ -94,7 +96,7 @@ export function Contest3Projector() {
           </div>
           <div className="text-left">
             <h1 className="text-8xl font-medium tracking-wide text-mocha-900">
-              {g.guest_name}
+              {withNames(g.guest_name)}
             </h1>
             <p className="mt-2 text-2xl tracking-wide text-mocha-500">
               {g.avatar_name}
@@ -113,14 +115,14 @@ export function Contest3Projector() {
               обещание {i + 1}
             </p>
             <p className="mt-4 text-4xl font-medium leading-snug tracking-wide text-mocha-900">
-              {p.text}
+              {withNames(p.text)}
             </p>
           </div>
         ))}
       </section>
 
       <p className="mt-12 text-center text-xl tracking-wide text-mocha-400">
-        — с любовью, Амалии
+        — с любовью, <span className="text-blush-600">Амалии</span>
       </p>
     </main>
   );
