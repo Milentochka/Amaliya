@@ -6,13 +6,17 @@ import { useEffect, useState } from "react";
 
 import {
   Contest3CurrentGuest,
+  Contest3PromiseRow,
   Contest3Stats,
   ContestStatus,
   hostContest3Assign,
   hostContest3ClearActive,
+  hostContest3EditPromise,
+  hostContest3ListPromises,
   hostContest3MarkRead,
   hostContest3Next,
   hostContest3Reset,
+  hostContest3Restart,
   hostContest3Stats,
   hostSetContestStatus,
 } from "@/lib/api";
@@ -26,14 +30,29 @@ const STATUS_LABEL: Record<ContestStatus, string> = {
 export default function HostContest3Page() {
   const [stats, setStats] = useState<Contest3Stats | null>(null);
   const [current, setCurrent] = useState<Contest3CurrentGuest | null>(null);
+  const [promises, setPromises] = useState<Contest3PromiseRow[] | null>(null);
+  const [showPromises, setShowPromises] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const [confirmAssign, setConfirmAssign] = useState(false);
+  const [confirmRestart, setConfirmRestart] = useState(false);
   const [working, setWorking] = useState(false);
 
   async function refresh() {
     try {
       setStats(await hostContest3Stats());
+      if (showPromises) {
+        setPromises(await hostContest3ListPromises());
+      }
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function loadPromises() {
+    try {
+      setPromises(await hostContest3ListPromises());
+      setShowPromises(true);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -110,6 +129,18 @@ export default function HostContest3Page() {
       await hostContest3Reset();
       setCurrent(null);
       setConfirmReset(false);
+      await refresh();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function doRestart() {
+    setError(null);
+    try {
+      await hostContest3Restart();
+      setCurrent(null);
+      setConfirmRestart(false);
       await refresh();
     } catch (e) {
       setError((e as Error).message);
@@ -256,6 +287,13 @@ export default function HostContest3Page() {
                 </button>
               )}
               <button
+                onClick={() => setConfirmRestart(true)}
+                disabled={working}
+                className="rounded-full border border-cream-300 px-4 py-2 text-sm text-mocha-700 hover:bg-cream-100"
+              >
+                ↻ Начать заново с первого гостя
+              </button>
+              <button
                 onClick={() => setConfirmAssign(true)}
                 disabled={working}
                 className="rounded-full px-4 py-2 text-sm text-mocha-400 hover:bg-blush-100 hover:text-blush-700"
@@ -319,6 +357,73 @@ export default function HostContest3Page() {
         </section>
       )}
 
+      {/* Promise editor */}
+      <section className="rounded-3xl border border-cream-200 bg-white/70 p-5 shadow-gentle">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm uppercase tracking-wider text-mocha-400">
+            Тексты обещаний
+          </h2>
+          {!showPromises ? (
+            <button
+              onClick={loadPromises}
+              className="rounded-full border border-cream-300 px-3 py-1 text-xs text-mocha-700 hover:bg-cream-100"
+            >
+              Показать и редактировать
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowPromises(false)}
+              className="rounded-full px-3 py-1 text-xs text-mocha-400 hover:bg-cream-100"
+            >
+              Скрыть
+            </button>
+          )}
+        </div>
+        {showPromises && promises && (
+          <ul className="mt-4 space-y-2">
+            {promises.map((p) => (
+              <PromiseRow
+                key={p.id}
+                p={p}
+                onError={(m) => setError(m)}
+                onSaved={async () => {
+                  setPromises(await hostContest3ListPromises());
+                }}
+              />
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {confirmRestart && (
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-mocha-900/30 px-5">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-soft">
+            <h3 className="text-lg font-medium text-mocha-900">
+              Начать заново?
+            </h3>
+            <p className="mt-2 text-sm text-mocha-500">
+              Все пометки «прочитано» снимутся, но назначения «кому какое
+              обещание» останутся прежними. Следующий гость снова станет
+              первым в порядке показа.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmRestart(false)}
+                className="rounded-full px-4 py-2 text-sm text-mocha-500 hover:bg-cream-100"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={doRestart}
+                className="rounded-full bg-blush-500 px-4 py-2 text-sm font-medium text-white hover:bg-blush-600"
+              >
+                Начать заново
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {confirmAssign && (
         <div className="fixed inset-0 z-30 flex items-center justify-center bg-mocha-900/30 px-5">
           <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-soft">
@@ -377,5 +482,77 @@ export default function HostContest3Page() {
         </div>
       )}
     </div>
+  );
+}
+
+function PromiseRow({
+  p,
+  onSaved,
+  onError,
+}: {
+  p: Contest3PromiseRow;
+  onSaved: () => Promise<void>;
+  onError: (msg: string) => void;
+}) {
+  const [text, setText] = useState(p.text);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    setText(p.text);
+  }, [p]);
+
+  const locked = p.is_read;
+  const sameAsServer = text.trim() === p.text;
+
+  async function commit() {
+    if (sameAsServer || !text.trim()) return;
+    setSaving(true);
+    try {
+      await hostContest3EditPromise(p.id, text.trim());
+      await onSaved();
+    } catch (e) {
+      onError((e as Error).message);
+      setText(p.text);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <li className="flex items-start gap-2 rounded-2xl border border-cream-200 bg-white px-3 py-2">
+      <span className="w-8 shrink-0 text-right text-xs text-mocha-400">
+        №{p.id}
+      </span>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={commit}
+        disabled={locked}
+        rows={1}
+        className={
+          "flex-1 resize-y rounded-xl border border-transparent bg-transparent px-2 py-1 text-sm leading-snug text-mocha-900 focus:border-cream-300 focus:bg-white " +
+          (locked ? "opacity-50 cursor-not-allowed" : "")
+        }
+      />
+      <div className="flex shrink-0 flex-col items-end gap-1 text-[10px]">
+        {locked && (
+          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">
+            прочитано
+          </span>
+        )}
+        {!locked && p.is_assigned && (
+          <span className="rounded-full bg-cream-200 px-2 py-0.5 text-mocha-500">
+            назначено
+          </span>
+        )}
+        {!locked && !p.is_assigned && (
+          <span className="rounded-full bg-blush-100 px-2 py-0.5 text-blush-700">
+            в пуле
+          </span>
+        )}
+        {saving && (
+          <span className="text-mocha-400">сохраняю…</span>
+        )}
+      </div>
+    </li>
   );
 }

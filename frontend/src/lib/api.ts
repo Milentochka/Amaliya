@@ -821,6 +821,43 @@ export async function hostContest3Reset(): Promise<void> {
   if (!res.ok) throw new Error(await parseError(res));
 }
 
+export async function hostContest3Restart(): Promise<void> {
+  const res = await fetch(`${API_URL}/api/host/contest3/restart`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export interface Contest3PromiseRow {
+  id: number;
+  text: string;
+  is_assigned: boolean;
+  is_read: boolean;
+}
+
+export async function hostContest3ListPromises(): Promise<Contest3PromiseRow[]> {
+  const res = await fetch(`${API_URL}/api/host/contest3/promises`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Contest3PromiseRow[];
+}
+
+export async function hostContest3EditPromise(
+  promiseId: number,
+  text: string,
+): Promise<{ id: number; text: string }> {
+  const res = await fetch(`${API_URL}/api/host/contest3/promises/${promiseId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ text }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as { id: number; text: string };
+}
+
 export async function projectorContest3View(): Promise<Contest3ProjectorView> {
   const res = await fetch(`${API_URL}/api/projector/contest3`, {
     credentials: "include",

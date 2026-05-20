@@ -32,6 +32,7 @@ from app.schemas.contests import (
 from app.services.contests import (
     InvalidStatus,
     NoGuestPending,
+    PromiseNotFound,
     QuestionNotFound,
     TeamNotFound,
     TraitNotFound,
@@ -46,9 +47,12 @@ from app.services.contests import (
     contest3_admin_overview,
     contest3_assign_random,
     contest3_clear_active,
+    contest3_edit_promise,
+    contest3_list_promises,
     contest3_mark_read,
     contest3_pick_next,
     contest3_reset,
+    contest3_restart,
     contest4_overview,
     contest4_set_active,
     contest5_close_active,
@@ -330,6 +334,51 @@ async def contest3_reset_endpoint(
     await _require_admin(session, amaliya_admin_session)
     await contest3_reset(session)
     return {"message": "reset"}
+
+
+@router.post("/contest3/restart", response_model=MessageOut)
+async def contest3_restart_endpoint(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    """Start the run again with the SAME assignments — only unmark reads."""
+    await _require_admin(session, amaliya_admin_session)
+    await contest3_restart(session)
+    return {"message": "restarted"}
+
+
+@router.get("/contest3/promises")
+async def contest3_list(
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await contest3_list_promises(session)
+
+
+@router.patch("/contest3/promises/{promise_id}")
+async def contest3_promise_patch(
+    promise_id: int,
+    payload: dict,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    text = (payload.get("text") or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Текст не может быть пустым")
+    try:
+        return await contest3_edit_promise(
+            session, promise_id=promise_id, text=text
+        )
+    except PromiseNotFound:
+        raise HTTPException(status_code=404, detail="Обещание не найдено")
+    except ValueError as e:
+        labels = {
+            "already_read": "Это обещание уже зачитали, нельзя менять",
+            "currently_active": "Это обещание сейчас на проекторе, нельзя менять",
+        }
+        raise HTTPException(status_code=400, detail=labels.get(str(e), str(e)))
 
 
 @router.get("/contest3/cards.pdf")

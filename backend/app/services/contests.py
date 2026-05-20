@@ -683,6 +683,74 @@ async def contest3_reset(session: AsyncSession) -> None:
     await session.commit()
 
 
+async def contest3_restart(session: AsyncSession) -> None:
+    """Same as reset but keeps the assignments: only marks all promises
+    as unread again and clears the active step. Used for a re-run of the
+    contest with the same distribution."""
+    promises = (
+        await session.execute(select(Contest3Promise))
+    ).scalars().all()
+    for p in promises:
+        p.read_aloud_at = None
+    state = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 3)
+        )
+    ).scalar_one_or_none()
+    if state is not None:
+        state.active_step = {}
+    await session.commit()
+
+
+async def contest3_list_promises(session: AsyncSession) -> List[dict]:
+    """All 50 promises with read/assigned flags but WITHOUT exposing which
+    guest got which one — keeps the surprise."""
+    promises = (
+        await session.execute(
+            select(Contest3Promise).order_by(Contest3Promise.id)
+        )
+    ).scalars().all()
+    return [
+        {
+            "id": p.id,
+            "text": p.text,
+            "is_assigned": p.assigned_guest_id is not None,
+            "is_read": p.read_aloud_at is not None,
+        }
+        for p in promises
+    ]
+
+
+async def contest3_edit_promise(
+    session: AsyncSession, *, promise_id: int, text: str
+) -> dict:
+    """Edit promise text. Refuses to edit a promise that has already been
+    read aloud OR is currently active on the projector."""
+    p = (
+        await session.execute(
+            select(Contest3Promise).where(Contest3Promise.id == promise_id)
+        )
+    ).scalar_one_or_none()
+    if p is None:
+        raise PromiseNotFound()
+    if p.read_aloud_at is not None:
+        raise ValueError("already_read")
+    # Check that this promise is not in the active step
+    state = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 3)
+        )
+    ).scalar_one_or_none()
+    if state is not None:
+        active = state.active_step or {}
+        active_ids = active.get("promise_ids") or []
+        if promise_id in active_ids:
+            raise ValueError("currently_active")
+    p.text = text.strip()
+    await session.commit()
+    return {"id": p.id, "text": p.text}
+
+
 async def contest3_all_promises_for_pdf(
     session: AsyncSession,
 ) -> List[str]:
