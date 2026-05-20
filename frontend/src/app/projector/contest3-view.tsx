@@ -78,46 +78,48 @@ export function Contest3Projector() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-cream-100 via-cream-50 to-white px-12 py-12">
       <header className="flex flex-col items-center text-center">
-        <p className="text-sm uppercase tracking-widest text-mocha-400">
+        <p className="text-xl uppercase tracking-widest text-mocha-400">
           Твои обещания, Амалия — от
         </p>
-        <div className="mt-4 flex items-center gap-5">
-          <div className="relative h-32 w-32 overflow-hidden rounded-full bg-cream-100 ring-4 ring-cream-100 shadow-soft">
+        <div className="mt-5 flex items-center gap-6">
+          <div className="relative h-40 w-40 overflow-hidden rounded-full bg-cream-100 ring-4 ring-cream-100 shadow-soft">
             <Image
               src={g.avatar_url}
               alt={g.avatar_name}
               fill
-              sizes="128px"
+              sizes="160px"
               className="object-contain p-2"
               unoptimized
             />
           </div>
           <div className="text-left">
-            <h1 className="text-6xl font-light text-mocha-900">
+            <h1 className="text-8xl font-medium tracking-wide text-mocha-900">
               {g.guest_name}
             </h1>
-            <p className="mt-1 text-lg text-mocha-500">{g.avatar_name}</p>
+            <p className="mt-2 text-2xl tracking-wide text-mocha-500">
+              {g.avatar_name}
+            </p>
           </div>
         </div>
       </header>
 
-      <section className="mx-auto mt-12 grid max-w-5xl gap-6 sm:grid-cols-2">
+      <section className="mx-auto mt-14 grid max-w-6xl gap-6 sm:grid-cols-2">
         {g.promises.map((p, i) => (
           <div
             key={p.id}
-            className="rounded-3xl border border-cream-200 bg-white/80 p-8 shadow-soft"
+            className="rounded-3xl border border-cream-200 bg-white/80 p-10 shadow-soft"
           >
-            <p className="text-xs uppercase tracking-widest text-blush-600">
+            <p className="text-lg uppercase tracking-widest text-blush-600">
               обещание {i + 1}
             </p>
-            <p className="mt-3 text-3xl font-light leading-snug text-mocha-900">
+            <p className="mt-4 text-4xl font-medium leading-snug tracking-wide text-mocha-900">
               {p.text}
             </p>
           </div>
         ))}
       </section>
 
-      <p className="mt-10 text-center text-sm text-mocha-400">
+      <p className="mt-12 text-center text-xl tracking-wide text-mocha-400">
         — с любовью, Амалии
       </p>
     </main>

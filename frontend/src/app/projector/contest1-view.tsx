@@ -69,12 +69,12 @@ export function Contest1Projector() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-cream-100 via-cream-50 to-white px-10 py-8">
       <header className="text-center">
-        <p className="text-xs uppercase tracking-widest text-mocha-400">
+        <p className="text-lg uppercase tracking-widest text-mocha-400">
           Конкурс 1
         </p>
-        <h1 className="mt-2 text-5xl font-light text-mocha-900">
+        <h1 className="mt-3 text-7xl font-medium tracking-wide text-mocha-900">
           На кого похожа{" "}
-          <span className="font-medium text-blush-600">Амалия?</span>
+          <span className="text-blush-600">Амалия?</span>
         </h1>
       </header>
 
@@ -127,7 +127,7 @@ export function Contest1Projector() {
             t.votes_mom + t.votes_dad + t.votes_unique + relTotal;
           return (
             <div key={t.id} className="space-y-1">
-              <div className="text-sm font-medium text-mocha-900">
+              <div className="text-lg font-semibold tracking-wide text-mocha-900">
                 {t.order_index}. {t.name}
               </div>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1">
@@ -169,14 +169,14 @@ export function Contest1Projector() {
       </section>
 
       {/* Verdict */}
-      <section className="mt-8 rounded-3xl border border-blush-200 bg-blush-100/40 p-8 text-center">
-        <p className="text-xs uppercase tracking-widest text-blush-700">
+      <section className="mt-8 rounded-3xl border border-blush-200 bg-blush-100/40 p-10 text-center">
+        <p className="text-lg uppercase tracking-widest text-blush-700">
           {isClosed ? "Итог конкурса" : "Текущий лидер"}
         </p>
-        <p className="mt-2 text-5xl font-light text-mocha-900">
+        <p className="mt-3 text-7xl font-medium tracking-wide text-mocha-900">
           {summary.verdict ?? "—"}
         </p>
-        <p className="mt-3 text-sm text-mocha-500">
+        <p className="mt-4 text-xl tracking-wide text-mocha-500">
           мама {summary.totals.mom} · папа {summary.totals.dad} · родственники{" "}
           {summary.totals.relatives}
           {summary.top_relative_name &&

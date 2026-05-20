@@ -13,13 +13,15 @@ function Idle() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-cream-100 via-cream-50 to-white">
       <div className="text-center">
-        <p className="text-xs uppercase tracking-widest text-mocha-400">
+        <p className="text-lg uppercase tracking-widest text-mocha-400">
           Амалия · 24 мая 2026
         </p>
-        <h1 className="mt-3 text-5xl font-light text-mocha-900">
-          Минуточку <span className="font-medium text-blush-600">…</span>
+        <h1 className="mt-4 text-8xl font-medium tracking-wide text-mocha-900">
+          Минуточку <span className="text-blush-600">…</span>
         </h1>
-        <p className="mt-4 text-mocha-500">Ведущий вот-вот начнёт конкурс.</p>
+        <p className="mt-6 text-2xl tracking-wide text-mocha-500">
+          Ведущий вот-вот начнёт конкурс.
+        </p>
       </div>
     </main>
   );
