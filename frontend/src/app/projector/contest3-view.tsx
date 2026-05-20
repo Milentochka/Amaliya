@@ -68,7 +68,7 @@ export function Contest3Projector() {
           <p className="mt-6 max-w-xl text-lg text-mocha-500">
             Каждому из гостей досталось по два обещания для{" "}
             <span className="text-blush-600">Амалии</span>. Ведущий покажет,
-            кто что обещал — встань и зачитай!
+            кто что обещал — встаньте и зачитайте!
           </p>
         </div>
       </main>
