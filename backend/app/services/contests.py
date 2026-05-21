@@ -703,22 +703,86 @@ async def contest3_restart(session: AsyncSession) -> None:
 
 
 async def contest3_list_promises(session: AsyncSession) -> List[dict]:
-    """All 50 promises with read/assigned flags but WITHOUT exposing which
-    guest got which one — keeps the surprise."""
+    """All 50 promises with read/assigned flags + guest name when assigned.
+
+    Admin tooling — the panel reveals assignments so the host can curate
+    who gets what. Guests still don't see this; the projector only shows
+    the active reveal."""
     promises = (
         await session.execute(
             select(Contest3Promise).order_by(Contest3Promise.id)
         )
     ).scalars().all()
-    return [
-        {
-            "id": p.id,
-            "text": p.text,
-            "is_assigned": p.assigned_guest_id is not None,
-            "is_read": p.read_aloud_at is not None,
-        }
-        for p in promises
-    ]
+
+    guests_by_id = {
+        g.id: g
+        for g in (await session.execute(select(Guest))).scalars().all()
+    }
+
+    out = []
+    for p in promises:
+        guest = (
+            guests_by_id.get(p.assigned_guest_id)
+            if p.assigned_guest_id
+            else None
+        )
+        out.append(
+            {
+                "id": p.id,
+                "text": p.text,
+                "is_assigned": p.assigned_guest_id is not None,
+                "is_read": p.read_aloud_at is not None,
+                "guest_id": str(p.assigned_guest_id) if p.assigned_guest_id else None,
+                "guest_name": guest.name if guest else None,
+            }
+        )
+    return out
+
+
+async def contest3_assign_promise(
+    session: AsyncSession, *, promise_id: int, guest_id: Optional[uuid.UUID]
+) -> dict:
+    p = (
+        await session.execute(
+            select(Contest3Promise).where(Contest3Promise.id == promise_id)
+        )
+    ).scalar_one_or_none()
+    if p is None:
+        raise PromiseNotFound()
+    if p.read_aloud_at is not None:
+        raise ValueError("already_read")
+    # Don't allow swap while the promise is on the projector
+    state = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 3)
+        )
+    ).scalar_one_or_none()
+    if state is not None:
+        active = state.active_step or {}
+        active_ids = active.get("promise_ids") or []
+        if promise_id in active_ids:
+            raise ValueError("currently_active")
+
+    if guest_id is not None:
+        g = (
+            await session.execute(select(Guest).where(Guest.id == guest_id))
+        ).scalar_one_or_none()
+        if g is None:
+            raise ValueError("guest_not_found")
+    p.assigned_guest_id = guest_id
+    await session.commit()
+
+    name = None
+    if guest_id is not None:
+        gobj = (
+            await session.execute(select(Guest).where(Guest.id == guest_id))
+        ).scalar_one()
+        name = gobj.name
+    return {
+        "id": p.id,
+        "guest_id": str(guest_id) if guest_id else None,
+        "guest_name": name,
+    }
 
 
 async def contest3_edit_promise(

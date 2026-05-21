@@ -1,7 +1,7 @@
 """Host endpoints — controls contests, requires admin cookie."""
 
 import uuid
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
@@ -45,6 +45,7 @@ from app.services.contests import (
     contest2_set_active,
     contest2_set_first_correct,
     contest3_admin_overview,
+    contest3_assign_promise,
     contest3_assign_random,
     contest3_clear_active,
     contest3_edit_promise,
@@ -377,6 +378,36 @@ async def contest3_promise_patch(
         labels = {
             "already_read": "Это обещание уже зачитали, нельзя менять",
             "currently_active": "Это обещание сейчас на проекторе, нельзя менять",
+        }
+        raise HTTPException(status_code=400, detail=labels.get(str(e), str(e)))
+
+
+@router.patch("/contest3/promises/{promise_id}/assign")
+async def contest3_promise_assign(
+    promise_id: int,
+    payload: dict,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    raw = payload.get("guest_id")
+    guest_id: Optional[uuid.UUID] = None
+    if raw:
+        try:
+            guest_id = uuid.UUID(str(raw))
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Неверный guest_id")
+    try:
+        return await contest3_assign_promise(
+            session, promise_id=promise_id, guest_id=guest_id
+        )
+    except PromiseNotFound:
+        raise HTTPException(status_code=404, detail="Обещание не найдено")
+    except ValueError as e:
+        labels = {
+            "already_read": "Это обещание уже зачитали, нельзя менять",
+            "currently_active": "Это обещание сейчас на проекторе, нельзя менять",
+            "guest_not_found": "Гость не найден",
         }
         raise HTTPException(status_code=400, detail=labels.get(str(e), str(e)))
 

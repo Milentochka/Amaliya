@@ -5,11 +5,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import {
+  adminListGuests,
   Contest3CurrentGuest,
   Contest3PromiseRow,
   Contest3Stats,
   ContestStatus,
+  GuestAdmin,
   hostContest3Assign,
+  hostContest3AssignPromise,
   hostContest3ClearActive,
   hostContest3EditPromise,
   hostContest3ListPromises,
@@ -32,6 +35,7 @@ export default function HostContest3Page() {
   const [current, setCurrent] = useState<Contest3CurrentGuest | null>(null);
   const [promises, setPromises] = useState<Contest3PromiseRow[] | null>(null);
   const [showPromises, setShowPromises] = useState(false);
+  const [guests, setGuests] = useState<GuestAdmin[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const [confirmAssign, setConfirmAssign] = useState(false);
@@ -51,7 +55,12 @@ export default function HostContest3Page() {
 
   async function loadPromises() {
     try {
-      setPromises(await hostContest3ListPromises());
+      const [list, gs] = await Promise.all([
+        hostContest3ListPromises(),
+        adminListGuests(),
+      ]);
+      setPromises(list);
+      setGuests(gs);
       setShowPromises(true);
     } catch (e) {
       setError((e as Error).message);
@@ -385,6 +394,7 @@ export default function HostContest3Page() {
               <PromiseRow
                 key={p.id}
                 p={p}
+                guests={guests}
                 onError={(m) => setError(m)}
                 onSaved={async () => {
                   setPromises(await hostContest3ListPromises());
@@ -487,10 +497,12 @@ export default function HostContest3Page() {
 
 function PromiseRow({
   p,
+  guests,
   onSaved,
   onError,
 }: {
   p: Contest3PromiseRow;
+  guests: GuestAdmin[];
   onSaved: () => Promise<void>;
   onError: (msg: string) => void;
 }) {
@@ -503,7 +515,7 @@ function PromiseRow({
   const locked = p.is_read;
   const sameAsServer = text.trim() === p.text;
 
-  async function commit() {
+  async function commitText() {
     if (sameAsServer || !text.trim()) return;
     setSaving(true);
     try {
@@ -517,41 +529,74 @@ function PromiseRow({
     }
   }
 
+  async function changeGuest(newGuestId: string) {
+    const nextId = newGuestId === "" ? null : newGuestId;
+    if (nextId === p.guest_id) return;
+    setSaving(true);
+    try {
+      await hostContest3AssignPromise(p.id, nextId);
+      await onSaved();
+    } catch (e) {
+      onError((e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
-    <li className="flex items-start gap-2 rounded-2xl border border-cream-200 bg-white px-3 py-2">
-      <span className="w-8 shrink-0 text-right text-xs text-mocha-400">
-        №{p.id}
-      </span>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        onBlur={commit}
-        disabled={locked}
-        rows={1}
-        className={
-          "flex-1 resize-y rounded-xl border border-transparent bg-transparent px-2 py-1 text-sm leading-snug text-mocha-900 focus:border-cream-300 focus:bg-white " +
-          (locked ? "opacity-50 cursor-not-allowed" : "")
-        }
-      />
-      <div className="flex shrink-0 flex-col items-end gap-1 text-[10px]">
-        {locked && (
-          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">
-            прочитано
-          </span>
-        )}
-        {!locked && p.is_assigned && (
-          <span className="rounded-full bg-cream-200 px-2 py-0.5 text-mocha-500">
-            назначено
-          </span>
-        )}
-        {!locked && !p.is_assigned && (
-          <span className="rounded-full bg-blush-100 px-2 py-0.5 text-blush-700">
-            в пуле
-          </span>
-        )}
-        {saving && (
-          <span className="text-mocha-400">сохраняю…</span>
-        )}
+    <li className="rounded-2xl border border-cream-200 bg-white px-3 py-2">
+      <div className="flex items-start gap-2">
+        <span className="w-8 shrink-0 text-right text-xs text-mocha-400">
+          №{p.id}
+        </span>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onBlur={commitText}
+          disabled={locked}
+          rows={1}
+          className={
+            "flex-1 resize-y rounded-xl border border-transparent bg-transparent px-2 py-1 text-sm leading-snug text-mocha-900 focus:border-cream-300 focus:bg-white " +
+            (locked ? "opacity-50 cursor-not-allowed" : "")
+          }
+        />
+        <div className="flex shrink-0 flex-col items-end gap-1 text-[10px]">
+          {locked && (
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">
+              прочитано
+            </span>
+          )}
+          {!locked && p.is_assigned && (
+            <span className="rounded-full bg-cream-200 px-2 py-0.5 text-mocha-500">
+              назначено
+            </span>
+          )}
+          {!locked && !p.is_assigned && (
+            <span className="rounded-full bg-blush-100 px-2 py-0.5 text-blush-700">
+              в пуле
+            </span>
+          )}
+          {saving && <span className="text-mocha-400">сохраняю…</span>}
+        </div>
+      </div>
+      <div className="ml-10 mt-1 flex items-center gap-2">
+        <span className="text-[11px] text-mocha-400">Кому:</span>
+        <select
+          value={p.guest_id ?? ""}
+          onChange={(e) => changeGuest(e.target.value)}
+          disabled={locked}
+          className={
+            "flex-1 rounded-full border border-cream-300 bg-white px-2 py-1 text-xs text-mocha-700 outline-none focus:border-blush-400 " +
+            (locked ? "opacity-50 cursor-not-allowed" : "")
+          }
+        >
+          <option value="">— в пуле —</option>
+          {guests.map((g) => (
+            <option key={g.id} value={g.id}>
+              {g.name}
+            </option>
+          ))}
+        </select>
       </div>
     </li>
   );

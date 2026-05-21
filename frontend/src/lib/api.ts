@@ -834,6 +834,8 @@ export interface Contest3PromiseRow {
   text: string;
   is_assigned: boolean;
   is_read: boolean;
+  guest_id: string | null;
+  guest_name: string | null;
 }
 
 export async function hostContest3ListPromises(): Promise<Contest3PromiseRow[]> {
@@ -856,6 +858,27 @@ export async function hostContest3EditPromise(
   });
   if (!res.ok) throw new Error(await parseError(res));
   return (await res.json()) as { id: number; text: string };
+}
+
+export async function hostContest3AssignPromise(
+  promiseId: number,
+  guestId: string | null,
+): Promise<{ id: number; guest_id: string | null; guest_name: string | null }> {
+  const res = await fetch(
+    `${API_URL}/api/host/contest3/promises/${promiseId}/assign`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ guest_id: guestId }),
+    },
+  );
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as {
+    id: number;
+    guest_id: string | null;
+    guest_name: string | null;
+  };
 }
 
 export async function projectorContest3View(): Promise<Contest3ProjectorView> {
