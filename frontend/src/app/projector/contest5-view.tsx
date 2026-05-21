@@ -126,7 +126,7 @@ export function Contest5Projector() {
             <img
               src={`/contests/contest5/${q.image_key}.jpg`}
               alt=""
-              className="max-h-[55vh] w-auto object-contain"
+              className="max-h-[55vh] min-h-[40vh] w-auto object-contain"
             />
           </div>
         )}
@@ -141,7 +141,7 @@ export function Contest5Projector() {
                 <img
                   src={`/contests/contest5/${q.answer_image_key}.jpg`}
                   alt=""
-                  className="max-h-[55vh] w-auto object-contain"
+                  className="max-h-[55vh] min-h-[40vh] w-auto object-contain"
                 />
               </div>
             )}
