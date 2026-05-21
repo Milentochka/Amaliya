@@ -11,6 +11,7 @@ from app.db.database import get_session
 from app.schemas.auth import MessageOut
 from app.schemas.contests import (
     Contest1Overview,
+    Contest1StageIn,
     Contest1TallyIn,
     Contest1TraitOut,
     Contest2ActiveIn,
@@ -38,6 +39,7 @@ from app.services.contests import (
     TraitNotFound,
     contest1_overview,
     contest1_reset,
+    contest1_set_stage,
     contest1_set_tally,
     contest2_clear_first_correct,
     contest2_overview,
@@ -160,6 +162,19 @@ async def contest1_reset_endpoint(
     await _require_admin(session, amaliya_admin_session)
     await contest1_reset(session)
     return {"message": "reset"}
+
+
+@router.post("/contest1/stage", response_model=ContestStateOut)
+async def contest1_stage(
+    payload: Contest1StageIn,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    try:
+        return await contest1_set_stage(session, stage=payload.stage)
+    except InvalidStatus:
+        raise HTTPException(status_code=400, detail="Стейдж должен быть 1, 2 или 3")
 
 
 @router.get("/contest1/blank.pdf")

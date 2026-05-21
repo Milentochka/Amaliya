@@ -6,10 +6,12 @@ import { useEffect, useState } from "react";
 
 import {
   Contest1Overview,
+  Contest1Stage,
   Contest1Trait,
   ContestStatus,
   hostContest1Overview,
   hostContest1Reset,
+  hostContest1SetStage,
   hostContest1SetTally,
   hostSetContestStatus,
   RelativeVote,
@@ -59,6 +61,16 @@ export default function HostContest1Page() {
     }
   }
 
+  async function changeStage(s: Contest1Stage) {
+    setError(null);
+    try {
+      await hostContest1SetStage(s);
+      await refresh();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
   if (!data && !error) return <p className="text-mocha-400">Загрузка…</p>;
   if (error && !data)
     return (
@@ -70,6 +82,8 @@ export default function HostContest1Page() {
 
   const status = data.state.status;
   const summary = data.summary;
+  const rawStage = (data.state.active_step as { stage?: number } | null)?.stage;
+  const stage: Contest1Stage = rawStage === 2 || rawStage === 3 ? rawStage : 1;
 
   return (
     <div className="space-y-6">
@@ -119,6 +133,36 @@ export default function HostContest1Page() {
           </button>
         </div>
       </header>
+
+      {/* Projector stage switcher */}
+      <section className="rounded-3xl border border-cream-200 bg-white/70 p-4 shadow-gentle">
+        <p className="text-xs uppercase tracking-wider text-mocha-400">
+          Что показывать на проекторе
+        </p>
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          {([
+            [1, "1 · фото"],
+            [2, "2 · голоса"],
+            [3, "3 · итог"],
+          ] as const).map(([n, label]) => {
+            const active = stage === n;
+            return (
+              <button
+                key={n}
+                onClick={() => changeStage(n)}
+                className={
+                  "rounded-2xl px-3 py-2 text-sm transition " +
+                  (active
+                    ? "bg-blush-500 text-white shadow-soft"
+                    : "border border-cream-300 bg-white text-mocha-700 hover:bg-cream-100")
+                }
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
       {/* Photo collage — like the PDF */}
       <section className="flex flex-wrap items-end justify-center gap-3 rounded-3xl border border-cream-200 bg-white/70 p-5 shadow-gentle">

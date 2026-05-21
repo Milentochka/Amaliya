@@ -266,7 +266,36 @@ async def contest1_reset(session: AsyncSession) -> None:
         t.votes_dad = 0
         t.votes_unique = 0
         t.votes_relatives = []
+    row = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 1)
+        )
+    ).scalar_one_or_none()
+    if row is not None:
+        row.active_step = {}
     await session.commit()
+
+
+async def contest1_set_stage(session: AsyncSession, stage: int) -> dict:
+    """Projector view has 3 slides: 1=photos, 2=votes, 3=verdict."""
+    if stage not in (1, 2, 3):
+        raise InvalidStatus()
+    row = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 1)
+        )
+    ).scalar_one_or_none()
+    if row is None:
+        row = ContestState(
+            contest_id=1,
+            status=ContestStatus.NOT_STARTED,
+            active_step={"stage": stage},
+        )
+        session.add(row)
+    else:
+        row.active_step = {**(row.active_step or {}), "stage": stage}
+    await session.commit()
+    return await get_state(session, 1)
 
 
 # -------- Contest 2: «Знаете ли вы» --------

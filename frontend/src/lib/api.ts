@@ -530,6 +530,8 @@ export async function adminListGame(): Promise<GamePlayer[]> {
 
 export type ContestStatus = "not_started" | "active" | "closed";
 
+export type Contest1Stage = 1 | 2 | 3;
+
 export interface ContestState {
   contest_id: number;
   status: ContestStatus;
@@ -624,6 +626,19 @@ export async function hostContest1Reset(): Promise<void> {
     credentials: "include",
   });
   if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function hostContest1SetStage(
+  stage: Contest1Stage,
+): Promise<ContestState> {
+  const res = await fetch(`${API_URL}/api/host/contest1/stage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ stage }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as ContestState;
 }
 
 export async function projectorContest1Overview(): Promise<Contest1Overview> {

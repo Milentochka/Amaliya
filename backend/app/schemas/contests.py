@@ -50,6 +50,10 @@ class Contest1TallyIn(BaseModel):
     votes_relatives: Optional[List[RelativeVote]] = None
 
 
+class Contest1StageIn(BaseModel):
+    stage: Literal[1, 2, 3]
+
+
 # -------- Contest 2 --------
 
 
