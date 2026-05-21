@@ -121,12 +121,12 @@ export function Contest5Projector() {
           {withNames(q.text, ACCENT_DARK)}
         </h1>
         {q.image_key && (
-          <div className="mx-auto mt-8 flex max-h-[40vh] max-w-3xl items-center justify-center overflow-hidden rounded-3xl bg-mocha-900/30">
+          <div className="mx-auto mt-8 flex max-h-[55vh] w-full max-w-5xl items-center justify-center overflow-hidden rounded-3xl bg-mocha-900/30">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/contests/contest5/${q.image_key}.jpg`}
               alt=""
-              className="max-h-[40vh] w-auto object-contain"
+              className="max-h-[55vh] w-auto object-contain"
             />
           </div>
         )}
@@ -136,12 +136,12 @@ export function Contest5Projector() {
               {withNames(q.answer, "font-bold text-emerald-100")}
             </p>
             {q.answer_image_key && (
-              <div className="mx-auto mt-6 flex max-h-[35vh] max-w-2xl items-center justify-center overflow-hidden rounded-3xl bg-mocha-900/30">
+              <div className="mx-auto mt-6 flex max-h-[55vh] w-full max-w-5xl items-center justify-center overflow-hidden rounded-3xl bg-mocha-900/30">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`/contests/contest5/${q.answer_image_key}.jpg`}
                   alt=""
-                  className="max-h-[35vh] w-auto object-contain"
+                  className="max-h-[55vh] w-auto object-contain"
                 />
               </div>
             )}
