@@ -180,7 +180,7 @@ export function Contest5Projector() {
           {data.categories.map((c) => (
             <div
               key={c.id}
-              className="rounded-2xl bg-mocha-900 px-3 py-5 text-center text-xl font-semibold uppercase tracking-wider text-blush-300"
+              className="flex min-h-[120px] items-center justify-center rounded-2xl bg-mocha-900 px-3 py-6 text-center text-4xl font-semibold uppercase tracking-wider text-blush-300"
             >
               {c.name}
             </div>
