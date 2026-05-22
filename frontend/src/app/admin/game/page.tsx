@@ -63,6 +63,7 @@ export default function AdminGamePage() {
               <th className="px-4 py-3 text-left">Игрок</th>
               <th className="px-4 py-3 text-right">Попыток</th>
               <th className="px-4 py-3 text-right">Всего</th>
+              <th className="px-4 py-3 text-right">Средняя</th>
               <th className="px-4 py-3 text-right">Лучшая</th>
               <th className="px-4 py-3 text-left">Первая</th>
               <th className="px-4 py-3 text-left">Последняя</th>
@@ -72,7 +73,7 @@ export default function AdminGamePage() {
             {rows?.length === 0 && (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={8}
                   className="px-4 py-8 text-center text-sm text-mocha-400"
                 >
                   Пока никто не играл.
@@ -110,6 +111,12 @@ export default function AdminGamePage() {
                 </td>
                 <td className="px-4 py-3 text-right font-medium text-mocha-900">
                   {r.total_score.toLocaleString("ru-RU")}
+                </td>
+                <td className="px-4 py-3 text-right text-mocha-700">
+                  {(r.attempts > 0
+                    ? Math.round(r.total_score / r.attempts)
+                    : 0
+                  ).toLocaleString("ru-RU")}
                 </td>
                 <td className="px-4 py-3 text-right text-mocha-700">
                   {r.best_score.toLocaleString("ru-RU")}
