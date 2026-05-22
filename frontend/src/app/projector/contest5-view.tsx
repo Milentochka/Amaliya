@@ -121,12 +121,12 @@ export function Contest5Projector() {
           {withNames(q.text, ACCENT_DARK)}
         </h1>
         {q.image_key && (
-          <div className="mx-auto mt-8 flex max-h-[55vh] w-full max-w-5xl items-center justify-center overflow-hidden rounded-3xl bg-mocha-900/30">
+          <div className="mx-auto mt-6 flex max-h-[32vh] w-full max-w-4xl items-center justify-center overflow-hidden rounded-3xl bg-mocha-900/30">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/contests/contest5/${q.image_key}.jpg`}
               alt=""
-              className="max-h-[55vh] min-h-[40vh] w-auto object-contain"
+              className="max-h-[32vh] min-h-[22vh] w-auto object-contain"
             />
           </div>
         )}
