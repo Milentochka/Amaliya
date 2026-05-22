@@ -41,7 +41,7 @@ export function Contest3Projector() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-cream-100 via-cream-50 to-white px-12">
         <div className="text-center">
-          <p className="text-xs uppercase tracking-widest text-mocha-400">
+          <p className="text-lg uppercase tracking-widest text-mocha-400">
             Конкурс 3 · итог
           </p>
           <h1 className="mt-3 text-6xl font-light leading-tight text-mocha-900">
@@ -59,13 +59,13 @@ export function Contest3Projector() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-cream-100 via-cream-50 to-white">
         <div className="text-center">
-          <p className="text-xs uppercase tracking-widest text-mocha-400">
+          <p className="text-lg uppercase tracking-widest text-mocha-400">
             Конкурс 3
           </p>
           <h1 className="mt-3 text-7xl font-light text-mocha-900">
             50 <span className="font-medium text-blush-600">обещаний</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-mocha-500">
+          <p className="mt-6 max-w-3xl text-2xl tracking-wide text-mocha-500">
             Каждому из гостей досталось по два обещания для{" "}
             <span className="text-blush-600">Амалии</span>. Ведущий покажет,
             кто что обещал — встаньте и зачитайте!

@@ -40,13 +40,13 @@ export function Contest4Projector() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-cream-100 via-cream-50 to-white">
         <div className="text-center">
-          <p className="text-xs uppercase tracking-widest text-mocha-400">
+          <p className="text-lg uppercase tracking-widest text-mocha-400">
             Конкурс 4 · итог
           </p>
           <h1 className="mt-3 text-6xl font-light text-mocha-900">
             Спасибо за <span className="font-medium text-blush-600">черты</span>
           </h1>
-          <p className="mt-4 text-mocha-500">
+          <p className="mt-6 text-2xl tracking-wide text-mocha-500">
             Каждая теперь — часть Амалии.
           </p>
         </div>
@@ -59,13 +59,13 @@ export function Contest4Projector() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-cream-100 via-cream-50 to-white">
         <div className="text-center">
-          <p className="text-xs uppercase tracking-widest text-mocha-400">
+          <p className="text-lg uppercase tracking-widest text-mocha-400">
             Конкурс 4
           </p>
           <h1 className="mt-3 text-7xl font-light text-mocha-900">
             Знак <span className="font-medium text-blush-600">зодиака</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-mocha-500">
+          <p className="mt-6 max-w-3xl text-2xl tracking-wide text-mocha-500">
             Каждый знак передаст <span className="text-blush-600">Амалии</span>{" "}
             по две своих черты. Берите бумажные бланки и выбирайте.
           </p>

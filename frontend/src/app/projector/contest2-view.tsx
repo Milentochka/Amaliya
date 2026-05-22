@@ -54,18 +54,18 @@ export function Contest2Projector() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-cream-100 via-cream-50 to-white">
         <div className="text-center">
-          <p className="text-xs uppercase tracking-widest text-mocha-400">
+          <p className="text-lg uppercase tracking-widest text-mocha-400">
             Конкурс 2
           </p>
           <h1 className="mt-3 text-7xl font-light text-mocha-900">
             Знаете ли{" "}
             <span className="font-medium text-blush-600">вы?</span>
           </h1>
-          <p className="mt-4 text-mocha-500">
+          <p className="mt-6 text-2xl tracking-wide text-mocha-500">
             Ведущий вот-вот покажет первый вопрос.
           </p>
           {data.answered > 0 && (
-            <p className="mt-6 text-sm text-mocha-400">
+            <p className="mt-6 text-xl text-mocha-400">
               отвечено {data.answered} из {data.total}
             </p>
           )}
