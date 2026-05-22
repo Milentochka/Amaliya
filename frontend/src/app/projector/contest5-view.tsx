@@ -117,7 +117,7 @@ export function Contest5Projector() {
         <p className="text-center text-2xl uppercase tracking-widest text-blush-300">
           {q.category_name} · {q.value}
         </p>
-        <h1 className="mx-auto mt-6 max-w-6xl text-center text-7xl font-medium leading-snug tracking-wide">
+        <h1 className="mx-auto mt-4 max-w-6xl text-center text-5xl font-medium leading-tight tracking-wide">
           {withNames(q.text, ACCENT_DARK)}
         </h1>
         {q.image_key && (
