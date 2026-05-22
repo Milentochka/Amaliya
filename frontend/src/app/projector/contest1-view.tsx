@@ -219,7 +219,7 @@ function PolaroidPhoto({
       >
         <Image src={src} alt={alt} fill className="object-cover" unoptimized />
       </div>
-      <p className="mt-2 text-center text-sm text-mocha-500">{caption}</p>
+      <p className="mt-3 text-center text-3xl tracking-wide text-mocha-700">{caption}</p>
     </div>
   );
 }
