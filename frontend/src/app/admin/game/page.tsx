@@ -32,6 +32,9 @@ export default function AdminGamePage() {
   }, []);
 
   const totalAttempts = rows?.reduce((a, r) => a + r.attempts, 0) ?? 0;
+  const totalScore = rows?.reduce((a, r) => a + r.total_score, 0) ?? 0;
+  const avgPerAttempt =
+    totalAttempts > 0 ? Math.round(totalScore / totalAttempts) : 0;
 
   return (
     <div className="space-y-6">
@@ -41,7 +44,7 @@ export default function AdminGamePage() {
         </h1>
         <p className="mt-2 text-sm text-mocha-500">
           {rows
-            ? `${rows.length} игроков · ${totalAttempts} попыток`
+            ? `${rows.length} игроков · ${totalAttempts} попыток · в среднем ${avgPerAttempt.toLocaleString("ru-RU")} за попытку`
             : "Загружаю…"}
         </p>
       </header>
