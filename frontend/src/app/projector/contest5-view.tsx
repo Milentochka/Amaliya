@@ -88,17 +88,17 @@ export function Contest5Projector() {
           {data.teams.map((t) => (
             <div
               key={t.id}
-              className="rounded-3xl bg-mocha-700/50 px-7 py-5"
+              className="rounded-3xl bg-mocha-700/50 px-8 py-6"
               style={{ borderLeft: `10px solid ${t.color}` }}
             >
-              <div className="text-base uppercase tracking-widest text-cream-300">
+              <div className="text-3xl font-semibold uppercase tracking-widest text-cream-100">
                 {t.name}
               </div>
-              <div className="mt-2 flex items-baseline gap-5">
+              <div className="mt-3 flex items-baseline gap-6">
                 <span className="text-5xl font-semibold text-cream-50">
                   {t.score}
                 </span>
-                <span className="text-xl text-blush-300">
+                <span className="text-3xl tracking-wide text-blush-300">
                   ставка: {t.final_wager}
                 </span>
               </div>
