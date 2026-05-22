@@ -84,19 +84,19 @@ export function Contest2Projector() {
         <p className="text-xl uppercase tracking-widest text-mocha-400">
           Вопрос {q.order_index} из {data.total}
         </p>
-        <h1 className="mt-4 text-7xl font-medium leading-snug tracking-wide text-mocha-900">
+        <h1 className="mt-4 text-8xl font-medium leading-snug tracking-wide text-mocha-900">
           {withNames(q.text)}
         </h1>
       </header>
 
-      <section className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-2">
+      <section className="mx-auto mt-12 grid max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2">
         {q.options.map((o, i) => {
           const correct = revealed && i === q.correct_index;
           return (
             <div
               key={i}
               className={
-                "flex items-center gap-5 rounded-3xl border px-8 py-6 text-4xl font-semibold tracking-wide shadow-gentle transition " +
+                "flex items-center gap-6 rounded-3xl border px-8 py-7 text-5xl font-semibold leading-snug tracking-wide shadow-gentle transition " +
                 (correct
                   ? "border-emerald-400 bg-emerald-50 text-emerald-800"
                   : "border-cream-200 bg-white/80 text-mocha-900")
@@ -104,7 +104,7 @@ export function Contest2Projector() {
             >
               <span
                 className={
-                  "flex h-14 w-14 items-center justify-center rounded-full text-2xl font-bold " +
+                  "flex h-20 w-20 shrink-0 items-center justify-center rounded-full text-4xl font-bold " +
                   (correct
                     ? "bg-emerald-600 text-white"
                     : "bg-cream-200 text-mocha-700")
@@ -113,7 +113,7 @@ export function Contest2Projector() {
                 {String.fromCharCode(0x0410 + i)}
               </span>
               <span className="flex-1">{withNames(o)}</span>
-              {correct && <span className="text-5xl">✓</span>}
+              {correct && <span className="text-6xl">✓</span>}
             </div>
           );
         })}
