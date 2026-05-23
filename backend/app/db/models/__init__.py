@@ -17,6 +17,7 @@ from app.db.models.contest import (
     ZodiacTraitTemplate,
 )
 from app.db.models.event import EventMeta, EventPart, Parent, ParentRole
+from app.db.models.family_media import FamilyMedia
 from app.db.models.game import GameAttempt
 from app.db.models.guest import Guest, GuestGender
 from app.db.models.rsvp import EventPartType, Rsvp, RsvpStatus
@@ -46,6 +47,7 @@ __all__ = [
     "EventMeta",
     "EventPart",
     "EventPartType",
+    "FamilyMedia",
     "GameAttempt",
     "Guest",
     "GuestGender",

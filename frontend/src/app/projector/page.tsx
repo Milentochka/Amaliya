@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { ContestState, projectorContestsList } from "@/lib/api";
 import { Contest1Projector } from "./contest1-view";
@@ -8,6 +8,7 @@ import { Contest2Projector } from "./contest2-view";
 import { Contest3Projector } from "./contest3-view";
 import { Contest4Projector } from "./contest4-view";
 import { Contest5Projector } from "./contest5-view";
+import { FamilySlideshow } from "./family-slideshow";
 
 function Idle() {
   return (
@@ -25,6 +26,17 @@ function Idle() {
       </div>
     </main>
   );
+}
+
+function IdleResolver({ states }: { states: ContestState[] }) {
+  const someClosed = states.some((s) => s.status === "closed");
+  const [slideshowEmpty, setSlideshowEmpty] = useState(false);
+  const handleEmpty = useCallback(() => setSlideshowEmpty(true), []);
+
+  // Between contests (someClosed && nothing active) → fallback text always.
+  // Before any contest has been started → slideshow if media exists.
+  if (someClosed || slideshowEmpty) return <Idle />;
+  return <FamilySlideshow onEmpty={handleEmpty} />;
 }
 
 export default function ProjectorPage() {
@@ -55,5 +67,6 @@ export default function ProjectorPage() {
   if (active?.contest_id === 3) return <Contest3Projector />;
   if (active?.contest_id === 4) return <Contest4Projector />;
   if (active?.contest_id === 5) return <Contest5Projector />;
-  return <Idle />;
+  if (!states) return <Idle />;
+  return <IdleResolver states={states} />;
 }

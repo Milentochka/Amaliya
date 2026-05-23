@@ -9,6 +9,8 @@ from app.api.admin_data import router as admin_data_router
 from app.api.admin_wishlist import router as admin_wishlist_router
 from app.api.auth import router as auth_router
 from app.api.event import router as event_router
+from app.api.family_media import host_router as family_media_host_router
+from app.api.family_media import projector_router as family_media_projector_router
 from app.api.game import router as game_router
 from app.api.health import router as health_router
 from app.api.host import router as host_router
@@ -64,6 +66,8 @@ def create_app() -> FastAPI:
     app.include_router(game_router, prefix="/api")
     app.include_router(host_router, prefix="/api")
     app.include_router(projector_router, prefix="/api")
+    app.include_router(family_media_host_router, prefix="/api")
+    app.include_router(family_media_projector_router, prefix="/api")
     return app
 
 

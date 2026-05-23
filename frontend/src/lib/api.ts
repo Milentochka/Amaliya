@@ -1222,3 +1222,62 @@ export async function adminDeleteWishlistItem(itemId: string): Promise<void> {
   });
   if (!res.ok) throw new Error(await parseError(res));
 }
+
+// -------- Family media (local-only projector slideshow) --------
+
+export interface FamilyMedia {
+  id: number;
+  kind: "photo" | "video";
+  filename: string;
+  url: string;
+  order_index: number;
+}
+
+export async function hostFamilyMediaList(): Promise<FamilyMedia[]> {
+  const res = await fetch(`${API_URL}/api/host/media`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as FamilyMedia[];
+}
+
+export async function hostFamilyMediaUpload(file: File): Promise<FamilyMedia> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(`${API_URL}/api/host/media`, {
+    method: "POST",
+    credentials: "include",
+    body: fd,
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as FamilyMedia;
+}
+
+export async function hostFamilyMediaDelete(id: number): Promise<void> {
+  const res = await fetch(`${API_URL}/api/host/media/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function hostFamilyMediaReorder(
+  ids: number[],
+): Promise<FamilyMedia[]> {
+  const res = await fetch(`${API_URL}/api/host/media/order`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ ids }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as FamilyMedia[];
+}
+
+export async function projectorFamilyMediaList(): Promise<FamilyMedia[]> {
+  const res = await fetch(`${API_URL}/api/projector/media`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as FamilyMedia[];
+}

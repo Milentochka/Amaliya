@@ -48,3 +48,6 @@ htmlcov/
 # Misc
 tmp/
 .cache/
+
+# Uploaded family slideshow media (local-only; ephemeral on prod)
+frontend/public/family/
