@@ -930,7 +930,36 @@ async def contest4_set_active(
     if row is None:
         row = ContestState(contest_id=4)
         session.add(row)
+    # Changing zodiac always clears the previously highlighted traits.
     row.active_step = {"zodiac_key": zodiac_key} if zodiac_key else {}
+    await session.commit()
+    return await get_state(session, 4)
+
+
+async def contest4_toggle_trait(
+    session: AsyncSession, *, order_index: int
+) -> dict:
+    """Toggle a trait of the currently active zodiac as 'being read aloud'.
+    Stored in active_step.selected_trait_indices (list of order_index ints).
+    No effect if no zodiac is active."""
+    row = (
+        await session.execute(
+            select(ContestState).where(ContestState.contest_id == 4)
+        )
+    ).scalar_one_or_none()
+    if row is None:
+        return await get_state(session, 4)
+    step = dict(row.active_step or {})
+    if not step.get("zodiac_key"):
+        return await get_state(session, 4)
+    selected = list(step.get("selected_trait_indices") or [])
+    if order_index in selected:
+        selected = [i for i in selected if i != order_index]
+    else:
+        selected.append(int(order_index))
+        selected.sort()
+    step["selected_trait_indices"] = selected
+    row.active_step = step
     await session.commit()
     return await get_state(session, 4)
 
@@ -972,13 +1001,18 @@ async def contest4_projector_view(session: AsyncSession) -> dict:
                 }
             )
 
+    selected = list(step.get("selected_trait_indices") or [])
     return {
         "state": state,
         "current": {
             "key": z.zodiac_key,
             "name": z.zodiac_name,
             "glyph": z.glyph,
-            "traits": [r.trait_text for r in rows],
+            "traits": [
+                {"order_index": r.order_index, "text": r.trait_text}
+                for r in rows
+            ],
+            "selected_trait_indices": [int(i) for i in selected],
             "guests": matched,
         },
     }

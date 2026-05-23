@@ -10,6 +10,7 @@ import {
   ContestStatus,
   hostContest4Overview,
   hostContest4SetActive,
+  hostContest4ToggleTrait,
   hostSetContestStatus,
 } from "@/lib/api";
 
@@ -25,6 +26,15 @@ function activeKey(data: Contest4Overview | null): string | null {
     "zodiac_key"
   ];
   return typeof v === "string" ? v : null;
+}
+
+function selectedTraitIndices(data: Contest4Overview | null): number[] {
+  if (!data) return [];
+  const v = (data.state.active_step as Record<string, unknown> | null)?.[
+    "selected_trait_indices"
+  ];
+  if (!Array.isArray(v)) return [];
+  return v.filter((x): x is number => typeof x === "number");
 }
 
 export default function HostContest4Page() {
@@ -73,6 +83,16 @@ export default function HostContest4Page() {
     }
   }
 
+  async function toggleTrait(orderIndex: number) {
+    setError(null);
+    try {
+      await hostContest4ToggleTrait(orderIndex);
+      await refresh();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
   if (!data && !error) return <p className="text-mocha-400">Загрузка…</p>;
   if (error && !data)
     return (
@@ -84,6 +104,7 @@ export default function HostContest4Page() {
 
   const status = data.state.status;
   const active = activeKey(data);
+  const selected = selectedTraitIndices(data);
   const populated = data.zodiacs.filter((z) => z.guests.length > 0);
   const empty = data.zodiacs.filter((z) => z.guests.length === 0);
 
@@ -179,7 +200,9 @@ export default function HostContest4Page() {
             key={z.key}
             z={z}
             isActive={active === z.key}
+            selectedTraitIndices={active === z.key ? selected : []}
             onShow={() => showZodiac(z.key)}
+            onToggleTrait={toggleTrait}
           />
         ))}
       </section>
@@ -209,12 +232,17 @@ export default function HostContest4Page() {
 function ZodiacCard({
   z,
   isActive,
+  selectedTraitIndices,
   onShow,
+  onToggleTrait,
 }: {
   z: Contest4Zodiac;
   isActive: boolean;
+  selectedTraitIndices: number[];
   onShow: () => void;
+  onToggleTrait: (orderIndex: number) => void;
 }) {
+  const expectedSelections = z.guests.length * 2;
   return (
     <div
       className={
@@ -273,19 +301,53 @@ function ZodiacCard({
         </div>
       </div>
 
-      <details className="mt-3">
-        <summary className="cursor-pointer text-xs text-mocha-400 hover:text-mocha-700">
-          Показать 10 черт
-        </summary>
-        <ol className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-mocha-700">
-          {z.traits.map((t) => (
-            <li key={t.order_index}>
-              <span className="text-mocha-400 mr-1">{t.order_index}.</span>
-              {t.text}
-            </li>
-          ))}
-        </ol>
-      </details>
+      {isActive ? (
+        <section className="mt-4">
+          <p className="text-xs uppercase tracking-wider text-mocha-400">
+            Тапни на черту → подсветка на проекторе ·{" "}
+            <span className="text-mocha-700">
+              выбрано {selectedTraitIndices.length} из {expectedSelections}
+            </span>
+          </p>
+          <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            {z.traits.map((t) => {
+              const on = selectedTraitIndices.includes(t.order_index);
+              return (
+                <button
+                  key={t.order_index}
+                  onClick={() => onToggleTrait(t.order_index)}
+                  className={
+                    "flex items-start gap-2 rounded-2xl border px-3 py-2 text-left text-sm transition " +
+                    (on
+                      ? "border-blush-400 bg-blush-100 text-blush-800 ring-1 ring-blush-300"
+                      : "border-cream-200 bg-white text-mocha-700 hover:bg-cream-50")
+                  }
+                >
+                  <span className={on ? "text-blush-500" : "text-mocha-400"}>
+                    {t.order_index}.
+                  </span>
+                  <span className="flex-1">{t.text}</span>
+                  {on && <span className="text-blush-600">✓</span>}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : (
+        <details className="mt-3">
+          <summary className="cursor-pointer text-xs text-mocha-400 hover:text-mocha-700">
+            Показать 10 черт
+          </summary>
+          <ol className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-mocha-700">
+            {z.traits.map((t) => (
+              <li key={t.order_index}>
+                <span className="text-mocha-400 mr-1">{t.order_index}.</span>
+                {t.text}
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
     </div>
   );
 }

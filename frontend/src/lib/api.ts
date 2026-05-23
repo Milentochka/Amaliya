@@ -935,7 +935,8 @@ export interface Contest4CurrentZodiac {
   key: string;
   name: string;
   glyph: string;
-  traits: string[];
+  traits: Contest4Trait[];
+  selected_trait_indices: number[];
   guests: Contest4GuestRef[];
 }
 
@@ -971,6 +972,19 @@ export async function projectorContest4View(): Promise<Contest4ProjectorView> {
   });
   if (!res.ok) throw new Error(await parseError(res));
   return (await res.json()) as Contest4ProjectorView;
+}
+
+export async function hostContest4ToggleTrait(
+  orderIndex: number,
+): Promise<ContestState> {
+  const res = await fetch(`${API_URL}/api/host/contest4/trait`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ order_index: orderIndex }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as ContestState;
 }
 
 // -------- Contest 5 («Своя игра») --------

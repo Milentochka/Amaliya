@@ -89,27 +89,27 @@ export function Contest4Projector() {
       </header>
 
       {z.guests.length > 0 && (
-        <section className="mx-auto mt-12 max-w-5xl">
+        <section className="mx-auto mt-10 max-w-6xl">
           <p className="text-center text-xl uppercase tracking-widest text-mocha-400">
             Берите свои бланки
           </p>
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-5">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
             {z.guests.map((g) => (
               <div
                 key={g.id}
-                className="flex items-center gap-4 rounded-3xl border border-cream-200 bg-white/80 px-7 py-4 shadow-gentle"
+                className="flex items-center gap-3 rounded-3xl border border-cream-200 bg-white/80 px-6 py-3 shadow-gentle"
               >
-                <div className="relative h-16 w-16 overflow-hidden rounded-full bg-cream-100">
+                <div className="relative h-14 w-14 overflow-hidden rounded-full bg-cream-100">
                   <Image
                     src={g.avatar_url}
                     alt={g.avatar_name}
                     fill
-                    sizes="64px"
+                    sizes="56px"
                     className="object-contain p-1"
                     unoptimized
                   />
                 </div>
-                <span className="text-4xl font-semibold tracking-wide text-mocha-900">
+                <span className="text-3xl font-semibold tracking-wide text-mocha-900">
                   {g.name}
                 </span>
               </div>
@@ -118,10 +118,34 @@ export function Contest4Projector() {
         </section>
       )}
 
-      <p className="mt-14 text-center text-xl tracking-wide text-mocha-500">
-        Каждый выбирает две черты, отмечает в бланке и зачитывает их{" "}
-        <span className="text-blush-600">Амалии</span>.
-      </p>
+      <section className="mx-auto mt-10 max-w-6xl">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {z.traits.map((t) => {
+            const on = z.selected_trait_indices.includes(t.order_index);
+            return (
+              <div
+                key={t.order_index}
+                className={
+                  "flex items-start gap-4 rounded-2xl border px-6 py-4 text-3xl tracking-wide transition " +
+                  (on
+                    ? "border-blush-400 bg-blush-100 text-blush-800 shadow-soft"
+                    : "border-cream-200 bg-white/70 text-mocha-700")
+                }
+              >
+                <span
+                  className={
+                    "text-2xl font-bold " +
+                    (on ? "text-blush-500" : "text-mocha-400")
+                  }
+                >
+                  {t.order_index}.
+                </span>
+                <span className="flex-1">{t.text}</span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
     </main>
   );
 }

@@ -163,7 +163,8 @@ class Contest4CurrentZodiac(BaseModel):
     key: str
     name: str
     glyph: str
-    traits: List[str]
+    traits: List[Contest4Trait]
+    selected_trait_indices: List[int] = []
     guests: List[Contest4GuestRef]
 
 
@@ -174,6 +175,10 @@ class Contest4ProjectorView(BaseModel):
 
 class Contest4ActiveIn(BaseModel):
     zodiac_key: Optional[str] = None
+
+
+class Contest4TraitToggleIn(BaseModel):
+    order_index: int
 
 
 # -------- Contest 5 «Своя игра» --------

@@ -23,6 +23,7 @@ from app.schemas.contests import (
     Contest3Stats,
     Contest4ActiveIn,
     Contest4Overview,
+    Contest4TraitToggleIn,
     Contest5OpenIn,
     Contest5Overview,
     Contest5ResolveIn,
@@ -58,6 +59,7 @@ from app.services.contests import (
     contest3_restart,
     contest4_overview,
     contest4_set_active,
+    contest4_toggle_trait,
     contest5_close_active,
     contest5_open_final,
     contest5_open_question,
@@ -466,6 +468,16 @@ async def contest4_active(
         return await contest4_set_active(session, zodiac_key=payload.zodiac_key)
     except ValueError:
         raise HTTPException(status_code=400, detail="Неизвестный знак")
+
+
+@router.post("/contest4/trait", response_model=ContestStateOut)
+async def contest4_trait(
+    payload: Contest4TraitToggleIn,
+    amaliya_admin_session: Optional[str] = Cookie(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    await _require_admin(session, amaliya_admin_session)
+    return await contest4_toggle_trait(session, order_index=payload.order_index)
 
 
 @router.get("/contest4/blanks/{zodiac_key}.pdf")
