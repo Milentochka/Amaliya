@@ -34,9 +34,12 @@ export function FamilySlideshow({ onEmpty }: { onEmpty: () => void }) {
     };
   }, [onEmpty]);
 
-  const current = items && items.length > 0 ? items[idx % items.length] : null;
+  const count = items?.length ?? 0;
+  const current = count > 0 && items ? items[idx % count] : null;
 
   // Advance: photos on a fixed timer, videos via onEnded handler.
+  // Depends on `idx` (not just `current`) so even a list of 1 item or a
+  // wrap-around onto the same item re-arms the timer.
   useEffect(() => {
     if (!current) return;
     if (timerRef.current) {
@@ -55,7 +58,7 @@ export function FamilySlideshow({ onEmpty }: { onEmpty: () => void }) {
         timerRef.current = null;
       }
     };
-  }, [current]);
+  }, [idx, current]);
 
   if (items === null) {
     return (
@@ -70,12 +73,16 @@ export function FamilySlideshow({ onEmpty }: { onEmpty: () => void }) {
     return null;
   }
 
+  // Composite key forces React to remount the element on each iteration,
+  // so a single video in the playlist actually restarts when it loops.
+  const elKey = `${idx}-${current.id}`;
+
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black">
       {current.kind === "photo" ? (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
-          key={current.id}
+          key={elKey}
           src={current.url}
           alt=""
           className="max-h-screen max-w-full object-contain"
@@ -83,7 +90,7 @@ export function FamilySlideshow({ onEmpty }: { onEmpty: () => void }) {
       ) : (
         <video
           ref={videoRef}
-          key={current.id}
+          key={elKey}
           src={current.url}
           autoPlay
           muted
