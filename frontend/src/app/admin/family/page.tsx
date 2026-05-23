@@ -64,12 +64,24 @@ export default function AdminFamilyPage() {
     if (!items || dragId.current === null || dragId.current === targetId) return;
     const fromId = dragId.current;
     dragId.current = null;
+    await moveTo(fromId, items.findIndex((i) => i.id === targetId));
+  }
+
+  async function moveTo(id: number, newIndex: number) {
+    if (!items) return;
+    const fromIdx = items.findIndex((i) => i.id === id);
+    if (fromIdx < 0) return;
+    if (newIndex < 0 || newIndex >= items.length) return;
+    if (fromIdx === newIndex) return;
     const newOrder = items.map((i) => i.id);
-    const fromIdx = newOrder.indexOf(fromId);
-    const toIdx = newOrder.indexOf(targetId);
     newOrder.splice(fromIdx, 1);
-    newOrder.splice(toIdx, 0, fromId);
-    setItems(items.map((i) => i)); // optimistic
+    newOrder.splice(newIndex, 0, id);
+    // Optimistic UI: reorder locally first, then sync.
+    setItems(
+      newOrder.map(
+        (mid) => items.find((i) => i.id === mid)!,
+      ),
+    );
     try {
       const next = await hostFamilyMediaReorder(newOrder);
       setItems(next);
@@ -89,7 +101,8 @@ export default function AdminFamilyPage() {
         <p className="mt-2 text-sm text-mocha-500">
           Фото и видео без звука, которые крутятся на проекторе до начала
           конкурсов. Каждое фото — 7 секунд, видео — до конца. Видео должно
-          быть mp4/mov/webm (звук всё равно отключается).
+          быть mp4/mov/webm (звук всё равно отключается). Порядок меняй
+          стрелками ↑↓ на карточках (с компьютера ещё можно перетаскивать).
         </p>
       </header>
 
@@ -172,12 +185,34 @@ export default function AdminFamilyPage() {
                     #{i + 1} · {m.kind === "photo" ? "фото" : "видео"}
                   </div>
                 </div>
-                <div className="flex items-center justify-between px-2.5 py-1.5 text-xs">
-                  <span className="truncate text-mocha-400" title={m.filename}>
+                <div className="flex items-center justify-between gap-1 px-2 py-1.5 text-xs">
+                  <div className="flex items-center gap-0.5">
+                    <button
+                      onClick={() => moveTo(m.id, i - 1)}
+                      disabled={i === 0}
+                      title="Выше"
+                      className="rounded-full px-2 py-0.5 text-mocha-500 hover:bg-cream-100 hover:text-mocha-900 disabled:opacity-30 disabled:hover:bg-transparent"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      onClick={() => moveTo(m.id, i + 1)}
+                      disabled={i === items!.length - 1}
+                      title="Ниже"
+                      className="rounded-full px-2 py-0.5 text-mocha-500 hover:bg-cream-100 hover:text-mocha-900 disabled:opacity-30 disabled:hover:bg-transparent"
+                    >
+                      ↓
+                    </button>
+                  </div>
+                  <span
+                    className="flex-1 truncate text-right text-mocha-400"
+                    title={m.filename}
+                  >
                     {m.filename}
                   </span>
                   <button
                     onClick={() => onDelete(m.id)}
+                    title="Удалить"
                     className="rounded-full px-2 py-0.5 text-mocha-400 hover:bg-blush-100 hover:text-blush-700"
                   >
                     ✕
