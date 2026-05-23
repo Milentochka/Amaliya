@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { ContestState, ContestStatus, hostContestsList } from "@/lib/api";
+import {
+  ContestState,
+  ContestStatus,
+  hostContestsList,
+  hostGetProjectorMode,
+  hostSetProjectorMode,
+} from "@/lib/api";
 
 const CONTESTS: { id: number; title: string; subtitle: string; href: string | null }[] = [
   {
@@ -53,12 +59,31 @@ const STATUS_STYLE: Record<ContestStatus, string> = {
 export default function HostHomePage() {
   const [states, setStates] = useState<ContestState[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [contestsEnabled, setContestsEnabled] = useState<boolean | null>(null);
+  const [modeBusy, setModeBusy] = useState(false);
 
   useEffect(() => {
     hostContestsList()
       .then(setStates)
       .catch((e) => setError((e as Error).message));
+    hostGetProjectorMode()
+      .then((m) => setContestsEnabled(m.contests_enabled))
+      .catch((e) => setError((e as Error).message));
   }, []);
+
+  async function toggleMode() {
+    if (contestsEnabled === null || modeBusy) return;
+    setError(null);
+    setModeBusy(true);
+    try {
+      const next = await hostSetProjectorMode(!contestsEnabled);
+      setContestsEnabled(next.contests_enabled);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setModeBusy(false);
+    }
+  }
 
   function stateFor(id: number): ContestStatus {
     return states?.find((s) => s.contest_id === id)?.status ?? "not_started";
@@ -88,6 +113,49 @@ export default function HostHomePage() {
           {error}
         </p>
       )}
+
+      {/* Master mode switch — controls whether projector shows the slideshow
+          or any contest. Off by default. */}
+      <section
+        className={
+          "rounded-3xl border-2 p-5 shadow-gentle transition " +
+          (contestsEnabled
+            ? "border-blush-400 bg-blush-50/60"
+            : "border-cream-300 bg-cream-50/60")
+        }
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-wider text-mocha-400">
+              Режим проектора
+            </p>
+            <p className="mt-1 text-lg font-medium text-mocha-900">
+              {contestsEnabled === null
+                ? "…"
+                : contestsEnabled
+                ? "Конкурсы"
+                : "Слайд-шоу семьи"}
+            </p>
+            <p className="mt-1 text-xs text-mocha-500">
+              {contestsEnabled
+                ? "Проектор показывает активный конкурс или «Минуточку…» между ними."
+                : "Проектор крутит фото/видео из раздела «Слайд-шоу»."}
+            </p>
+          </div>
+          <button
+            onClick={toggleMode}
+            disabled={contestsEnabled === null || modeBusy}
+            className={
+              "shrink-0 rounded-full px-5 py-2.5 text-sm font-medium transition disabled:opacity-50 " +
+              (contestsEnabled
+                ? "bg-cream-200 text-mocha-700 hover:bg-cream-300"
+                : "bg-blush-500 text-white hover:bg-blush-600")
+            }
+          >
+            {contestsEnabled ? "Вернуть слайд-шоу" : "Запустить конкурсы"}
+          </button>
+        </div>
+      </section>
 
       <ul className="space-y-3">
         {CONTESTS.map((c) => {

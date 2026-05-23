@@ -1281,3 +1281,38 @@ export async function projectorFamilyMediaList(): Promise<FamilyMedia[]> {
   if (!res.ok) throw new Error(await parseError(res));
   return (await res.json()) as FamilyMedia[];
 }
+
+// -------- Projector mode (slideshow vs contests) --------
+
+export interface ProjectorMode {
+  contests_enabled: boolean;
+}
+
+export async function projectorGetMode(): Promise<ProjectorMode> {
+  const res = await fetch(`${API_URL}/api/projector/mode`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as ProjectorMode;
+}
+
+export async function hostGetProjectorMode(): Promise<ProjectorMode> {
+  const res = await fetch(`${API_URL}/api/host/projector/mode`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as ProjectorMode;
+}
+
+export async function hostSetProjectorMode(
+  contestsEnabled: boolean,
+): Promise<ProjectorMode> {
+  const res = await fetch(`${API_URL}/api/host/projector/mode`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ contests_enabled: contestsEnabled }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as ProjectorMode;
+}

@@ -20,6 +20,7 @@ from app.db.models.event import EventMeta, EventPart, Parent, ParentRole
 from app.db.models.family_media import FamilyMedia
 from app.db.models.game import GameAttempt
 from app.db.models.guest import Guest, GuestGender
+from app.db.models.projector_settings import ProjectorSettings
 from app.db.models.rsvp import EventPartType, Rsvp, RsvpStatus
 from app.db.models.session import Session, SessionOwnerType
 from app.db.models.telegram_binding_code import (
@@ -53,6 +54,7 @@ __all__ = [
     "GuestGender",
     "Parent",
     "ParentRole",
+    "ProjectorSettings",
     "Rsvp",
     "RsvpStatus",
     "Session",

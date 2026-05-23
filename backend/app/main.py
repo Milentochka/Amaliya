@@ -11,6 +11,8 @@ from app.api.auth import router as auth_router
 from app.api.event import router as event_router
 from app.api.family_media import host_router as family_media_host_router
 from app.api.family_media import projector_router as family_media_projector_router
+from app.api.projector_mode import host_router as projector_mode_host_router
+from app.api.projector_mode import projector_router as projector_mode_projector_router
 from app.api.game import router as game_router
 from app.api.health import router as health_router
 from app.api.host import router as host_router
@@ -68,6 +70,8 @@ def create_app() -> FastAPI:
     app.include_router(projector_router, prefix="/api")
     app.include_router(family_media_host_router, prefix="/api")
     app.include_router(family_media_projector_router, prefix="/api")
+    app.include_router(projector_mode_host_router, prefix="/api")
+    app.include_router(projector_mode_projector_router, prefix="/api")
     return app
 
 

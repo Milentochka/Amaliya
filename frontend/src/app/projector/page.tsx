@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { ContestState, projectorContestsList } from "@/lib/api";
+import {
+  ContestState,
+  projectorContestsList,
+  projectorGetMode,
+} from "@/lib/api";
 import { Contest1Projector } from "./contest1-view";
 import { Contest2Projector } from "./contest2-view";
 import { Contest3Projector } from "./contest3-view";
@@ -28,26 +32,29 @@ function Idle() {
   );
 }
 
-function IdleResolver({ states }: { states: ContestState[] }) {
-  const someClosed = states.some((s) => s.status === "closed");
-  const [slideshowEmpty, setSlideshowEmpty] = useState(false);
-  const handleEmpty = useCallback(() => setSlideshowEmpty(true), []);
-
-  // Between contests (someClosed && nothing active) → fallback text always.
-  // Before any contest has been started → slideshow if media exists.
-  if (someClosed || slideshowEmpty) return <Idle />;
+function Slideshow() {
+  const [empty, setEmpty] = useState(false);
+  const handleEmpty = useCallback(() => setEmpty(true), []);
+  if (empty) return <Idle />;
   return <FamilySlideshow onEmpty={handleEmpty} />;
 }
 
 export default function ProjectorPage() {
   const [states, setStates] = useState<ContestState[] | null>(null);
+  const [contestsEnabled, setContestsEnabled] = useState<boolean | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function tick() {
       try {
-        const s = await projectorContestsList();
-        if (!cancelled) setStates(s);
+        const [s, m] = await Promise.all([
+          projectorContestsList(),
+          projectorGetMode(),
+        ]);
+        if (!cancelled) {
+          setStates(s);
+          setContestsEnabled(m.contests_enabled);
+        }
       } catch {
         // ignore — projector should keep showing whatever it has
       }
@@ -60,13 +67,16 @@ export default function ProjectorPage() {
     };
   }, []);
 
-  const active = states?.find((s) => s.status === "active");
+  // Master toggle off → always slideshow (with Idle fallback when empty).
+  if (contestsEnabled === false) return <Slideshow />;
 
+  // Toggle on (or still loading): contest view if any contest is active,
+  // otherwise the «Минуточку…» card between contests.
+  const active = states?.find((s) => s.status === "active");
   if (active?.contest_id === 1) return <Contest1Projector />;
   if (active?.contest_id === 2) return <Contest2Projector />;
   if (active?.contest_id === 3) return <Contest3Projector />;
   if (active?.contest_id === 4) return <Contest4Projector />;
   if (active?.contest_id === 5) return <Contest5Projector />;
-  if (!states) return <Idle />;
-  return <IdleResolver states={states} />;
+  return <Idle />;
 }
