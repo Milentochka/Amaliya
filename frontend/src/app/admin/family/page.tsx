@@ -118,7 +118,7 @@ export default function AdminFamilyPage() {
           </button>
         </p>
         <p className="mt-2 text-xs text-mocha-400">
-          jpg / png / heic / webp / gif / mp4 / mov / webm — до 60 МБ за файл
+          jpg / png / heic / webp / gif / mp4 / mov / webm — до 100 МБ за файл
         </p>
         <input
           ref={fileInput}

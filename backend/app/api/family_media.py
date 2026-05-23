@@ -16,7 +16,7 @@ from app.services.family_media import (
 )
 from app.services.wishlist import resolve_admin_id_from_token
 
-MAX_BYTES = 60 * 1024 * 1024  # 60 MB per file
+MAX_BYTES = 100 * 1024 * 1024  # 100 MB per file
 
 host_router = APIRouter(prefix="/host/media", tags=["host", "media"])
 projector_router = APIRouter(prefix="/projector/media", tags=["projector", "media"])
@@ -50,7 +50,7 @@ async def host_upload(
     await _require_admin(session, amaliya_admin_session)
     content = await file.read()
     if len(content) > MAX_BYTES:
-        raise HTTPException(status_code=413, detail="Файл слишком большой (макс. 60 МБ)")
+        raise HTTPException(status_code=413, detail="Файл слишком большой (макс. 100 МБ)")
     if len(content) == 0:
         raise HTTPException(status_code=400, detail="Файл пустой")
     try:
