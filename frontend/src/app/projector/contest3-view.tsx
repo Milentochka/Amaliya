@@ -114,7 +114,7 @@ export function Contest3Projector() {
             <p className="text-lg uppercase tracking-widest text-blush-600">
               обещание {i + 1}
             </p>
-            <p className="mt-4 text-4xl font-medium leading-snug tracking-wide text-mocha-900">
+            <p className="mt-4 whitespace-pre-line text-4xl font-medium leading-snug tracking-wide text-mocha-900">
               {withNames(p.text)}
             </p>
           </div>
