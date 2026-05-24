@@ -20,6 +20,12 @@ class ProjectorSettings(Base):
     contests_enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False
     )
+    music_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True
+    )
+    music_volume: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=70
+    )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

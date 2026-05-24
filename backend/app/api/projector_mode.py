@@ -14,10 +14,14 @@ from app.services.wishlist import resolve_admin_id_from_token
 
 class ProjectorModeOut(BaseModel):
     contests_enabled: bool
+    music_enabled: bool
+    music_volume: int  # 0..100
 
 
 class ProjectorModeIn(BaseModel):
-    contests_enabled: bool
+    contests_enabled: Optional[bool] = None
+    music_enabled: Optional[bool] = None
+    music_volume: Optional[int] = None
 
 
 async def _get_or_create(session: AsyncSession) -> ProjectorSettings:
@@ -46,10 +50,18 @@ async def _require_admin(session: AsyncSession, token: Optional[str]) -> int:
     return admin_id
 
 
+def _serialize(row) -> dict:
+    return {
+        "contests_enabled": row.contests_enabled,
+        "music_enabled": row.music_enabled,
+        "music_volume": row.music_volume,
+    }
+
+
 @projector_router.get("", response_model=ProjectorModeOut)
 async def get_mode(session: AsyncSession = Depends(get_session)):
     row = await _get_or_create(session)
-    return {"contests_enabled": row.contests_enabled}
+    return _serialize(row)
 
 
 @host_router.get("/mode", response_model=ProjectorModeOut)
@@ -59,7 +71,7 @@ async def host_get_mode(
 ):
     await _require_admin(session, amaliya_admin_session)
     row = await _get_or_create(session)
-    return {"contests_enabled": row.contests_enabled}
+    return _serialize(row)
 
 
 @host_router.put("/mode", response_model=ProjectorModeOut)
@@ -70,7 +82,12 @@ async def host_set_mode(
 ):
     await _require_admin(session, amaliya_admin_session)
     row = await _get_or_create(session)
-    row.contests_enabled = payload.contests_enabled
+    if payload.contests_enabled is not None:
+        row.contests_enabled = payload.contests_enabled
+    if payload.music_enabled is not None:
+        row.music_enabled = payload.music_enabled
+    if payload.music_volume is not None:
+        row.music_volume = max(0, min(100, int(payload.music_volume)))
     await session.commit()
     await session.refresh(row)
-    return {"contests_enabled": row.contests_enabled}
+    return _serialize(row)

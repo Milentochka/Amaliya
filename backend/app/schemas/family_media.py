@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class FamilyMediaOut(BaseModel):
     id: int
-    kind: Literal["photo", "video"]
+    kind: Literal["photo", "video", "music"]
     filename: str
     url: str
     order_index: int

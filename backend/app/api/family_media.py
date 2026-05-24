@@ -63,7 +63,11 @@ async def host_upload(
         if str(e) == "unsupported_file_type":
             raise HTTPException(
                 status_code=400,
-                detail="Только jpg/png/heic/webp/gif/mp4/mov/webm/m4v",
+                detail=(
+                    "Только jpg/png/heic/webp/gif (фото), "
+                    "mp4/mov/webm/m4v (видео), "
+                    "mp3/m4a/wav/ogg/aac/flac (музыка)"
+                ),
             )
         raise
 

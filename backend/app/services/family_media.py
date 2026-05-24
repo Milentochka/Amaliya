@@ -26,6 +26,7 @@ MEDIA_DIR = (
 
 PHOTO_EXT = {".jpg", ".jpeg", ".png", ".heic", ".webp", ".gif"}
 VIDEO_EXT = {".mp4", ".mov", ".webm", ".m4v"}
+MUSIC_EXT = {".mp3", ".m4a", ".wav", ".ogg", ".aac", ".flac"}
 
 
 def _safe_filename(original: str) -> str:
@@ -42,6 +43,8 @@ def detect_kind(filename: str) -> str | None:
         return "photo"
     if ext in VIDEO_EXT:
         return "video"
+    if ext in MUSIC_EXT:
+        return "music"
     return None
 
 

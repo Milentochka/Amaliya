@@ -1227,7 +1227,7 @@ export async function adminDeleteWishlistItem(itemId: string): Promise<void> {
 
 export interface FamilyMedia {
   id: number;
-  kind: "photo" | "video";
+  kind: "photo" | "video" | "music";
   filename: string;
   url: string;
   order_index: number;
@@ -1282,10 +1282,18 @@ export async function projectorFamilyMediaList(): Promise<FamilyMedia[]> {
   return (await res.json()) as FamilyMedia[];
 }
 
-// -------- Projector mode (slideshow vs contests) --------
+// -------- Projector mode (slideshow vs contests + music) --------
 
 export interface ProjectorMode {
   contests_enabled: boolean;
+  music_enabled: boolean;
+  music_volume: number; // 0..100
+}
+
+export interface ProjectorModeUpdate {
+  contests_enabled?: boolean;
+  music_enabled?: boolean;
+  music_volume?: number;
 }
 
 export async function projectorGetMode(): Promise<ProjectorMode> {
@@ -1305,13 +1313,17 @@ export async function hostGetProjectorMode(): Promise<ProjectorMode> {
 }
 
 export async function hostSetProjectorMode(
-  contestsEnabled: boolean,
+  patch: boolean | ProjectorModeUpdate,
 ): Promise<ProjectorMode> {
+  // Back-compat: a bare boolean is treated as `contests_enabled` (the
+  // original signature). New code passes a partial-update object.
+  const body: ProjectorModeUpdate =
+    typeof patch === "boolean" ? { contests_enabled: patch } : patch;
   const res = await fetch(`${API_URL}/api/host/projector/mode`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ contests_enabled: contestsEnabled }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(await parseError(res));
   return (await res.json()) as ProjectorMode;

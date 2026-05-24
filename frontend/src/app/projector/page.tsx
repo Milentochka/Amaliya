@@ -4,9 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 
 import {
   ContestState,
+  ProjectorMode,
   projectorContestsList,
   projectorGetMode,
 } from "@/lib/api";
+import { BackgroundMusic } from "./background-music";
 import { Contest1Projector } from "./contest1-view";
 import { Contest2Projector } from "./contest2-view";
 import { Contest3Projector } from "./contest3-view";
@@ -39,9 +41,25 @@ function Slideshow() {
   return <FamilySlideshow onEmpty={handleEmpty} />;
 }
 
+function AudioUnlockOverlay({ onUnlock }: { onUnlock: () => void }) {
+  return (
+    <button
+      onClick={onUnlock}
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-mocha-900/90 text-cream-50 backdrop-blur"
+    >
+      <span className="text-9xl">▶</span>
+      <p className="text-4xl font-light tracking-wide">Запустить проектор</p>
+      <p className="max-w-xl text-center text-lg text-cream-300">
+        Один клик нужен, чтобы браузер разрешил включить фоновую музыку.
+      </p>
+    </button>
+  );
+}
+
 export default function ProjectorPage() {
   const [states, setStates] = useState<ContestState[] | null>(null);
-  const [contestsEnabled, setContestsEnabled] = useState<boolean | null>(null);
+  const [mode, setMode] = useState<ProjectorMode | null>(null);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -53,7 +71,7 @@ export default function ProjectorPage() {
         ]);
         if (!cancelled) {
           setStates(s);
-          setContestsEnabled(m.contests_enabled);
+          setMode(m);
         }
       } catch {
         // ignore — projector should keep showing whatever it has
@@ -67,16 +85,37 @@ export default function ProjectorPage() {
     };
   }, []);
 
-  // Master toggle off → always slideshow (with Idle fallback when empty).
-  if (contestsEnabled === false) return <Slideshow />;
-
-  // Toggle on (or still loading): contest view if any contest is active,
-  // otherwise the «Минуточку…» card between contests.
   const active = states?.find((s) => s.status === "active");
-  if (active?.contest_id === 1) return <Contest1Projector />;
-  if (active?.contest_id === 2) return <Contest2Projector />;
-  if (active?.contest_id === 3) return <Contest3Projector />;
-  if (active?.contest_id === 4) return <Contest4Projector />;
-  if (active?.contest_id === 5) return <Contest5Projector />;
-  return <Idle />;
+  const contestsEnabled = mode?.contests_enabled ?? null;
+
+  let view: React.ReactNode;
+  if (contestsEnabled === false) {
+    view = <Slideshow />;
+  } else if (active?.contest_id === 1) view = <Contest1Projector />;
+  else if (active?.contest_id === 2) view = <Contest2Projector />;
+  else if (active?.contest_id === 3) view = <Contest3Projector />;
+  else if (active?.contest_id === 4) view = <Contest4Projector />;
+  else if (active?.contest_id === 5) view = <Contest5Projector />;
+  else view = <Idle />;
+
+  // Background music plays only in slideshow mode and only after the user
+  // has tapped the unlock overlay (browser autoplay rules).
+  const musicPlaying =
+    !!mode && !mode.contests_enabled && mode.music_enabled && audioUnlocked;
+
+  return (
+    <>
+      {view}
+      {!audioUnlocked && (
+        <AudioUnlockOverlay onUnlock={() => setAudioUnlocked(true)} />
+      )}
+      {mode && (
+        <BackgroundMusic
+          enabled={musicPlaying}
+          volume={mode.music_volume}
+          audioUnlocked={audioUnlocked}
+        />
+      )}
+    </>
+  );
 }
