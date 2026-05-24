@@ -7,6 +7,7 @@ expected to persist uploads.
 """
 from __future__ import annotations
 
+import io
 import re
 import time
 import unicodedata
@@ -17,6 +18,17 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.family_media import FamilyMedia
+
+# Optional HEIC support — install pillow-heif to enable on-upload conversion
+# of iPhone .heic files (Chrome/Firefox can't render HEIC natively).
+try:
+    from PIL import Image
+    from pillow_heif import register_heif_opener  # type: ignore
+
+    register_heif_opener()
+    _HEIC_SUPPORT = True
+except Exception:
+    _HEIC_SUPPORT = False
 
 
 # Resolves to <repo>/frontend/public/family from any cwd.
@@ -67,9 +79,32 @@ async def list_media(session: AsyncSession) -> list[dict]:
     return [_serialize(r) for r in rows]
 
 
+def _maybe_convert_heic(filename: str, content: bytes) -> tuple[str, bytes]:
+    """If the file is HEIC and we have pillow-heif, transcode to JPEG so
+    Chrome/Firefox can render it. Returns possibly-modified (filename, bytes)."""
+    if not _HEIC_SUPPORT:
+        return filename, content
+    if not filename.lower().endswith((".heic", ".heif")):
+        return filename, content
+    try:
+        img = Image.open(io.BytesIO(content))
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+        buf = io.BytesIO()
+        img.save(buf, "JPEG", quality=88, optimize=True)
+        new_name = filename.rsplit(".", 1)[0] + ".jpg"
+        return new_name, buf.getvalue()
+    except Exception:
+        # If conversion fails, keep the original and let the browser try.
+        return filename, content
+
+
 async def add_media(
     session: AsyncSession, *, original_filename: str, content: bytes
 ) -> dict:
+    # HEIC photos from iPhones don't render in Chrome/Firefox — convert
+    # transparently on upload before deciding on extension/kind.
+    original_filename, content = _maybe_convert_heic(original_filename, content)
     kind = detect_kind(original_filename)
     if kind is None:
         raise ValueError("unsupported_file_type")
