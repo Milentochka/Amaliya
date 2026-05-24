@@ -41,17 +41,14 @@ function Slideshow() {
   return <FamilySlideshow onEmpty={handleEmpty} />;
 }
 
-function AudioUnlockOverlay({ onUnlock }: { onUnlock: () => void }) {
+function AudioUnlockBadge({ onUnlock }: { onUnlock: () => void }) {
   return (
     <button
       onClick={onUnlock}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-mocha-900/90 text-cream-50 backdrop-blur"
+      className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-mocha-900/85 px-5 py-3 text-base font-medium text-cream-50 shadow-soft backdrop-blur hover:bg-mocha-900"
     >
-      <span className="text-9xl">▶</span>
-      <p className="text-4xl font-light tracking-wide">Запустить проектор</p>
-      <p className="max-w-xl text-center text-lg text-cream-300">
-        Один клик нужен, чтобы браузер разрешил включить фоновую музыку.
-      </p>
+      <span className="text-xl">▶</span>
+      Включить музыку
     </button>
   );
 }
@@ -103,11 +100,16 @@ export default function ProjectorPage() {
   const musicPlaying =
     !!mode && !mode.contests_enabled && mode.music_enabled && audioUnlocked;
 
+  // Show the unlock badge only when music actually has somewhere to go —
+  // i.e. we are in slideshow mode and the host left music enabled.
+  const showUnlock =
+    !audioUnlocked && !!mode && !mode.contests_enabled && mode.music_enabled;
+
   return (
     <>
       {view}
-      {!audioUnlocked && (
-        <AudioUnlockOverlay onUnlock={() => setAudioUnlocked(true)} />
+      {showUnlock && (
+        <AudioUnlockBadge onUnlock={() => setAudioUnlocked(true)} />
       )}
       {mode && (
         <BackgroundMusic
